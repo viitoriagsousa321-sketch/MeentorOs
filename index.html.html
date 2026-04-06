@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MentorOS</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#f8f7f4;--cd:#fff;--bd:#e5e3de;--tx:#1a1a2e;--mt:#888;--lt:#fafaf8}
+body{font-family:'DM Sans',system-ui,sans-serif;background:var(--bg);color:var(--tx)}
+.app{display:flex;min-height:100vh}
+.sb{background:var(--cd);border-right:1px solid var(--bd);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;transition:width .25s,min-width .25s;overflow:hidden;flex-shrink:0;z-index:10}
+.sb.c{width:52px;min-width:52px}.sb.e{width:210px;min-width:210px}
+.sh{padding:14px;border-bottom:1px solid var(--bd);display:flex;align-items:center;gap:8;min-height:52px}
+.sh h1{font-size:18px;font-weight:800;letter-spacing:-.5px;white-space:nowrap;flex:1}
+.st0{background:none;border:none;cursor:pointer;color:var(--mt);padding:4px;display:flex}
+.sn{flex:1;padding:8px 6px;display:flex;flex-direction:column;gap:2px;overflow-y:auto}
+.nb{display:flex;align-items:center;gap:9px;border:none;border-radius:8px;cursor:pointer;font-size:12px;font-weight:500;font-family:inherit;white-space:nowrap;overflow:hidden;min-height:36px;transition:all .15s;color:#666;background:transparent}
+.sb.c .nb{justify-content:center;padding:8px 0}.sb.e .nb{padding:8px 11px}
+.nb.on{background:var(--tx);color:#fff;font-weight:600}.nb:hover:not(.on){background:#f0eeea}
+.sf{padding:10px;border-top:1px solid var(--bd);display:flex;align-items:center;gap:6}
+.mn{flex:1;padding:24px 28px;overflow-y:auto;min-width:0;max-width:1000px}
+.cd{background:var(--cd);border-radius:11px;border:1px solid var(--bd);padding:18px;margin-bottom:14px}
+.cdf{background:var(--lt);border-radius:11px;border:1px solid var(--bd);padding:18px;margin-bottom:14px}
+.btn{padding:8px 16px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;border:none;transition:all .15s}
+.bp{background:var(--tx);color:#fff}.bs2{background:#f0eeea;color:var(--tx);border:1px solid #ddd}
+.bdn{background:#fef2f2;color:#dc2626;border:1px solid #fecaca}.bsuc{background:#059669;color:#fff}
+.btn:disabled{opacity:.5;cursor:not-allowed}.bsm{padding:5px 10px;font-size:11px}
+.inp,.sel,.ta{padding:8px 11px;border-radius:8px;border:1px solid #ddd;font-size:12px;font-family:inherit;outline:none;background:var(--lt);width:100%;box-sizing:border-box}
+.ta{min-height:70px;resize:vertical;line-height:1.6}.sel{cursor:pointer}
+.lb{font-size:11px;font-weight:600;color:var(--mt);display:block;margin-bottom:3px}
+.bdg{display:inline-block;padding:2px 9px;border-radius:20px;font-size:10px;font-weight:600}
+.pb{height:5px;border-radius:5px;background:#e8e6e1;overflow:hidden}.pbf{height:100%;border-radius:5px;transition:width .4s}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.g4{display:grid;grid-template-columns:repeat(auto-fit,minmax(135px,1fr));gap:10px}
+.tc{text-align:center}
+.pt{display:inline-flex;padding:2px 8px;border-radius:12px;font-size:10px;font-weight:700}
+.pE{background:#2563eb18;color:#2563eb}.pA{background:#05966918;color:#059669}
+.pR{background:#d9770618;color:#d97706}.pA2{background:#7c3aed18;color:#7c3aed}
+.pSIM{background:#b4530918;color:#b45309}
+.pi{display:flex;align-items:center;gap:8px;padding:9px 11px;margin-bottom:3px;background:#fff;border-radius:8px;border:1px solid var(--bd)}
+.pi.done{opacity:.5}
+.pk{width:18px;height:18px;border-radius:5px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#fff}
+.pk.un{border:2px solid #ccc;background:transparent}
+.ptg{font-size:10px;padding:1px 7px;border-radius:10px;font-weight:600}
+.sr{display:flex;align-items:center;gap:8px;cursor:pointer;padding:6px 0}
+.sd{width:10px;height:10px;border-radius:3px;flex-shrink:0}
+.tr{transition:stroke-dashoffset 1s linear}
+.ti{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid #f5f4f0;font-size:11px}
+.tk{width:16px;height:16px;border-radius:4px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#fff}
+.qb{width:50px;height:50px;border-radius:10px;border:none;cursor:pointer;font-size:24px;font-weight:700;display:flex;align-items:center;justify-content:center;font-family:inherit}
+.qb:active{transform:scale(.9)}
+.qg{background:#dcfce7;color:#059669}.qr{background:#fef2f2;color:#dc2626}
+.modal-bg{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.3);display:flex;align-items:center;justify-content:center;z-index:100}
+.modal{background:#fff;border-radius:14px;padding:24px;max-width:360px;width:90%}
+.login-box{max-width:380px;width:90%;background:#fff;border-radius:16px;padding:40px;border:1px solid var(--bd)}
+.saving{position:fixed;bottom:16px;right:16px;background:#1a1a2e;color:#fff;padding:6px 14px;border-radius:8px;font-size:11px;font-weight:600;z-index:999;opacity:.8}
+@media(max-width:600px){.mn{padding:16px 14px}.g2{grid-template-columns:1fr}.sb.e{width:170px;min-width:170px}}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>
+<script>
+// Initialize Firebase BEFORE React
+firebase.initializeApp({
+  apiKey:"AIzaSyCdBqAfy51qmeQUSgpatryW9NqRAeO1xGE",
+  authDomain:"mentoros-57228.firebaseapp.com",
+  databaseURL:"https://mentoros-57228-default-rtdb.firebaseio.com",
+  projectId:"mentoros-57228",
+  storageBucket:"mentoros-57228.firebasestorage.app",
+  messagingSenderId:"907892590296",
+  appId:"1:907892590296:web:2b9ddede20d26e0b5779ad"
+});
+</script>
+<script type="text/babel">
+const {useState,useEffect,useCallback,useRef}=React;
+const auth=firebase.auth();
+const db=firebase.database();
+
+// Firebase storage wrapper
+const FB={
+  ref:null,
+  init(uid){this.ref=db.ref("users/"+uid+"/data")},
+  async g(){if(!this.ref)return null;const s=await this.ref.once("value");return s.val()},
+  s(d){if(this.ref)this.ref.set(d)}
+};
+
+function sm2(it,q){let{ef,interval:iv,repetitions:rp}=it;if(q<3){rp=0;iv=1}else{iv=rp===0?1:rp===1?6:Math.round(iv*ef);rp++}return{...it,ef:Math.max(1.3,ef+(.1-(5-q)*(.08+(5-q)*.02))),interval:iv,repetitions:rp,nextReview:Date.now()+iv*864e5,lastReview:Date.now()}}
+function lToday(){const d=new Date();return[d.getFullYear(),String(d.getMonth()+1).padStart(2,"0"),String(d.getDate()).padStart(2,"0")].join("-")}
+function addDL(ds,n){const[y,m,d]=ds.split("-").map(Number);const dt=new Date(y,m-1,d+n);return[dt.getFullYear(),String(dt.getMonth()+1).padStart(2,"0"),String(dt.getDate()).padStart(2,"0")].join("-")}
+function dowL(ds){const[y,m,d]=ds.split("-").map(Number);return new Date(y,m-1,d).getDay()}
+function fBR(ds){const[y,m,d]=ds.split("-").map(Number);return new Date(y,m-1,d).toLocaleDateString("pt-BR",{weekday:"long",day:"numeric",month:"short"})}
+
+const CUR=[
+{s:"Lingua Portuguesa",c:"#dc2626",t:[["Compreensao e Interpretacao",2],["Tipologia e Generos",1],["Ortografia e Acentuacao",1],["Classes de Palavras",2],["Sintaxe: Periodo Simples",2],["Sintaxe: Periodo Composto",3],["Concordancia Verbal e Nominal",2],["Regencia e Crase",2],["Pontuacao",2],["Coesao e Coerencia",2],["Reescritura",1],["Semantica e Vozes Verbais",2]]},
+{s:"Direito Constitucional",c:"#2563eb",t:[["Principios Fundamentais (art.1-4)",1],["Poder Constituinte",2],["Direitos Individuais (art.5)",3],["Remedios Constitucionais",2],["Direitos Sociais (art.6-11)",2],["Nacionalidade (art.12-13)",1],["Dir. Politicos e Partidos",2],["Organizacao do Estado (art.18-24)",3],["Estados, Municipios, DF",2],["Intervencao Federal",1],["Adm Publica na CF (art.37-43)",3],["Poder Legislativo (art.44-58)",3],["Imunidades Parlamentares",2],["Processo Legislativo (art.59-69)",3],["Fiscalizacao e TCU",2],["Defesa do Estado e Seg Publica",2]]},
+{s:"Direito Administrativo",c:"#059669",t:[["Regime Juridico-Administrativo",1],["Principios (LIMPE)",2],["Organizacao Administrativa",2],["Poderes Administrativos",2],["Atos: Elementos e Atributos",2],["Atos: Extincao",2],["Licitacao 14.133: Modalidades",3],["Dispensa e Inexigibilidade",2],["Contratos Administrativos",2],["8.112: Provimento e Vacancia",2],["8.112: Direitos e Vantagens",2],["8.112: PAD",3],["Responsabilidade Civil",2],["Improbidade (8.429)",2],["Controle da Administracao",2],["Servicos Publicos",1],["LAI (12.527)",1],["LGPD (13.709)",2]]},
+{s:"Regimento Interno CD",c:"#7c3aed",t:[["Mesa Diretora",2],["Deputados: Exercicio e Licencas",1],["Liderancas e Blocos",1],["Comissoes e CPIs",3],["Sessoes da Camara",2],["Processo Legislativo no RICD",3],["Proposicoes e Tramitacao",2],["Votacao e Quoruns",2],["Fiscalizacao e Controle",1],["Etica e Decoro",1],["Regimento Comum do CN",2]]},
+{s:"AFO / Orcamento",c:"#d97706",t:[["Principios Orcamentarios",2],["PPA, LDO, LOA",3],["Creditos Adicionais",2],["Receita Publica",2],["Empenho",2],["Liquidacao e Pagamento",2],["Restos a Pagar",2],["Suprimento de Fundos",1],["LRF",3],["SIAFI e SIOP",2],["GRU e Retencoes",1],["Programacao Financeira",2]]},
+{s:"Administracao Publica",c:"#0891b2",t:[["Modelos de Gestao",2],["PDRAE",2],["Gestao por Resultados",2],["Gestao de Pessoas",2],["Planejamento Estrategico",2],["BPM",2],["Governanca",2],["Gestao de Projetos",2],["Governo Digital",1]]},
+{s:"Raciocinio Logico",c:"#6d28d9",t:[["Logica Proposicional",2],["Tabelas-Verdade",2],["Equivalencias e Negacoes",2],["Argumentacao",2],["Diagramas Logicos",1],["Conjuntos e Probabilidade",2],["Analise Combinatoria",3],["Proporcionalidade",2],["Sequencias",1]]},
+{s:"Nocoes de TI",c:"#e11d48",t:[["Hardware e SO",1],["Redes TCP/IP",2],["Seguranca da Informacao",2],["Banco de Dados",2],["Nuvem",1],["IA e ML",1],["Governanca de TI",2],["Eng. Software",2],["LGPD em TI",1],["Dados Abertos",1]]},
+{s:"Redacao Oficial",c:"#0d9488",t:[["Principios da Redacao",1],["Padrao Oficio",2],["Comunicacoes Oficiais",1],["Atos Normativos",2],["Pronomes de Tratamento",1],["Tecnica Legislativa",2]]},
+];
+const SUBS=CUR.map(c=>c.s);const TTOT=CUR.reduce((a,c)=>a+c.t.length,0);
+function tN(ci,ti){return CUR[ci].t[ti][0]}function tW(ci,ti){return CUR[ci].t[ti][1]}function tid(ci,ti){return"t"+ci+"_"+ti}
+function pC(k){return{E:"#2563eb",A:"#059669",R:"#d97706",A2:"#7c3aed",SIM:"#b45309"}[k]||"#888"}
+function eaDur(w){return w===3?{e:40,a:50}:w===2?{e:30,a:45}:{e:25,a:35}}
+const PHS=["E","A","R","A2"];
+
+function Ic({name,size=18,color}){
+  const p={fill:"none",stroke:color||"currentColor",strokeWidth:"2",strokeLinecap:"round",strokeLinejoin:"round"};
+  const m={
+    dashboard:<g><rect x="3" y="3" width="7" height="7" rx="1" {...p}/><rect x="14" y="3" width="7" height="7" rx="1" {...p}/><rect x="3" y="14" width="7" height="7" rx="1" {...p}/><rect x="14" y="14" width="7" height="7" rx="1" {...p}/></g>,
+    book:<g><path d="M4 19.5A2.5 2.5 0 016.5 17H20" {...p}/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z" {...p}/></g>,
+    check:<polyline points="20 6 9 17 4 12" {...p}/>,flash:<polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" {...p}/>,
+    diag:<path d="M22 12h-4l-3 9L9 3l-3 9H2" {...p}/>,
+    timer:<g><circle cx="12" cy="12" r="10" {...p}/><polyline points="12 6 12 12 16 14" {...p}/></g>,
+    plus:<g><line x1="12" y1="5" x2="12" y2="19" {...p}/><line x1="5" y1="12" x2="19" y2="12" {...p}/></g>,
+    trash:<g><polyline points="3 6 5 6 21 6" {...p}/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2" {...p}/></g>,
+    play:<polygon points="5 3 19 12 5 21 5 3" {...p}/>,pause:<g><rect x="6" y="4" width="4" height="16" {...p}/><rect x="14" y="4" width="4" height="16" {...p}/></g>,
+    reset:<g><path d="M1 4v6h6" {...p}/><path d="M3.51 15a9 9 0 102.13-9.36L1 10" {...p}/></g>,
+    target:<g><circle cx="12" cy="12" r="10" {...p}/><circle cx="12" cy="12" r="6" {...p}/><circle cx="12" cy="12" r="2" {...p}/></g>,
+    award:<g><circle cx="12" cy="8" r="7" {...p}/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88" {...p}/></g>,
+    chevL:<polyline points="15 18 9 12 15 6" {...p}/>,chevR:<polyline points="9 18 15 12 9 6" {...p}/>,chevD:<polyline points="6 9 12 15 18 9" {...p}/>,
+    upload:<g><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" {...p}/><polyline points="17 8 12 3 7 8" {...p}/><line x1="12" y1="3" x2="12" y2="15" {...p}/></g>,
+    move:<g><polyline points="5 9 2 12 5 15" {...p}/><polyline points="19 9 22 12 19 15" {...p}/><line x1="2" y1="12" x2="22" y2="12" {...p}/></g>,
+    logout:<g><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4" {...p}/><polyline points="16 17 21 12 16 7" {...p}/><line x1="21" y1="12" x2="9" y2="12" {...p}/></g>,
+  };
+  return<svg width={size} height={size} viewBox="0 0 24 24">{m[name]||null}</svg>;
+}
+
+// ═══ ROOT APP WITH AUTH ═══
+function Root(){
+  const[user,setUser]=useState(undefined);// undefined=loading, null=logged out
+  const[data,setData]=useState(null);const[saving,setSaving]=useState(false);
+  const saveTimer=useRef(null);
+
+  useEffect(()=>{
+    const unsub=auth.onAuthStateChanged(u=>{
+      setUser(u||null);
+      if(u){FB.init(u.uid);FB.g().then(d=>{setData(d||{studyPlan:[],questions:[],questionStats:{},flashcards:[],diagnosis:{scores:{}},simulados:[],pomodoro:{sessions:0,totalMinutes:0},xp:0,td:{}})});}
+    });
+    return unsub;
+  },[]);
+
+  const sv=useCallback(d=>{
+    setData(d);
+    setSaving(true);
+    clearTimeout(saveTimer.current);
+    saveTimer.current=setTimeout(()=>{FB.s(d);setSaving(false)},800);// debounce saves
+  },[]);
+
+  if(user===undefined)return<div style={{display:"flex",alignItems:"center",justifyContent:"center",height:"100vh"}}><h1 style={{fontSize:36,fontWeight:800}}>MentorOS</h1></div>;
+  if(!user)return<Login/>;
+  if(!data)return<div style={{display:"flex",alignItems:"center",justifyContent:"center",height:"100vh"}}><div className="tc"><h1 style={{fontSize:36,fontWeight:800}}>MentorOS</h1><p style={{color:"#888",marginTop:8}}>Carregando dados...</p></div></div>;
+  return<><App d={data} sv={sv} user={user}/>{saving&&<div className="saving">Salvando...</div>}</>;
+}
+
+// ═══ LOGIN ═══
+function Login(){
+  const[email,setEmail]=useState("");const[pw,setPw]=useState("");const[err,setErr]=useState("");const[ld,setLd]=useState(false);
+  const go=async()=>{if(!email||!pw)return;setLd(true);setErr("");try{await auth.signInWithEmailAndPassword(email,pw)}catch(e){setErr(e.code==="auth/wrong-password"||e.code==="auth/invalid-credential"?"Email ou senha incorretos":e.code==="auth/user-not-found"?"Usuario nao encontrado":"Erro: "+e.message)}setLd(false)};
+  return<div style={{display:"flex",alignItems:"center",justifyContent:"center",minHeight:"100vh",padding:20}}>
+    <div className="login-box tc">
+      <h1 style={{fontSize:28,fontWeight:800,marginBottom:4}}>MentorOS</h1>
+      <p style={{color:"#888",fontSize:13,marginBottom:28}}>Camara dos Deputados</p>
+      <div style={{textAlign:"left",display:"flex",flexDirection:"column",gap:12}}>
+        <div><span className="lb">Email</span><input className="inp" type="email" value={email} onChange={e=>setEmail(e.target.value)} placeholder="seu@email.com"/></div>
+        <div><span className="lb">Senha</span><input className="inp" type="password" value={pw} onChange={e=>setPw(e.target.value)} placeholder="********" onKeyDown={e=>e.key==="Enter"&&go()}/></div>
+        {err&&<div style={{color:"#dc2626",fontSize:12,fontWeight:600}}>{err}</div>}
+        <button className="btn bp" onClick={go} disabled={ld} style={{width:"100%",padding:"12px",fontSize:14}}>{ld?"Entrando...":"Entrar"}</button>
+      </div>
+    </div>
+  </div>;
+}
+
+// ═══ MAIN APP ═══
+function App({d,sv,user}){
+  const[tab,setTab]=useState("dashboard");const[so,setSo]=useState(window.innerWidth>700);
+  const tabs=[{id:"dashboard",icon:"dashboard",label:"Dashboard"},{id:"plano",icon:"book",label:"Plano EARA"},{id:"questoes",icon:"check",label:"Questoes"},{id:"flash",icon:"flash",label:"Flashcards"},{id:"diag",icon:"diag",label:"Diagnostico"},{id:"pomodoro",icon:"timer",label:"Pomodoro"}];
+  const pg={dashboard:<Dash d={d} sv={sv} go={setTab}/>,plano:<Plano d={d} sv={sv}/>,questoes:<Quest d={d} sv={sv}/>,flash:<Flash d={d} sv={sv}/>,diag:<Diag d={d} sv={sv}/>,pomodoro:<Pomo d={d} sv={sv}/>};
+  return<div className="app">
+    <nav className={`sb ${so?"e":"c"}`}>
+      <div className="sh" style={{justifyContent:so?"flex-start":"center"}}>{so&&<h1>MentorOS</h1>}<button className="st0" onClick={()=>setSo(!so)}><Ic name={so?"chevL":"chevR"} size={18}/></button></div>
+      <div className="sn">{tabs.map(t=><button key={t.id} onClick={()=>setTab(t.id)} title={t.label} className={`nb ${tab===t.id?"on":""}`}><span style={{flexShrink:0,display:"flex"}}><Ic name={t.icon} size={16}/></span>{so&&<span>{t.label}</span>}</button>)}</div>
+      <div className="sf" style={{justifyContent:so?"flex-start":"center",flexDirection:so?"row":"column",gap:so?6:4}}>
+        <span style={{display:"flex"}}><Ic name="award" size={14} color="#d97706"/></span>
+        {so&&<span style={{fontSize:11,fontWeight:700,color:"#d97706",flex:1}}>{d.xp||0} XP</span>}
+        <button className="st0" onClick={()=>auth.signOut()} title="Sair"><Ic name="logout" size={14} color="#dc2626"/></button>
+      </div>
+    </nav>
+    <main className="mn">{pg[tab]}</main>
+  </div>;
+}
+
+// ═══ DASHBOARD ═══
+function Dash({d,sv,go}){
+  const tQ=d.questions?.length||0,cor=(d.questions||[]).filter(q=>q.correct).length,pct=tQ>0?Math.round(cor/tQ*100):0;
+  const td=d.td||{};const dn=Object.keys(td).filter(k=>td[k]).length;const[exp,setExp]=useState(null);
+  const today=lToday();const tp=(d.studyPlan||[]).filter(s=>s.date===today);
+  const dueF=(d.flashcards||[]).filter(f=>(f.nextReview||0)<=Date.now()).length;
+  return<div>
+    <h2 style={{fontSize:24,fontWeight:800,marginBottom:20}}>Dashboard</h2>
+    <div className="g4" style={{marginBottom:20}}>
+      {[{l:"Questoes",v:tQ,c:"#2563eb"},{l:"Acerto",v:pct+"%",c:"#059669"},{l:"Topicos",v:dn+"/"+TTOT,c:"#7c3aed"},{l:"Flash pend.",v:dueF,c:"#d97706"},{l:"Pomodoros",v:d.pomodoro?.sessions||0,c:"#dc2626"}].map((s,i)=>
+        <div className="cd" key={i} style={{padding:12}}><div style={{fontSize:10,color:"#999",fontWeight:600,textTransform:"uppercase"}}>{s.l}</div><div style={{fontSize:22,fontWeight:800,color:s.c,marginTop:4}}>{s.v}</div></div>)}
+    </div>
+    {tp.length>0&&<div className="cd" style={{marginBottom:16}}><h3 style={{fontSize:15,fontWeight:700,marginBottom:12}}>Hoje</h3>
+      {tp.map((s,i)=><div key={i} style={{display:"flex",alignItems:"center",gap:8,padding:"6px 0",borderBottom:i<tp.length-1?"1px solid #f0eeea":"none"}}>
+        <span className={`pt p${s.phase}`}>{s.phase}</span><span style={{flex:1,fontSize:13}}>{s.tn}</span><span style={{fontSize:11,color:"#aaa"}}>{s.dur}min</span>
+        <div style={{width:8,height:8,borderRadius:4,background:s.done?"#059669":"#ddd"}}/>
+      </div>)}
+    </div>}
+    <div className="cd"><h3 style={{fontSize:15,fontWeight:700,marginBottom:14}}>Progresso</h3>
+      {CUR.map((c,ci)=>{const done=c.t.filter((_,ti)=>td[tid(ci,ti)]).length;const tot=c.t.length;const p=Math.round(done/tot*100);const isE=exp===ci;
+        return<div key={ci} style={{marginBottom:10}}>
+          <div className="sr" onClick={()=>setExp(isE?null:ci)}><div className="sd" style={{background:c.c}}/><span style={{flex:1,fontSize:13,fontWeight:600}}>{c.s}</span><span style={{fontSize:12,fontWeight:700,color:c.c,minWidth:44,textAlign:"right"}}>{done}/{tot}</span><span style={{color:"#ccc",display:"flex",transition:"transform .2s",transform:isE?"rotate(180deg)":"rotate(0)"}}><Ic name="chevD" size={15}/></span></div>
+          <div className="pb"><div className="pbf" style={{width:p+"%",background:c.c}}/></div>
+          {isE&&<div style={{marginTop:10,paddingLeft:20}}>{c.t.map((t,ti)=>{const k=tid(ci,ti);const ok=td[k];return<div key={k} className="ti"><div className="tk" style={{background:ok?c.c:"transparent",border:ok?"none":"2px solid #ccc"}} onClick={()=>{const nt={...td,[k]:!ok};sv({...d,td:nt,xp:(d.xp||0)+(!ok?5:-5)})}}>{ok&&<Ic name="check" size={10}/>}</div><span style={{fontWeight:500,color:ok?"#aaa":"#1a1a2e",textDecoration:ok?"line-through":"none"}}>{t[0]}</span></div>})}</div>}
+        </div>})}
+    </div>
+    <div style={{display:"flex",gap:8,flexWrap:"wrap",marginTop:8}}>{[{l:"Cronograma",t:"plano"},{l:"Questoes",t:"questoes"},{l:"Flashcards",t:"flash"},{l:"Pomodoro",t:"pomodoro"}].map((a,i)=><button key={i} className="btn bs2 bsm" onClick={()=>go(a.t)}>{a.l}</button>)}</div>
+  </div>;
+}
+
+// ═══ PLANO ═══
+function Plano({d,sv}){
+  const[gW,sGW]=useState("8");const MAX=210;
+  const[showAdd,setShowAdd]=useState(false);const[addDate,setAddDate]=useState(lToday());const[addCi,setAddCi]=useState(0);const[addTi,setAddTi]=useState(0);const[addPh,setAddPh]=useState("E");
+  const[moveId,setMoveId]=useState(null);const[moveTo,setMoveTo]=useState("");
+  const sp=d.studyPlan||[];
+  const gen=()=>{const weeks=parseInt(gW),pl=[];const sd=lToday();let tp={};CUR.forEach((_,i)=>tp[i]=0);const studied=[];let uid=1;
+    for(let dy=0;dy<weeks*7;dy++){const ds=addDL(sd,dy);const dow=dowL(ds);
+      if(dow===0){pl.push({id:uid++,subject:"SIMULADO",tn:"Simulado CEBRASPE 180 questoes",tkey:"sim",phase:"SIM",date:ds,dur:300,done:false,clr:"#b45309"});continue;}
+      if(dow===6){const wk=studied.filter(s=>s.dy>dy-7&&s.dy<dy);let dm=0;const seen=new Set();wk.forEach(it=>{if(!seen.has(it.tkey)&&dm<MAX){seen.add(it.tkey);pl.push({id:uid++,subject:CUR[it.ci].s,tn:tN(it.ci,it.ti),tkey:it.tkey,phase:"A2",date:ds,dur:30,done:false,clr:CUR[it.ci].c});dm+=30;}});continue;}
+      let dm=0;const recent=studied.filter(s=>s.dy<dy&&s.dy>=dy-3);const older=studied.filter(s=>s.dy<dy-3);
+      let revT=recent.map(s=>tN(s.ci,s.ti));if(older.length>0){const r=older[Math.random()*older.length|0];revT.push(tN(r.ci,r.ti)+" (antigo)");}
+      if(revT.length>0){pl.push({id:uid++,subject:"REVISAO",tn:revT.slice(0,4).join(", "),tkey:"rev_"+dy,phase:"R",date:ds,dur:15,done:false,clr:"#d97706"});dm+=15;}
+      let si=dy%CUR.length;
+      while(dm<MAX-30){const ci=si%CUR.length;if(tp[ci]>=CUR[ci].t.length)tp[ci]=0;const ti=tp[ci];const dur=eaDur(tW(ci,ti));
+        if(dm+dur.e+dur.a>MAX+20)break;const tkey=tid(ci,ti);
+        pl.push({id:uid++,subject:CUR[ci].s,tn:tN(ci,ti),tkey,phase:"E",date:ds,dur:dur.e,done:false,clr:CUR[ci].c});
+        pl.push({id:uid++,subject:CUR[ci].s,tn:tN(ci,ti),tkey,phase:"A",date:ds,dur:dur.a,done:false,clr:CUR[ci].c});
+        dm+=dur.e+dur.a;studied.push({dy,ci,ti,tkey});tp[ci]++;si++;}
+    }sv({...d,studyPlan:pl});};
+  const tog=id=>{const p=sp.map(s=>s.id===id?{...s,done:!s.done}:s);const f=p.find(s=>s.id===id);const td={...(d.td||{})};if(f.done&&f.phase==="A2")td[f.tkey]=true;sv({...d,studyPlan:p,td,xp:(d.xp||0)+(f.done?10:-10)})};
+  const rm=id=>sv({...d,studyPlan:sp.filter(s=>s.id!==id)});
+  const addItem=()=>{const cr=CUR[addCi];const w=tW(addCi,addTi);const dur=addPh==="E"?eaDur(w).e:addPh==="A"?eaDur(w).a:addPh==="R"?15:30;
+    sv({...d,studyPlan:[...sp,{id:Date.now(),subject:cr.s,tn:tN(addCi,addTi),tkey:tid(addCi,addTi),phase:addPh,date:addDate,dur,done:false,clr:cr.c}]});setShowAdd(false);};
+  const doMove=()=>{if(!moveTo||!moveId)return;sv({...d,studyPlan:sp.map(s=>s.id===moveId?{...s,date:moveTo}:s)});setMoveId(null)};
+  const gr={};sp.forEach(s=>{(gr[s.date]=gr[s.date]||[]).push(s)});const dts=Object.keys(gr).sort();
+  const totM=sp.reduce((a,s)=>a+s.dur,0);const doneM=sp.filter(s=>s.done).reduce((a,s)=>a+s.dur,0);
+  return<div>
+    <h2 style={{fontSize:24,fontWeight:800,marginBottom:4}}>Plano de Estudos</h2>
+    <p style={{color:"#888",fontSize:14,marginBottom:16}}>EARA | ~3h30/dia | R=15min | Dom=Simulado</p>
+    <div style={{display:"flex",gap:8,marginBottom:16,flexWrap:"wrap"}}><span className="pt pE">E</span><span className="pt pA">A</span><span className="pt pR">R 15min</span><span className="pt pA2">A2</span><span className="pt pSIM">SIM</span></div>
+    <div className="cdf">
+      <div style={{display:"flex",gap:8,alignItems:"flex-end",flexWrap:"wrap"}}>
+        <div><span className="lb">Semanas</span><input className="inp" type="number" value={gW} onChange={e=>sGW(e.target.value)} style={{width:60}}/></div>
+        <button className="btn bp" onClick={gen}>Gerar</button>
+        <button className="btn bs2" onClick={()=>setShowAdd(true)} style={{display:"flex",alignItems:"center",gap:4}}><Ic name="plus" size={14}/>Adicionar</button>
+        {sp.length>0&&<button className="btn bdn bsm" onClick={()=>sv({...d,studyPlan:[]})}>Limpar</button>}
+      </div>
+    </div>
+    {showAdd&&<div className="cd"><h3 style={{fontSize:14,fontWeight:700,marginBottom:10}}>Adicionar</h3>
+      <div style={{display:"flex",gap:8,flexWrap:"wrap",alignItems:"flex-end",marginBottom:10}}>
+        <div><span className="lb">Data</span><input className="inp" type="date" value={addDate} onChange={e=>setAddDate(e.target.value)} style={{width:150}}/></div>
+        <div><span className="lb">Fase</span><select className="sel" value={addPh} onChange={e=>setAddPh(e.target.value)} style={{width:80}}>{PHS.map(p=><option key={p}>{p}</option>)}</select></div>
+        <div style={{flex:1,minWidth:120}}><span className="lb">Materia</span><select className="sel" value={addCi} onChange={e=>{setAddCi(parseInt(e.target.value));setAddTi(0)}}>{CUR.map((c,i)=><option key={i} value={i}>{c.s}</option>)}</select></div>
+        <div style={{flex:1,minWidth:140}}><span className="lb">Topico</span><select className="sel" value={addTi} onChange={e=>setAddTi(parseInt(e.target.value))}>{CUR[addCi].t.map((t,i)=><option key={i} value={i}>{t[0]}</option>)}</select></div>
+      </div>
+      <div style={{display:"flex",gap:8}}><button className="btn bp" onClick={addItem}>OK</button><button className="btn bs2" onClick={()=>setShowAdd(false)}>Cancelar</button></div>
+    </div>}
+    {moveId&&<div className="modal-bg" onClick={()=>setMoveId(null)}><div className="modal" onClick={e=>e.stopPropagation()}>
+      <h3 style={{fontSize:16,fontWeight:700,marginBottom:12}}>Mover para qual dia?</h3>
+      <input className="inp" type="date" value={moveTo} onChange={e=>setMoveTo(e.target.value)} style={{marginBottom:12}}/>
+      <div style={{display:"flex",gap:8}}><button className="btn bp" onClick={doMove}>Mover</button><button className="btn bs2" onClick={()=>setMoveId(null)}>Cancelar</button></div>
+    </div></div>}
+    {sp.length>0&&<div className="cd" style={{marginBottom:16}}><div style={{display:"flex",justifyContent:"space-between"}}><span style={{fontSize:13,fontWeight:600}}>Progresso</span><span style={{fontSize:12,color:"#888"}}>{Math.round(doneM/60)}h/{Math.round(totM/60)}h</span></div><div className="pb" style={{marginTop:6,height:8}}><div className="pbf" style={{width:(totM>0?doneM/totM*100:0)+"%",background:"#2563eb",height:"100%"}}/></div></div>}
+    {dts.map(ds=>{const items=gr[ds];const dm=items.reduce((a,s)=>a+s.dur,0);const dow=dowL(ds);
+      return<div key={ds} style={{marginBottom:18}}>
+      <div style={{display:"flex",justifyContent:"space-between",marginBottom:8}}><span style={{fontSize:12,fontWeight:700,color:dow===0?"#b45309":dow===6?"#7c3aed":"#999",textTransform:"uppercase"}}>{fBR(ds)}{dow===0?" — SIMULADO":dow===6?" — APROFUNDAMENTO":""}</span><span style={{fontSize:11,color:"#bbb"}}>{dm>=60?Math.round(dm/6)/10+"h":dm+"min"}</span></div>
+      {items.map(s=><div key={s.id} className={`pi ${s.done?"done":""}`} style={s.phase==="SIM"?{borderColor:"#d97706",background:"#fffbeb"}:{}}>
+        <div className={`pk ${s.done?"":"un"}`} style={{background:s.done?pC(s.phase):"transparent"}} onClick={()=>tog(s.id)}>{s.done&&<Ic name="check" size={11}/>}</div>
+        <span className={`pt p${s.phase}`}>{s.phase}</span>
+        <div style={{flex:1,minWidth:0}}><div style={{fontSize:12,fontWeight:600,textDecoration:s.done?"line-through":"none"}}>{s.tn}</div>{s.phase!=="SIM"&&s.phase!=="R"&&<span className="ptg" style={{background:(s.clr||"#1a1a2e")+"15",color:s.clr}}>{s.subject}</span>}</div>
+        <span style={{fontSize:11,color:"#aaa"}}>{s.dur}min</span>
+        <button onClick={()=>{setMoveId(s.id);setMoveTo(s.date)}} title="Mover" style={{background:"none",border:"none",cursor:"pointer",color:"#bbb",display:"flex"}}><Ic name="move" size={14}/></button>
+        <button onClick={()=>rm(s.id)} title="Remover" style={{background:"none",border:"none",cursor:"pointer",color:"#ccc",display:"flex"}}><Ic name="trash" size={14}/></button>
+      </div>)}
+    </div>})}
+    {dts.length===0&&<p style={{color:"#bbb",textAlign:"center",marginTop:40}}>Gere seu cronograma!</p>}
+  </div>;
+}
+
+// ═══ QUESTOES ═══
+function Quest({d,sv}){
+  const[dt,setDt]=useState(lToday());const[ci,setCi]=useState(0);const[ti,setTi]=useState(0);const qs=d.questionStats||{};const q=d.questions||[];
+  const mark=ok=>{const sub=CUR[ci].s;const st={...qs};if(!st[sub])st[sub]={correct:0,total:0};st[sub].total++;if(ok)st[sub].correct++;
+    sv({...d,questions:[...q,{id:Date.now(),date:dt,subject:sub,topic:CUR[ci].t[ti][0],correct:ok}],questionStats:st,xp:(d.xp||0)+(ok?5:2)})};
+  const dayQ=q.filter(x=>x.date===dt);const dayC=dayQ.filter(x=>x.correct).length;
+  const daySub={};dayQ.forEach(x=>{if(!daySub[x.subject])daySub[x.subject]={c:0,e:0};if(x.correct)daySub[x.subject].c++;else daySub[x.subject].e++});
+  return<div>
+    <h2 style={{fontSize:24,fontWeight:800,marginBottom:20}}>Questoes</h2>
+    <div className="g4" style={{marginBottom:20}}>{[{l:"Total",v:q.length,c:"#2563eb"},{l:"Acertos",v:q.filter(x=>x.correct).length,c:"#059669"},{l:"Dia",v:dayQ.length,c:"#d97706"},{l:"Dia ok",v:dayC,c:"#059669"}].map((s,i)=><div className="cd" key={i} style={{padding:12}}><div style={{fontSize:10,color:"#999",fontWeight:600,textTransform:"uppercase"}}>{s.l}</div><div style={{fontSize:22,fontWeight:800,color:s.c}}>{s.v}</div></div>)}</div>
+    <div className="cd">
+      <div style={{display:"flex",gap:10,marginBottom:16,flexWrap:"wrap",alignItems:"flex-end"}}>
+        <div><span className="lb">Data</span><input className="inp" type="date" value={dt} onChange={e=>setDt(e.target.value)} style={{width:150}}/></div>
+        <div style={{flex:1,minWidth:130}}><span className="lb">Materia</span><select className="sel" value={ci} onChange={e=>{setCi(parseInt(e.target.value));setTi(0)}}>{CUR.map((c,i)=><option key={i} value={i}>{c.s}</option>)}</select></div>
+        <div style={{flex:1,minWidth:150}}><span className="lb">Topico</span><select className="sel" value={ti} onChange={e=>setTi(parseInt(e.target.value))}>{CUR[ci].t.map((t,i)=><option key={i} value={i}>{t[0]}</option>)}</select></div>
+      </div>
+      <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:24,padding:"20px 0",background:"#fafaf8",borderRadius:10}}>
+        <button className="qb qg" onClick={()=>mark(true)}>+</button>
+        <div className="tc"><div style={{fontSize:11,color:"#888",fontWeight:600}}>{CUR[ci].s}</div><div style={{fontSize:28,fontWeight:800,marginTop:6}}>{(qs[CUR[ci].s]||{}).correct||0}<span style={{color:"#ccc"}}>/</span>{(qs[CUR[ci].s]||{}).total||0}</div></div>
+        <button className="qb qr" onClick={()=>mark(false)}>-</button>
+      </div>
+    </div>
+    {dayQ.length>0&&<div className="cd"><h3 style={{fontSize:14,fontWeight:700,marginBottom:10}}>Resumo {fBR(dt)}</h3>{Object.entries(daySub).map(([sub,v])=>{const p=Math.round(v.c/(v.c+v.e)*100);return<div key={sub} style={{display:"flex",justifyContent:"space-between",padding:"8px 0",borderBottom:"1px solid #f0eeea"}}><span style={{fontSize:13,fontWeight:600}}>{sub}</span><span style={{fontSize:12}}>{v.c}&#10003; {v.e}&#10007; ({p}%)</span></div>})}</div>}
+    {Object.keys(qs).length>0&&<div className="cd"><h3 style={{fontSize:14,fontWeight:700,marginBottom:10}}>Ranking</h3>{Object.entries(qs).map(([s,v])=>({s,p:v.total>0?Math.round(v.correct/v.total*100):0,c:v.correct,t:v.total})).sort((a,b)=>a.p-b.p).map((s,i)=><div key={i} style={{display:"flex",justifyContent:"space-between",padding:"8px 0",borderBottom:"1px solid #f0eeea"}}><span style={{fontSize:13,fontWeight:600}}>{s.s}</span><span style={{fontSize:11,color:"#aaa"}}>{s.c}/{s.t} ({s.p}%)</span></div>)}</div>}
+  </div>;
+}
+
+// ═══ FLASHCARDS ═══
+function Flash({d,sv}){
+  const[vw,setVw]=useState("review");const[fci,setFci]=useState(0);const[fti,setFti]=useState(0);
+  const[fr,setFr]=useState("");const[bk,setBk]=useState("");const[fl,setFl]=useState(false);const[idx,setIdx]=useState(0);
+  const[impSub,setImpSub]=useState(0);const[impTi,setImpTi]=useState(0);const[impMsg,setImpMsg]=useState("");
+  const fileRef=useRef(null);const now=Date.now();const fc=d.flashcards||[];
+  const allDue=fc.filter(f=>(f.nextReview||0)<=now);
+  const subN=CUR[fci].s;const topN=CUR[fci].t[fti][0];
+  const filtDue=fc.filter(f=>f.subject===subN&&f.topic===topN&&(f.nextReview||0)<=now);
+  const deck=vw==="review"?allDue:filtDue;const cur=deck[idx]||null;
+  const addC=()=>{if(!fr.trim()||!bk.trim())return;sv({...d,flashcards:[...fc,{id:Date.now(),front:fr,back:bk,subject:subN,topic:topN,ef:2.5,interval:0,repetitions:0,nextReview:0}]});setFr("");setBk("")};
+  const rev=q=>{if(!cur)return;const u=sm2(cur,q);sv({...d,flashcards:fc.map(f=>f.id===cur.id?u:f),xp:(d.xp||0)+(q>=3?3:1)});setFl(false);if(idx>=deck.length-1)setIdx(0)};
+  const impF=e=>{const file=e.target.files[0];if(!file)return;const reader=new FileReader();
+    reader.onload=ev=>{const lines=ev.target.result.split("\n").filter(l=>l.trim());let n=0;const cards=[...fc];const iS=CUR[impSub].s;const iT=CUR[impSub].t[impTi][0];
+      lines.forEach(line=>{const p=line.split("\t");if(p.length>=2){cards.push({id:Date.now()+n,front:p[0].trim(),back:p[1].trim(),subject:iS,topic:iT,ef:2.5,interval:0,repetitions:0,nextReview:0});n++;}});
+      sv({...d,flashcards:cards});setImpMsg(n+" importados");setTimeout(()=>setImpMsg(""),3000);};reader.readAsText(file);e.target.value="";};
+  const rvCard=()=><div>
+    <div style={{fontSize:12,color:"#888",marginBottom:10}}>{idx+1}/{deck.length} | {cur?.subject} &gt; {cur?.topic}</div>
+    <div className="cd tc" style={{padding:32,cursor:"pointer",minHeight:160,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center"}} onClick={()=>setFl(!fl)}>
+      <div style={{display:"flex",gap:6,marginBottom:10}}><span className="bdg" style={{background:"#2563eb18",color:"#2563eb"}}>{cur?.subject}</span><span className="bdg" style={{background:"#7c3aed18",color:"#7c3aed"}}>{cur?.topic}</span></div>
+      <div style={{fontSize:18,fontWeight:600,margin:"8px 0"}}>{fl?cur?.back:cur?.front}</div>
+      <div style={{fontSize:12,color:"#bbb"}}>{fl?"Resposta":"Toque para revelar"}</div>
+    </div>
+    {fl&&<div style={{display:"flex",gap:6,marginTop:14}}>{[{q:1,l:"Esqueci",c:"#dc2626"},{q:3,l:"Dificil",c:"#d97706"},{q:4,l:"Bom",c:"#2563eb"},{q:5,l:"Facil",c:"#059669"}].map(b=><button key={b.q} className="btn" style={{background:b.c,color:"#fff",flex:1}} onClick={()=>rev(b.q)}>{b.l}</button>)}</div>}
+  </div>;
+  return<div>
+    <div style={{display:"flex",justifyContent:"space-between",marginBottom:16,flexWrap:"wrap",gap:8}}>
+      <div><h2 style={{fontSize:24,fontWeight:800}}>Flashcards</h2><p style={{color:"#888",fontSize:13}}>{fc.length} total | {allDue.length} pendentes</p></div>
+      <div style={{display:"flex",gap:4,flexWrap:"wrap"}}>{["review","study","add","import","list"].map(v=><button key={v} className={`btn bsm ${vw===v?"bp":"bs2"}`} onClick={()=>{setVw(v);setIdx(0);setFl(false)}}>{v==="review"?"Revisao":v==="study"?"Topico":v==="add"?"Criar":v==="import"?"Importar":"Lista"}</button>)}</div>
+    </div>
+    {(vw==="study"||vw==="add")&&<div className="cd" style={{marginBottom:14}}>
+      <div style={{display:"flex",gap:10,flexWrap:"wrap",alignItems:"flex-end"}}>
+        <div style={{flex:1,minWidth:130}}><span className="lb">Materia</span><select className="sel" value={fci} onChange={e=>{setFci(parseInt(e.target.value));setFti(0);setIdx(0);setFl(false)}}>{CUR.map((c,i)=><option key={i} value={i}>{c.s}</option>)}</select></div>
+        <div style={{flex:1,minWidth:150}}><span className="lb">Topico</span><select className="sel" value={fti} onChange={e=>{setFti(parseInt(e.target.value));setIdx(0);setFl(false)}}>{CUR[fci].t.map((t,i)=><option key={i} value={i}>{t[0]}</option>)}</select></div>
+      </div>
+      {vw==="study"&&<div style={{marginTop:8,fontSize:12,color:"#888"}}>{fc.filter(f=>f.subject===subN&&f.topic===topN).length} cartoes | {filtDue.length} pendentes</div>}
+    </div>}
+    {vw==="review"&&(allDue.length===0?<div className="cd tc" style={{padding:40}}><div style={{fontSize:40,marginBottom:10}}>&#10003;</div><h3>Tudo revisado!</h3></div>:rvCard())}
+    {vw==="study"&&(filtDue.length===0?<div className="cd tc" style={{padding:30}}><h3 style={{fontSize:16}}>Nenhum pendente</h3></div>:rvCard())}
+    {vw==="add"&&<div className="cd"><div style={{display:"flex",flexDirection:"column",gap:10}}><div><span className="lb">Frente</span><textarea className="ta" value={fr} onChange={e=>setFr(e.target.value)} placeholder="Pergunta..."/></div><div><span className="lb">Verso</span><textarea className="ta" value={bk} onChange={e=>setBk(e.target.value)} placeholder="Resposta..."/></div><button className="btn bp" onClick={addC}>Adicionar</button></div></div>}
+    {vw==="import"&&<div className="cd">
+      <h3 style={{fontSize:14,fontWeight:700,marginBottom:10}}>Importar (TAB)</h3>
+      <div style={{display:"flex",gap:10,alignItems:"flex-end",flexWrap:"wrap",marginBottom:12}}>
+        <div style={{flex:1,minWidth:130}}><span className="lb">Materia</span><select className="sel" value={impSub} onChange={e=>{setImpSub(parseInt(e.target.value));setImpTi(0)}}>{CUR.map((c,i)=><option key={i} value={i}>{c.s}</option>)}</select></div>
+        <div style={{flex:1,minWidth:150}}><span className="lb">Topico</span><select className="sel" value={impTi} onChange={e=>setImpTi(parseInt(e.target.value))}>{CUR[impSub].t.map((t,i)=><option key={i} value={i}>{t[0]}</option>)}</select></div>
+        <button className="btn bp" onClick={()=>fileRef.current?.click()} style={{display:"flex",alignItems:"center",gap:6}}><Ic name="upload" size={14}/>Arquivo</button>
+        <input ref={fileRef} type="file" accept=".txt,.csv,.tsv" onChange={impF} style={{display:"none"}}/>
+      </div>
+      {impMsg&&<div style={{padding:"10px",background:"#dcfce7",borderRadius:8,color:"#059669",fontWeight:600,fontSize:13}}>{impMsg}</div>}
+    </div>}
+    {vw==="list"&&<div>{CUR.map((c,ci)=>{const cards=fc.filter(f=>f.subject===c.s);if(!cards.length)return null;
+      return<div key={ci} className="cd"><h3 style={{fontSize:14,fontWeight:700,marginBottom:10}}>{c.s} ({cards.length})</h3>
+        {cards.slice(0,15).map(f=><div key={f.id} style={{display:"flex",justifyContent:"space-between",padding:"5px 0",borderBottom:"1px solid #f5f4f0",fontSize:12}}>
+          <div><strong>{f.front}</strong> <span style={{color:"#888"}}>{f.back}</span><br/><span className="bdg" style={{background:"#f0eeea"}}>{f.topic}</span></div>
+          <button onClick={()=>sv({...d,flashcards:fc.filter(x=>x.id!==f.id)})} style={{background:"none",border:"none",cursor:"pointer",color:"#ccc"}}><Ic name="trash" size={13}/></button>
+        </div>)}
+      </div>})}{fc.length===0&&<p style={{color:"#bbb",textAlign:"center",marginTop:40}}>Nenhum</p>}</div>}
+  </div>;
+}
+
+// ═══ DIAGNOSTICO ═══
+function Diag({d,sv}){
+  const[sc,setSc]=useState(d.diagnosis?.scores||{});
+  const up=(s,v)=>{const n={...sc,[s]:parseInt(v)||0};setSc(n);sv({...d,diagnosis:{scores:n}})};
+  const avg=SUBS.length>0?Math.round(Object.values(sc).reduce((a,b)=>a+b,0)/SUBS.length):0;
+  return<div><h2 style={{fontSize:24,fontWeight:800,marginBottom:20}}>Diagnostico</h2>
+    <div className="cd" style={{display:"flex",alignItems:"center",gap:16,marginBottom:18}}><div className="tc"><div style={{fontSize:42,fontWeight:800,color:avg>=70?"#059669":avg>=50?"#d97706":"#dc2626"}}>{avg}</div><div style={{fontSize:12,color:"#888",fontWeight:600}}>MEDIA</div></div><div style={{flex:1}}><div className="pb" style={{height:10}}><div className="pbf" style={{width:avg+"%",background:avg>=70?"#059669":avg>=50?"#d97706":"#dc2626",height:"100%"}}/></div></div></div>
+    <div className="g2">{SUBS.map(s=>{const v=sc[s]||0;return<div className="cd" key={s} style={{padding:14}}><div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:6}}><span style={{fontSize:13,fontWeight:600}}>{s}</span><input className="inp" type="number" value={v} onChange={e=>up(s,e.target.value)} style={{width:55,textAlign:"center",padding:"4px 6px"}}/></div><div className="pb"><div className="pbf" style={{width:v+"%",background:v>=70?"#059669":v>=50?"#d97706":"#dc2626"}}/></div></div>})}</div>
+  </div>;
+}
+
+// ═══ POMODORO ═══
+function Pomo({d,sv}){
+  const M=[{l:"Foco",d:1800,c:"#dc2626"},{l:"Pausa",d:300,c:"#059669"},{l:"Longa",d:900,c:"#2563eb"}];
+  const[md,setMd]=useState(0);const[tl,setTl]=useState(M[0].d);const[rn,setRn]=useState(false);const iv=useRef(null);const dr=useRef(d);dr.current=d;
+  useEffect(()=>{if(rn){iv.current=setInterval(()=>{setTl(p=>{if(p<=1){clearInterval(iv.current);setRn(false);if(md===0){const x=dr.current;sv({...x,pomodoro:{sessions:(x.pomodoro?.sessions||0)+1,totalMinutes:(x.pomodoro?.totalMinutes||0)+30},xp:(x.xp||0)+20})}return 0}return p-1})},1000)}return()=>clearInterval(iv.current)},[rn,md]);
+  const sw=m=>{clearInterval(iv.current);setMd(m);setTl(M[m].d);setRn(false)};
+  const mn=Math.floor(tl/60);const sc=tl%60;const pc=((M[md].d-tl)/M[md].d)*100;
+  return<div><h2 style={{fontSize:24,fontWeight:800,marginBottom:20}}>Pomodoro 30/5/15</h2>
+    <div style={{display:"flex",gap:5,marginBottom:24}}>{M.map((m,i)=><button key={i} onClick={()=>sw(i)} style={{flex:1,padding:"10px",borderRadius:8,border:"2px solid "+(md===i?m.c:"#e5e3de"),background:md===i?m.c+"12":"#fff",color:md===i?m.c:"#999",fontWeight:600,fontSize:13,cursor:"pointer",fontFamily:"inherit"}}>{m.l} ({m.d/60}m)</button>)}</div>
+    <div className="cd tc" style={{padding:36}}>
+      <div style={{position:"relative",display:"inline-block"}}><svg width="200" height="200" viewBox="0 0 200 200"><circle cx="100" cy="100" r="88" fill="none" stroke="#e8e6e1" strokeWidth="8"/><circle cx="100" cy="100" r="88" fill="none" stroke={M[md].c} strokeWidth="8" strokeDasharray={2*Math.PI*88} strokeDashoffset={2*Math.PI*88*(1-pc/100)} strokeLinecap="round" transform="rotate(-90 100 100)" className="tr"/></svg><div style={{position:"absolute",top:"50%",left:"50%",transform:"translate(-50%,-50%)"}}><div style={{fontSize:46,fontWeight:800,fontFamily:"'JetBrains Mono',monospace",color:M[md].c}}>{String(mn).padStart(2,"0")}:{String(sc).padStart(2,"0")}</div></div></div>
+      <div style={{display:"flex",gap:8,justifyContent:"center",marginTop:24}}><button className="btn" style={{background:M[md].c,color:"#fff",width:110,display:"flex",alignItems:"center",justifyContent:"center",gap:6}} onClick={()=>setRn(!rn)}><Ic name={rn?"pause":"play"} size={16}/>{rn?"Pausar":"Iniciar"}</button><button className="btn bs2" onClick={()=>{clearInterval(iv.current);setTl(M[md].d);setRn(false)}}><Ic name="reset" size={16}/></button></div>
+    </div>
+    <div className="g2" style={{marginTop:16}}><div className="cd tc" style={{padding:16}}><div style={{fontSize:28,fontWeight:800,color:"#dc2626"}}>{d.pomodoro?.sessions||0}</div><div style={{fontSize:12,color:"#888"}}>Sessoes</div></div><div className="cd tc" style={{padding:16}}><div style={{fontSize:28,fontWeight:800,color:"#2563eb"}}>{d.pomodoro?.totalMinutes||0}</div><div style={{fontSize:12,color:"#888"}}>Min. Foco</div></div></div>
+  </div>;
+}
+
+ReactDOM.render(<Root/>,document.getElementById("root"));
+</script>
+</body>
+</html>
