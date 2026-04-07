@@ -50,19 +50,22 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:var(--bg);color:var(-
 .tr{transition:stroke-dashoffset 1s linear}
 .ti{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid #f5f4f0;font-size:11px}
 .tk{width:16px;height:16px;border-radius:4px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#fff}
-.qb{width:50px;height:50px;border-radius:10px;border:none;cursor:pointer;font-size:24px;font-weight:700;display:flex;align-items:center;justify-content:center;font-family:inherit}
-.qb:active{transform:scale(.9)}
-.qg{background:#dcfce7;color:#059669}.qr{background:#fef2f2;color:#dc2626}
 .modal-bg{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.3);display:flex;align-items:center;justify-content:center;z-index:100}
 .modal{background:#fff;border-radius:14px;padding:24px;max-width:360px;width:90%}
 .login-box{max-width:380px;width:90%;background:#fff;border-radius:16px;padding:40px;border:1px solid var(--bd)}
 .saving{position:fixed;bottom:16px;right:16px;background:#1a1a2e;color:#fff;padding:6px 14px;border-radius:8px;font-size:11px;font-weight:600;z-index:999;opacity:.8}
-@media(max-width:600px){.mn{padding:16px 14px}.g2{grid-template-columns:1fr}.sb.e{width:170px;min-width:170px}}
+/* Question input boxes */
+.qi{display:flex;align-items:center;gap:12px;padding:16px;background:#fafaf8;border-radius:10px}
+.qi-box{flex:1;text-align:center}
+.qi-inp{width:80px;padding:12px;border-radius:10px;border:2px solid #ddd;font-size:24px;font-weight:800;text-align:center;font-family:inherit;outline:none;background:#fff}
+.qi-inp:focus{border-color:#2563eb}
+.qi-inp.green{border-color:#059669;color:#059669}
+.qi-inp.red{border-color:#dc2626;color:#dc2626}
+@media(max-width:600px){.mn{padding:16px 14px}.g2{grid-template-columns:1fr}.sb.e{width:170px;min-width:170px}.qi-inp{width:65px;font-size:20px;padding:10px}}
 </style>
 </head>
 <body>
 <div id="root"></div>
-<!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
@@ -70,36 +73,17 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:var(--bg);color:var(-
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>
 <script>
-// Initialize Firebase BEFORE React
-firebase.initializeApp({
-  apiKey:"AIzaSyCdBqAfy51qmeQUSgpatryW9NqRAeO1xGE",
-  authDomain:"mentoros-57228.firebaseapp.com",
-  databaseURL:"https://mentoros-57228-default-rtdb.firebaseio.com",
-  projectId:"mentoros-57228",
-  storageBucket:"mentoros-57228.firebasestorage.app",
-  messagingSenderId:"907892590296",
-  appId:"1:907892590296:web:2b9ddede20d26e0b5779ad"
-});
+firebase.initializeApp({apiKey:"AIzaSyCdBqAfy51qmeQUSgpatryW9NqRAeO1xGE",authDomain:"mentoros-57228.firebaseapp.com",databaseURL:"https://mentoros-57228-default-rtdb.firebaseio.com",projectId:"mentoros-57228",storageBucket:"mentoros-57228.firebasestorage.app",messagingSenderId:"907892590296",appId:"1:907892590296:web:2b9ddede20d26e0b5779ad"});
 </script>
 <script type="text/babel">
 const {useState,useEffect,useCallback,useRef}=React;
-const auth=firebase.auth();
-const db=firebase.database();
-
-// Firebase storage wrapper
-const FB={
-  ref:null,
-  init(uid){this.ref=db.ref("users/"+uid+"/data")},
-  async g(){if(!this.ref)return null;const s=await this.ref.once("value");return s.val()},
-  s(d){if(this.ref)this.ref.set(d)}
-};
-
+const auth=firebase.auth();const db=firebase.database();
+const FB={ref:null,init(uid){this.ref=db.ref("users/"+uid+"/data")},async g(){if(!this.ref)return null;const s=await this.ref.once("value");return s.val()},s(d){if(this.ref)this.ref.set(d)}};
 function sm2(it,q){let{ef,interval:iv,repetitions:rp}=it;if(q<3){rp=0;iv=1}else{iv=rp===0?1:rp===1?6:Math.round(iv*ef);rp++}return{...it,ef:Math.max(1.3,ef+(.1-(5-q)*(.08+(5-q)*.02))),interval:iv,repetitions:rp,nextReview:Date.now()+iv*864e5,lastReview:Date.now()}}
-function lToday(){const d=new Date();return[d.getFullYear(),String(d.getMonth()+1).padStart(2,"0"),String(d.getDate()).padStart(2,"0")].join("-")}
-function addDL(ds,n){const[y,m,d]=ds.split("-").map(Number);const dt=new Date(y,m-1,d+n);return[dt.getFullYear(),String(dt.getMonth()+1).padStart(2,"0"),String(dt.getDate()).padStart(2,"0")].join("-")}
-function dowL(ds){const[y,m,d]=ds.split("-").map(Number);return new Date(y,m-1,d).getDay()}
-function fBR(ds){const[y,m,d]=ds.split("-").map(Number);return new Date(y,m-1,d).toLocaleDateString("pt-BR",{weekday:"long",day:"numeric",month:"short"})}
-
+function lT(){const d=new Date();return[d.getFullYear(),String(d.getMonth()+1).padStart(2,"0"),String(d.getDate()).padStart(2,"0")].join("-")}
+function aD(ds,n){const[y,m,d]=ds.split("-").map(Number);const dt=new Date(y,m-1,d+n);return[dt.getFullYear(),String(dt.getMonth()+1).padStart(2,"0"),String(dt.getDate()).padStart(2,"0")].join("-")}
+function dw(ds){const[y,m,d]=ds.split("-").map(Number);return new Date(y,m-1,d).getDay()}
+function fB(ds){const[y,m,d]=ds.split("-").map(Number);return new Date(y,m-1,d).toLocaleDateString("pt-BR",{weekday:"long",day:"numeric",month:"short"})}
 const CUR=[
 {s:"Lingua Portuguesa",c:"#dc2626",t:[["Compreensao e Interpretacao",2],["Tipologia e Generos",1],["Ortografia e Acentuacao",1],["Classes de Palavras",2],["Sintaxe: Periodo Simples",2],["Sintaxe: Periodo Composto",3],["Concordancia Verbal e Nominal",2],["Regencia e Crase",2],["Pontuacao",2],["Coesao e Coerencia",2],["Reescritura",1],["Semantica e Vozes Verbais",2]]},
 {s:"Direito Constitucional",c:"#2563eb",t:[["Principios Fundamentais (art.1-4)",1],["Poder Constituinte",2],["Direitos Individuais (art.5)",3],["Remedios Constitucionais",2],["Direitos Sociais (art.6-11)",2],["Nacionalidade (art.12-13)",1],["Dir. Politicos e Partidos",2],["Organizacao do Estado (art.18-24)",3],["Estados, Municipios, DF",2],["Intervencao Federal",1],["Adm Publica na CF (art.37-43)",3],["Poder Legislativo (art.44-58)",3],["Imunidades Parlamentares",2],["Processo Legislativo (art.59-69)",3],["Fiscalizacao e TCU",2],["Defesa do Estado e Seg Publica",2]]},
@@ -114,9 +98,8 @@ const CUR=[
 const SUBS=CUR.map(c=>c.s);const TTOT=CUR.reduce((a,c)=>a+c.t.length,0);
 function tN(ci,ti){return CUR[ci].t[ti][0]}function tW(ci,ti){return CUR[ci].t[ti][1]}function tid(ci,ti){return"t"+ci+"_"+ti}
 function pC(k){return{E:"#2563eb",A:"#059669",R:"#d97706",A2:"#7c3aed",SIM:"#b45309"}[k]||"#888"}
-function eaDur(w){return w===3?{e:40,a:50}:w===2?{e:30,a:45}:{e:25,a:35}}
+function eaD(w){return w===3?{e:40,a:50}:w===2?{e:30,a:45}:{e:25,a:35}}
 const PHS=["E","A","R","A2"];
-
 function Ic({name,size=18,color}){
   const p={fill:"none",stroke:color||"currentColor",strokeWidth:"2",strokeLinecap:"round",strokeLinejoin:"round"};
   const m={
@@ -138,42 +121,21 @@ function Ic({name,size=18,color}){
   };
   return<svg width={size} height={size} viewBox="0 0 24 24">{m[name]||null}</svg>;
 }
-
-// ═══ ROOT APP WITH AUTH ═══
+// ═══ ROOT ═══
 function Root(){
-  const[user,setUser]=useState(undefined);// undefined=loading, null=logged out
-  const[data,setData]=useState(null);const[saving,setSaving]=useState(false);
-  const saveTimer=useRef(null);
-
-  useEffect(()=>{
-    const unsub=auth.onAuthStateChanged(u=>{
-      setUser(u||null);
-      if(u){FB.init(u.uid);FB.g().then(d=>{setData(d||{studyPlan:[],questions:[],questionStats:{},flashcards:[],diagnosis:{scores:{}},simulados:[],pomodoro:{sessions:0,totalMinutes:0},xp:0,td:{}})});}
-    });
-    return unsub;
-  },[]);
-
-  const sv=useCallback(d=>{
-    setData(d);
-    setSaving(true);
-    clearTimeout(saveTimer.current);
-    saveTimer.current=setTimeout(()=>{FB.s(d);setSaving(false)},800);// debounce saves
-  },[]);
-
+  const[user,setUser]=useState(undefined);const[data,setData]=useState(null);const[saving,setSaving]=useState(false);const stRef=useRef(null);
+  useEffect(()=>{auth.onAuthStateChanged(u=>{setUser(u||null);if(u){FB.init(u.uid);FB.g().then(d=>{setData(d||{studyPlan:[],questions:[],questionStats:{},flashcards:[],diagnosis:{scores:{}},simulados:[],pomodoro:{sessions:0,totalMinutes:0},xp:0,td:{}})})}})},[]);
+  const sv=useCallback(d=>{setData(d);setSaving(true);clearTimeout(stRef.current);stRef.current=setTimeout(()=>{FB.s(d);setSaving(false)},800)},[]);
   if(user===undefined)return<div style={{display:"flex",alignItems:"center",justifyContent:"center",height:"100vh"}}><h1 style={{fontSize:36,fontWeight:800}}>MentorOS</h1></div>;
   if(!user)return<Login/>;
-  if(!data)return<div style={{display:"flex",alignItems:"center",justifyContent:"center",height:"100vh"}}><div className="tc"><h1 style={{fontSize:36,fontWeight:800}}>MentorOS</h1><p style={{color:"#888",marginTop:8}}>Carregando dados...</p></div></div>;
+  if(!data)return<div style={{display:"flex",alignItems:"center",justifyContent:"center",height:"100vh"}}><div className="tc"><h1 style={{fontSize:36,fontWeight:800}}>MentorOS</h1><p style={{color:"#888",marginTop:8}}>Carregando...</p></div></div>;
   return<><App d={data} sv={sv} user={user}/>{saving&&<div className="saving">Salvando...</div>}</>;
 }
-
-// ═══ LOGIN ═══
 function Login(){
   const[email,setEmail]=useState("");const[pw,setPw]=useState("");const[err,setErr]=useState("");const[ld,setLd]=useState(false);
-  const go=async()=>{if(!email||!pw)return;setLd(true);setErr("");try{await auth.signInWithEmailAndPassword(email,pw)}catch(e){setErr(e.code==="auth/wrong-password"||e.code==="auth/invalid-credential"?"Email ou senha incorretos":e.code==="auth/user-not-found"?"Usuario nao encontrado":"Erro: "+e.message)}setLd(false)};
+  const go=async()=>{if(!email||!pw)return;setLd(true);setErr("");try{await auth.signInWithEmailAndPassword(email,pw)}catch(e){setErr("Email ou senha incorretos")}setLd(false)};
   return<div style={{display:"flex",alignItems:"center",justifyContent:"center",minHeight:"100vh",padding:20}}>
-    <div className="login-box tc">
-      <h1 style={{fontSize:28,fontWeight:800,marginBottom:4}}>MentorOS</h1>
-      <p style={{color:"#888",fontSize:13,marginBottom:28}}>Camara dos Deputados</p>
+    <div className="login-box tc"><h1 style={{fontSize:28,fontWeight:800,marginBottom:4}}>MentorOS</h1><p style={{color:"#888",fontSize:13,marginBottom:28}}>Camara dos Deputados</p>
       <div style={{textAlign:"left",display:"flex",flexDirection:"column",gap:12}}>
         <div><span className="lb">Email</span><input className="inp" type="email" value={email} onChange={e=>setEmail(e.target.value)} placeholder="seu@email.com"/></div>
         <div><span className="lb">Senha</span><input className="inp" type="password" value={pw} onChange={e=>setPw(e.target.value)} placeholder="********" onKeyDown={e=>e.key==="Enter"&&go()}/></div>
@@ -183,8 +145,6 @@ function Login(){
     </div>
   </div>;
 }
-
-// ═══ MAIN APP ═══
 function App({d,sv,user}){
   const[tab,setTab]=useState("dashboard");const[so,setSo]=useState(window.innerWidth>700);
   const tabs=[{id:"dashboard",icon:"dashboard",label:"Dashboard"},{id:"plano",icon:"book",label:"Plano EARA"},{id:"questoes",icon:"check",label:"Questoes"},{id:"flash",icon:"flash",label:"Flashcards"},{id:"diag",icon:"diag",label:"Diagnostico"},{id:"pomodoro",icon:"timer",label:"Pomodoro"}];
@@ -193,21 +153,16 @@ function App({d,sv,user}){
     <nav className={`sb ${so?"e":"c"}`}>
       <div className="sh" style={{justifyContent:so?"flex-start":"center"}}>{so&&<h1>MentorOS</h1>}<button className="st0" onClick={()=>setSo(!so)}><Ic name={so?"chevL":"chevR"} size={18}/></button></div>
       <div className="sn">{tabs.map(t=><button key={t.id} onClick={()=>setTab(t.id)} title={t.label} className={`nb ${tab===t.id?"on":""}`}><span style={{flexShrink:0,display:"flex"}}><Ic name={t.icon} size={16}/></span>{so&&<span>{t.label}</span>}</button>)}</div>
-      <div className="sf" style={{justifyContent:so?"flex-start":"center",flexDirection:so?"row":"column",gap:so?6:4}}>
-        <span style={{display:"flex"}}><Ic name="award" size={14} color="#d97706"/></span>
-        {so&&<span style={{fontSize:11,fontWeight:700,color:"#d97706",flex:1}}>{d.xp||0} XP</span>}
-        <button className="st0" onClick={()=>auth.signOut()} title="Sair"><Ic name="logout" size={14} color="#dc2626"/></button>
-      </div>
+      <div className="sf" style={{justifyContent:so?"flex-start":"center",flexDirection:so?"row":"column",gap:so?6:4}}><span style={{display:"flex"}}><Ic name="award" size={14} color="#d97706"/></span>{so&&<span style={{fontSize:11,fontWeight:700,color:"#d97706",flex:1}}>{d.xp||0} XP</span>}<button className="st0" onClick={()=>auth.signOut()} title="Sair"><Ic name="logout" size={14} color="#dc2626"/></button></div>
     </nav>
     <main className="mn">{pg[tab]}</main>
   </div>;
 }
-
 // ═══ DASHBOARD ═══
 function Dash({d,sv,go}){
-  const tQ=d.questions?.length||0,cor=(d.questions||[]).filter(q=>q.correct).length,pct=tQ>0?Math.round(cor/tQ*100):0;
+  const tQ=(d.questions||[]).length,cor=(d.questions||[]).filter(q=>q.correct).length,pct=tQ>0?Math.round(cor/tQ*100):0;
   const td=d.td||{};const dn=Object.keys(td).filter(k=>td[k]).length;const[exp,setExp]=useState(null);
-  const today=lToday();const tp=(d.studyPlan||[]).filter(s=>s.date===today);
+  const today=lT();const tp=(d.studyPlan||[]).filter(s=>s.date===today);
   const dueF=(d.flashcards||[]).filter(f=>(f.nextReview||0)<=Date.now()).length;
   return<div>
     <h2 style={{fontSize:24,fontWeight:800,marginBottom:20}}>Dashboard</h2>
@@ -215,12 +170,7 @@ function Dash({d,sv,go}){
       {[{l:"Questoes",v:tQ,c:"#2563eb"},{l:"Acerto",v:pct+"%",c:"#059669"},{l:"Topicos",v:dn+"/"+TTOT,c:"#7c3aed"},{l:"Flash pend.",v:dueF,c:"#d97706"},{l:"Pomodoros",v:d.pomodoro?.sessions||0,c:"#dc2626"}].map((s,i)=>
         <div className="cd" key={i} style={{padding:12}}><div style={{fontSize:10,color:"#999",fontWeight:600,textTransform:"uppercase"}}>{s.l}</div><div style={{fontSize:22,fontWeight:800,color:s.c,marginTop:4}}>{s.v}</div></div>)}
     </div>
-    {tp.length>0&&<div className="cd" style={{marginBottom:16}}><h3 style={{fontSize:15,fontWeight:700,marginBottom:12}}>Hoje</h3>
-      {tp.map((s,i)=><div key={i} style={{display:"flex",alignItems:"center",gap:8,padding:"6px 0",borderBottom:i<tp.length-1?"1px solid #f0eeea":"none"}}>
-        <span className={`pt p${s.phase}`}>{s.phase}</span><span style={{flex:1,fontSize:13}}>{s.tn}</span><span style={{fontSize:11,color:"#aaa"}}>{s.dur}min</span>
-        <div style={{width:8,height:8,borderRadius:4,background:s.done?"#059669":"#ddd"}}/>
-      </div>)}
-    </div>}
+    {tp.length>0&&<div className="cd" style={{marginBottom:16}}><h3 style={{fontSize:15,fontWeight:700,marginBottom:12}}>Hoje</h3>{tp.map((s,i)=><div key={i} style={{display:"flex",alignItems:"center",gap:8,padding:"6px 0",borderBottom:i<tp.length-1?"1px solid #f0eeea":"none"}}><span className={`pt p${s.phase}`}>{s.phase}</span><span style={{flex:1,fontSize:13}}>{s.tn}</span><span style={{fontSize:11,color:"#aaa"}}>{s.dur}min</span><div style={{width:8,height:8,borderRadius:4,background:s.done?"#059669":"#ddd"}}/></div>)}</div>}
     <div className="cd"><h3 style={{fontSize:15,fontWeight:700,marginBottom:14}}>Progresso</h3>
       {CUR.map((c,ci)=>{const done=c.t.filter((_,ti)=>td[tid(ci,ti)]).length;const tot=c.t.length;const p=Math.round(done/tot*100);const isE=exp===ci;
         return<div key={ci} style={{marginBottom:10}}>
@@ -232,22 +182,19 @@ function Dash({d,sv,go}){
     <div style={{display:"flex",gap:8,flexWrap:"wrap",marginTop:8}}>{[{l:"Cronograma",t:"plano"},{l:"Questoes",t:"questoes"},{l:"Flashcards",t:"flash"},{l:"Pomodoro",t:"pomodoro"}].map((a,i)=><button key={i} className="btn bs2 bsm" onClick={()=>go(a.t)}>{a.l}</button>)}</div>
   </div>;
 }
-
 // ═══ PLANO ═══
 function Plano({d,sv}){
-  const[gW,sGW]=useState("8");const MAX=210;
-  const[showAdd,setShowAdd]=useState(false);const[addDate,setAddDate]=useState(lToday());const[addCi,setAddCi]=useState(0);const[addTi,setAddTi]=useState(0);const[addPh,setAddPh]=useState("E");
-  const[moveId,setMoveId]=useState(null);const[moveTo,setMoveTo]=useState("");
-  const sp=d.studyPlan||[];
-  const gen=()=>{const weeks=parseInt(gW),pl=[];const sd=lToday();let tp={};CUR.forEach((_,i)=>tp[i]=0);const studied=[];let uid=1;
-    for(let dy=0;dy<weeks*7;dy++){const ds=addDL(sd,dy);const dow=dowL(ds);
-      if(dow===0){pl.push({id:uid++,subject:"SIMULADO",tn:"Simulado CEBRASPE 180 questoes",tkey:"sim",phase:"SIM",date:ds,dur:300,done:false,clr:"#b45309"});continue;}
-      if(dow===6){const wk=studied.filter(s=>s.dy>dy-7&&s.dy<dy);let dm=0;const seen=new Set();wk.forEach(it=>{if(!seen.has(it.tkey)&&dm<MAX){seen.add(it.tkey);pl.push({id:uid++,subject:CUR[it.ci].s,tn:tN(it.ci,it.ti),tkey:it.tkey,phase:"A2",date:ds,dur:30,done:false,clr:CUR[it.ci].c});dm+=30;}});continue;}
+  const[gW,sGW]=useState("8");const MAX=210;const[showAdd,setShowAdd]=useState(false);const[addDate,setAddDate]=useState(lT());const[addCi,setAddCi]=useState(0);const[addTi,setAddTi]=useState(0);const[addPh,setAddPh]=useState("E");
+  const[moveId,setMoveId]=useState(null);const[moveTo,setMoveTo]=useState("");const sp=d.studyPlan||[];
+  const gen=()=>{const weeks=parseInt(gW),pl=[];const sd=lT();let tp={};CUR.forEach((_,i)=>tp[i]=0);const studied=[];let uid=1;
+    for(let dy=0;dy<weeks*7;dy++){const ds=aD(sd,dy);const dow0=dw(ds);
+      if(dow0===0){pl.push({id:uid++,subject:"SIMULADO",tn:"Simulado CEBRASPE 180 questoes",tkey:"sim",phase:"SIM",date:ds,dur:300,done:false,clr:"#b45309"});continue;}
+      if(dow0===6){const wk=studied.filter(s=>s.dy>dy-7&&s.dy<dy);let dm=0;const seen=new Set();wk.forEach(it=>{if(!seen.has(it.tkey)&&dm<MAX){seen.add(it.tkey);pl.push({id:uid++,subject:CUR[it.ci].s,tn:tN(it.ci,it.ti),tkey:it.tkey,phase:"A2",date:ds,dur:30,done:false,clr:CUR[it.ci].c});dm+=30;}});continue;}
       let dm=0;const recent=studied.filter(s=>s.dy<dy&&s.dy>=dy-3);const older=studied.filter(s=>s.dy<dy-3);
       let revT=recent.map(s=>tN(s.ci,s.ti));if(older.length>0){const r=older[Math.random()*older.length|0];revT.push(tN(r.ci,r.ti)+" (antigo)");}
       if(revT.length>0){pl.push({id:uid++,subject:"REVISAO",tn:revT.slice(0,4).join(", "),tkey:"rev_"+dy,phase:"R",date:ds,dur:15,done:false,clr:"#d97706"});dm+=15;}
       let si=dy%CUR.length;
-      while(dm<MAX-30){const ci=si%CUR.length;if(tp[ci]>=CUR[ci].t.length)tp[ci]=0;const ti=tp[ci];const dur=eaDur(tW(ci,ti));
+      while(dm<MAX-30){const ci=si%CUR.length;if(tp[ci]>=CUR[ci].t.length)tp[ci]=0;const ti=tp[ci];const dur=eaD(tW(ci,ti));
         if(dm+dur.e+dur.a>MAX+20)break;const tkey=tid(ci,ti);
         pl.push({id:uid++,subject:CUR[ci].s,tn:tN(ci,ti),tkey,phase:"E",date:ds,dur:dur.e,done:false,clr:CUR[ci].c});
         pl.push({id:uid++,subject:CUR[ci].s,tn:tN(ci,ti),tkey,phase:"A",date:ds,dur:dur.a,done:false,clr:CUR[ci].c});
@@ -255,7 +202,7 @@ function Plano({d,sv}){
     }sv({...d,studyPlan:pl});};
   const tog=id=>{const p=sp.map(s=>s.id===id?{...s,done:!s.done}:s);const f=p.find(s=>s.id===id);const td={...(d.td||{})};if(f.done&&f.phase==="A2")td[f.tkey]=true;sv({...d,studyPlan:p,td,xp:(d.xp||0)+(f.done?10:-10)})};
   const rm=id=>sv({...d,studyPlan:sp.filter(s=>s.id!==id)});
-  const addItem=()=>{const cr=CUR[addCi];const w=tW(addCi,addTi);const dur=addPh==="E"?eaDur(w).e:addPh==="A"?eaDur(w).a:addPh==="R"?15:30;
+  const addItem=()=>{const cr=CUR[addCi];const w=tW(addCi,addTi);const dur=addPh==="E"?eaD(w).e:addPh==="A"?eaD(w).a:addPh==="R"?15:30;
     sv({...d,studyPlan:[...sp,{id:Date.now(),subject:cr.s,tn:tN(addCi,addTi),tkey:tid(addCi,addTi),phase:addPh,date:addDate,dur,done:false,clr:cr.c}]});setShowAdd(false);};
   const doMove=()=>{if(!moveTo||!moveId)return;sv({...d,studyPlan:sp.map(s=>s.id===moveId?{...s,date:moveTo}:s)});setMoveId(null)};
   const gr={};sp.forEach(s=>{(gr[s.date]=gr[s.date]||[]).push(s)});const dts=Object.keys(gr).sort();
@@ -263,15 +210,13 @@ function Plano({d,sv}){
   return<div>
     <h2 style={{fontSize:24,fontWeight:800,marginBottom:4}}>Plano de Estudos</h2>
     <p style={{color:"#888",fontSize:14,marginBottom:16}}>EARA | ~3h30/dia | R=15min | Dom=Simulado</p>
-    <div style={{display:"flex",gap:8,marginBottom:16,flexWrap:"wrap"}}><span className="pt pE">E</span><span className="pt pA">A</span><span className="pt pR">R 15min</span><span className="pt pA2">A2</span><span className="pt pSIM">SIM</span></div>
-    <div className="cdf">
-      <div style={{display:"flex",gap:8,alignItems:"flex-end",flexWrap:"wrap"}}>
-        <div><span className="lb">Semanas</span><input className="inp" type="number" value={gW} onChange={e=>sGW(e.target.value)} style={{width:60}}/></div>
-        <button className="btn bp" onClick={gen}>Gerar</button>
-        <button className="btn bs2" onClick={()=>setShowAdd(true)} style={{display:"flex",alignItems:"center",gap:4}}><Ic name="plus" size={14}/>Adicionar</button>
-        {sp.length>0&&<button className="btn bdn bsm" onClick={()=>sv({...d,studyPlan:[]})}>Limpar</button>}
-      </div>
-    </div>
+    <div style={{display:"flex",gap:8,marginBottom:16,flexWrap:"wrap"}}><span className="pt pE">E</span><span className="pt pA">A</span><span className="pt pR">R</span><span className="pt pA2">A2</span><span className="pt pSIM">SIM</span></div>
+    <div className="cdf"><div style={{display:"flex",gap:8,alignItems:"flex-end",flexWrap:"wrap"}}>
+      <div><span className="lb">Semanas</span><input className="inp" type="number" value={gW} onChange={e=>sGW(e.target.value)} style={{width:60}}/></div>
+      <button className="btn bp" onClick={gen}>Gerar</button>
+      <button className="btn bs2" onClick={()=>setShowAdd(true)} style={{display:"flex",alignItems:"center",gap:4}}><Ic name="plus" size={14}/>Adicionar</button>
+      {sp.length>0&&<button className="btn bdn bsm" onClick={()=>sv({...d,studyPlan:[]})}>Limpar</button>}
+    </div></div>
     {showAdd&&<div className="cd"><h3 style={{fontSize:14,fontWeight:700,marginBottom:10}}>Adicionar</h3>
       <div style={{display:"flex",gap:8,flexWrap:"wrap",alignItems:"flex-end",marginBottom:10}}>
         <div><span className="lb">Data</span><input className="inp" type="date" value={addDate} onChange={e=>setAddDate(e.target.value)} style={{width:150}}/></div>
@@ -281,63 +226,101 @@ function Plano({d,sv}){
       </div>
       <div style={{display:"flex",gap:8}}><button className="btn bp" onClick={addItem}>OK</button><button className="btn bs2" onClick={()=>setShowAdd(false)}>Cancelar</button></div>
     </div>}
-    {moveId&&<div className="modal-bg" onClick={()=>setMoveId(null)}><div className="modal" onClick={e=>e.stopPropagation()}>
-      <h3 style={{fontSize:16,fontWeight:700,marginBottom:12}}>Mover para qual dia?</h3>
-      <input className="inp" type="date" value={moveTo} onChange={e=>setMoveTo(e.target.value)} style={{marginBottom:12}}/>
-      <div style={{display:"flex",gap:8}}><button className="btn bp" onClick={doMove}>Mover</button><button className="btn bs2" onClick={()=>setMoveId(null)}>Cancelar</button></div>
-    </div></div>}
+    {moveId&&<div className="modal-bg" onClick={()=>setMoveId(null)}><div className="modal" onClick={e=>e.stopPropagation()}><h3 style={{fontSize:16,fontWeight:700,marginBottom:12}}>Mover para qual dia?</h3><input className="inp" type="date" value={moveTo} onChange={e=>setMoveTo(e.target.value)} style={{marginBottom:12}}/><div style={{display:"flex",gap:8}}><button className="btn bp" onClick={doMove}>Mover</button><button className="btn bs2" onClick={()=>setMoveId(null)}>Cancelar</button></div></div></div>}
     {sp.length>0&&<div className="cd" style={{marginBottom:16}}><div style={{display:"flex",justifyContent:"space-between"}}><span style={{fontSize:13,fontWeight:600}}>Progresso</span><span style={{fontSize:12,color:"#888"}}>{Math.round(doneM/60)}h/{Math.round(totM/60)}h</span></div><div className="pb" style={{marginTop:6,height:8}}><div className="pbf" style={{width:(totM>0?doneM/totM*100:0)+"%",background:"#2563eb",height:"100%"}}/></div></div>}
-    {dts.map(ds=>{const items=gr[ds];const dm=items.reduce((a,s)=>a+s.dur,0);const dow=dowL(ds);
+    {dts.map(ds=>{const items=gr[ds];const dm=items.reduce((a,s)=>a+s.dur,0);const dow0=dw(ds);
       return<div key={ds} style={{marginBottom:18}}>
-      <div style={{display:"flex",justifyContent:"space-between",marginBottom:8}}><span style={{fontSize:12,fontWeight:700,color:dow===0?"#b45309":dow===6?"#7c3aed":"#999",textTransform:"uppercase"}}>{fBR(ds)}{dow===0?" — SIMULADO":dow===6?" — APROFUNDAMENTO":""}</span><span style={{fontSize:11,color:"#bbb"}}>{dm>=60?Math.round(dm/6)/10+"h":dm+"min"}</span></div>
+      <div style={{display:"flex",justifyContent:"space-between",marginBottom:8}}><span style={{fontSize:12,fontWeight:700,color:dow0===0?"#b45309":dow0===6?"#7c3aed":"#999",textTransform:"uppercase"}}>{fB(ds)}{dow0===0?" — SIMULADO":dow0===6?" — APROFUNDAMENTO":""}</span><span style={{fontSize:11,color:"#bbb"}}>{dm>=60?Math.round(dm/6)/10+"h":dm+"min"}</span></div>
       {items.map(s=><div key={s.id} className={`pi ${s.done?"done":""}`} style={s.phase==="SIM"?{borderColor:"#d97706",background:"#fffbeb"}:{}}>
         <div className={`pk ${s.done?"":"un"}`} style={{background:s.done?pC(s.phase):"transparent"}} onClick={()=>tog(s.id)}>{s.done&&<Ic name="check" size={11}/>}</div>
         <span className={`pt p${s.phase}`}>{s.phase}</span>
         <div style={{flex:1,minWidth:0}}><div style={{fontSize:12,fontWeight:600,textDecoration:s.done?"line-through":"none"}}>{s.tn}</div>{s.phase!=="SIM"&&s.phase!=="R"&&<span className="ptg" style={{background:(s.clr||"#1a1a2e")+"15",color:s.clr}}>{s.subject}</span>}</div>
         <span style={{fontSize:11,color:"#aaa"}}>{s.dur}min</span>
-        <button onClick={()=>{setMoveId(s.id);setMoveTo(s.date)}} title="Mover" style={{background:"none",border:"none",cursor:"pointer",color:"#bbb",display:"flex"}}><Ic name="move" size={14}/></button>
-        <button onClick={()=>rm(s.id)} title="Remover" style={{background:"none",border:"none",cursor:"pointer",color:"#ccc",display:"flex"}}><Ic name="trash" size={14}/></button>
+        <button onClick={()=>{setMoveId(s.id);setMoveTo(s.date)}} style={{background:"none",border:"none",cursor:"pointer",color:"#bbb",display:"flex"}}><Ic name="move" size={14}/></button>
+        <button onClick={()=>rm(s.id)} style={{background:"none",border:"none",cursor:"pointer",color:"#ccc",display:"flex"}}><Ic name="trash" size={14}/></button>
       </div>)}
     </div>})}
     {dts.length===0&&<p style={{color:"#bbb",textAlign:"center",marginTop:40}}>Gere seu cronograma!</p>}
   </div>;
 }
-
-// ═══ QUESTOES ═══
+// ═══ QUESTOES — BATCH INPUT ═══
 function Quest({d,sv}){
-  const[dt,setDt]=useState(lToday());const[ci,setCi]=useState(0);const[ti,setTi]=useState(0);const qs=d.questionStats||{};const q=d.questions||[];
-  const mark=ok=>{const sub=CUR[ci].s;const st={...qs};if(!st[sub])st[sub]={correct:0,total:0};st[sub].total++;if(ok)st[sub].correct++;
-    sv({...d,questions:[...q,{id:Date.now(),date:dt,subject:sub,topic:CUR[ci].t[ti][0],correct:ok}],questionStats:st,xp:(d.xp||0)+(ok?5:2)})};
+  const[dt,setDt]=useState(lT());const[ci,setCi]=useState(0);const[ti,setTi]=useState(0);
+  const[ac,setAc]=useState("");const[er,setEr]=useState("");const[msg,setMsg]=useState("");
+  const qs=d.questionStats||{};const q=d.questions||[];
+  const registrar=()=>{
+    const nAc=parseInt(ac)||0;const nEr=parseInt(er)||0;
+    if(nAc===0&&nEr===0)return;
+    const sub=CUR[ci].s;const topic=CUR[ci].t[ti][0];
+    const st={...qs};if(!st[sub])st[sub]={correct:0,total:0};
+    st[sub].correct+=nAc;st[sub].total+=nAc+nEr;
+    // Create batch entries
+    const newQ=[...q];
+    for(let i=0;i<nAc;i++)newQ.push({id:Date.now()+i,date:dt,subject:sub,topic,correct:true});
+    for(let i=0;i<nEr;i++)newQ.push({id:Date.now()+nAc+i,date:dt,subject:sub,topic,correct:false});
+    sv({...d,questions:newQ,questionStats:st,xp:(d.xp||0)+nAc*5+nEr*2});
+    setMsg(nAc+" acertos e "+nEr+" erros registrados em "+sub);
+    setAc("");setEr("");setTimeout(()=>setMsg(""),3000);
+  };
   const dayQ=q.filter(x=>x.date===dt);const dayC=dayQ.filter(x=>x.correct).length;
   const daySub={};dayQ.forEach(x=>{if(!daySub[x.subject])daySub[x.subject]={c:0,e:0};if(x.correct)daySub[x.subject].c++;else daySub[x.subject].e++});
+  const totQ=q.length;const totC=q.filter(x=>x.correct).length;
   return<div>
     <h2 style={{fontSize:24,fontWeight:800,marginBottom:20}}>Questoes</h2>
-    <div className="g4" style={{marginBottom:20}}>{[{l:"Total",v:q.length,c:"#2563eb"},{l:"Acertos",v:q.filter(x=>x.correct).length,c:"#059669"},{l:"Dia",v:dayQ.length,c:"#d97706"},{l:"Dia ok",v:dayC,c:"#059669"}].map((s,i)=><div className="cd" key={i} style={{padding:12}}><div style={{fontSize:10,color:"#999",fontWeight:600,textTransform:"uppercase"}}>{s.l}</div><div style={{fontSize:22,fontWeight:800,color:s.c}}>{s.v}</div></div>)}</div>
+    <div className="g4" style={{marginBottom:20}}>{[{l:"Total",v:totQ,c:"#2563eb"},{l:"Acertos",v:totC,c:"#059669"},{l:"Erros",v:totQ-totC,c:"#dc2626"},{l:"Hoje",v:dayQ.length,c:"#d97706"}].map((s,i)=><div className="cd" key={i} style={{padding:12}}><div style={{fontSize:10,color:"#999",fontWeight:600,textTransform:"uppercase"}}>{s.l}</div><div style={{fontSize:22,fontWeight:800,color:s.c}}>{s.v}</div></div>)}</div>
     <div className="cd">
+      <h3 style={{fontSize:15,fontWeight:700,marginBottom:14}}>Registrar Questoes</h3>
       <div style={{display:"flex",gap:10,marginBottom:16,flexWrap:"wrap",alignItems:"flex-end"}}>
         <div><span className="lb">Data</span><input className="inp" type="date" value={dt} onChange={e=>setDt(e.target.value)} style={{width:150}}/></div>
         <div style={{flex:1,minWidth:130}}><span className="lb">Materia</span><select className="sel" value={ci} onChange={e=>{setCi(parseInt(e.target.value));setTi(0)}}>{CUR.map((c,i)=><option key={i} value={i}>{c.s}</option>)}</select></div>
         <div style={{flex:1,minWidth:150}}><span className="lb">Topico</span><select className="sel" value={ti} onChange={e=>setTi(parseInt(e.target.value))}>{CUR[ci].t.map((t,i)=><option key={i} value={i}>{t[0]}</option>)}</select></div>
       </div>
-      <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:24,padding:"20px 0",background:"#fafaf8",borderRadius:10}}>
-        <button className="qb qg" onClick={()=>mark(true)}>+</button>
-        <div className="tc"><div style={{fontSize:11,color:"#888",fontWeight:600}}>{CUR[ci].s}</div><div style={{fontSize:28,fontWeight:800,marginTop:6}}>{(qs[CUR[ci].s]||{}).correct||0}<span style={{color:"#ccc"}}>/</span>{(qs[CUR[ci].s]||{}).total||0}</div></div>
-        <button className="qb qr" onClick={()=>mark(false)}>-</button>
+      {/* Batch input */}
+      <div className="qi">
+        <div className="qi-box">
+          <span className="lb" style={{color:"#059669"}}>Acertos</span>
+          <input className="qi-inp green" type="number" min="0" value={ac} onChange={e=>setAc(e.target.value)} placeholder="0"/>
+        </div>
+        <div className="qi-box">
+          <span className="lb" style={{color:"#dc2626"}}>Erros</span>
+          <input className="qi-inp red" type="number" min="0" value={er} onChange={e=>setEr(e.target.value)} placeholder="0"/>
+        </div>
+        <div className="qi-box">
+          <span className="lb">Total</span>
+          <div style={{fontSize:24,fontWeight:800,color:"#1a1a2e"}}>{(parseInt(ac)||0)+(parseInt(er)||0)}</div>
+        </div>
       </div>
+      <button className="btn bp" onClick={registrar} style={{width:"100%",marginTop:14,padding:12,fontSize:14}} disabled={!ac&&!er}>Registrar</button>
+      {msg&&<div style={{marginTop:10,padding:"10px 14px",background:"#dcfce7",borderRadius:8,color:"#059669",fontWeight:600,fontSize:13}}>{msg}</div>}
     </div>
-    {dayQ.length>0&&<div className="cd"><h3 style={{fontSize:14,fontWeight:700,marginBottom:10}}>Resumo {fBR(dt)}</h3>{Object.entries(daySub).map(([sub,v])=>{const p=Math.round(v.c/(v.c+v.e)*100);return<div key={sub} style={{display:"flex",justifyContent:"space-between",padding:"8px 0",borderBottom:"1px solid #f0eeea"}}><span style={{fontSize:13,fontWeight:600}}>{sub}</span><span style={{fontSize:12}}>{v.c}&#10003; {v.e}&#10007; ({p}%)</span></div>})}</div>}
-    {Object.keys(qs).length>0&&<div className="cd"><h3 style={{fontSize:14,fontWeight:700,marginBottom:10}}>Ranking</h3>{Object.entries(qs).map(([s,v])=>({s,p:v.total>0?Math.round(v.correct/v.total*100):0,c:v.correct,t:v.total})).sort((a,b)=>a.p-b.p).map((s,i)=><div key={i} style={{display:"flex",justifyContent:"space-between",padding:"8px 0",borderBottom:"1px solid #f0eeea"}}><span style={{fontSize:13,fontWeight:600}}>{s.s}</span><span style={{fontSize:11,color:"#aaa"}}>{s.c}/{s.t} ({s.p}%)</span></div>)}</div>}
+    {/* Day summary */}
+    {dayQ.length>0&&<div className="cd">
+      <h3 style={{fontSize:14,fontWeight:700,marginBottom:10}}>Resumo {fB(dt)} ({dayQ.length}q — {dayC} acertos — {Math.round(dayC/dayQ.length*100)}%)</h3>
+      {Object.entries(daySub).map(([sub,v])=>{const tot=v.c+v.e;const p=Math.round(v.c/tot*100);return<div key={sub} style={{display:"flex",justifyContent:"space-between",padding:"8px 0",borderBottom:"1px solid #f0eeea"}}>
+        <span style={{fontSize:13,fontWeight:600}}>{sub}</span>
+        <div style={{display:"flex",gap:10,alignItems:"center"}}>
+          <span style={{color:"#059669",fontWeight:700}}>{v.c} &#10003;</span>
+          <span style={{color:"#dc2626",fontWeight:700}}>{v.e} &#10007;</span>
+          <span className="bdg" style={{background:(p>=70?"#059669":p>=50?"#d97706":"#dc2626")+"18",color:p>=70?"#059669":p>=50?"#d97706":"#dc2626"}}>{p}%</span>
+        </div>
+      </div>})}
+    </div>}
+    {/* Ranking */}
+    {Object.keys(qs).length>0&&<div className="cd"><h3 style={{fontSize:14,fontWeight:700,marginBottom:10}}>Ranking geral</h3>
+      {Object.entries(qs).map(([s,v])=>({s,p:v.total>0?Math.round(v.correct/v.total*100):0,c:v.correct,t:v.total})).sort((a,b)=>a.p-b.p).map((s,i)=><div key={i} style={{display:"flex",justifyContent:"space-between",padding:"8px 0",borderBottom:"1px solid #f0eeea"}}>
+        <span style={{fontSize:13,fontWeight:600}}>{s.s}</span>
+        <span style={{fontSize:12,color:"#888"}}>{s.c}/{s.t} ({s.p}%)</span>
+      </div>)}
+    </div>}
   </div>;
 }
-
 // ═══ FLASHCARDS ═══
 function Flash({d,sv}){
   const[vw,setVw]=useState("review");const[fci,setFci]=useState(0);const[fti,setFti]=useState(0);
   const[fr,setFr]=useState("");const[bk,setBk]=useState("");const[fl,setFl]=useState(false);const[idx,setIdx]=useState(0);
   const[impSub,setImpSub]=useState(0);const[impTi,setImpTi]=useState(0);const[impMsg,setImpMsg]=useState("");
   const fileRef=useRef(null);const now=Date.now();const fc=d.flashcards||[];
-  const allDue=fc.filter(f=>(f.nextReview||0)<=now);
-  const subN=CUR[fci].s;const topN=CUR[fci].t[fti][0];
+  const allDue=fc.filter(f=>(f.nextReview||0)<=now);const subN=CUR[fci].s;const topN=CUR[fci].t[fti][0];
   const filtDue=fc.filter(f=>f.subject===subN&&f.topic===topN&&(f.nextReview||0)<=now);
   const deck=vw==="review"?allDue:filtDue;const cur=deck[idx]||null;
   const addC=()=>{if(!fr.trim()||!bk.trim())return;sv({...d,flashcards:[...fc,{id:Date.now(),front:fr,back:bk,subject:subN,topic:topN,ef:2.5,interval:0,repetitions:0,nextReview:0}]});setFr("");setBk("")};
@@ -370,8 +353,7 @@ function Flash({d,sv}){
     {vw==="review"&&(allDue.length===0?<div className="cd tc" style={{padding:40}}><div style={{fontSize:40,marginBottom:10}}>&#10003;</div><h3>Tudo revisado!</h3></div>:rvCard())}
     {vw==="study"&&(filtDue.length===0?<div className="cd tc" style={{padding:30}}><h3 style={{fontSize:16}}>Nenhum pendente</h3></div>:rvCard())}
     {vw==="add"&&<div className="cd"><div style={{display:"flex",flexDirection:"column",gap:10}}><div><span className="lb">Frente</span><textarea className="ta" value={fr} onChange={e=>setFr(e.target.value)} placeholder="Pergunta..."/></div><div><span className="lb">Verso</span><textarea className="ta" value={bk} onChange={e=>setBk(e.target.value)} placeholder="Resposta..."/></div><button className="btn bp" onClick={addC}>Adicionar</button></div></div>}
-    {vw==="import"&&<div className="cd">
-      <h3 style={{fontSize:14,fontWeight:700,marginBottom:10}}>Importar (TAB)</h3>
+    {vw==="import"&&<div className="cd"><h3 style={{fontSize:14,fontWeight:700,marginBottom:10}}>Importar (TAB)</h3>
       <div style={{display:"flex",gap:10,alignItems:"flex-end",flexWrap:"wrap",marginBottom:12}}>
         <div style={{flex:1,minWidth:130}}><span className="lb">Materia</span><select className="sel" value={impSub} onChange={e=>{setImpSub(parseInt(e.target.value));setImpTi(0)}}>{CUR.map((c,i)=><option key={i} value={i}>{c.s}</option>)}</select></div>
         <div style={{flex:1,minWidth:150}}><span className="lb">Topico</span><select className="sel" value={impTi} onChange={e=>setImpTi(parseInt(e.target.value))}>{CUR[impSub].t.map((t,i)=><option key={i} value={i}>{t[0]}</option>)}</select></div>
@@ -385,11 +367,9 @@ function Flash({d,sv}){
         {cards.slice(0,15).map(f=><div key={f.id} style={{display:"flex",justifyContent:"space-between",padding:"5px 0",borderBottom:"1px solid #f5f4f0",fontSize:12}}>
           <div><strong>{f.front}</strong> <span style={{color:"#888"}}>{f.back}</span><br/><span className="bdg" style={{background:"#f0eeea"}}>{f.topic}</span></div>
           <button onClick={()=>sv({...d,flashcards:fc.filter(x=>x.id!==f.id)})} style={{background:"none",border:"none",cursor:"pointer",color:"#ccc"}}><Ic name="trash" size={13}/></button>
-        </div>)}
-      </div>})}{fc.length===0&&<p style={{color:"#bbb",textAlign:"center",marginTop:40}}>Nenhum</p>}</div>}
+        </div>)}</div>})}{fc.length===0&&<p style={{color:"#bbb",textAlign:"center",marginTop:40}}>Nenhum</p>}</div>}
   </div>;
 }
-
 // ═══ DIAGNOSTICO ═══
 function Diag({d,sv}){
   const[sc,setSc]=useState(d.diagnosis?.scores||{});
@@ -400,7 +380,6 @@ function Diag({d,sv}){
     <div className="g2">{SUBS.map(s=>{const v=sc[s]||0;return<div className="cd" key={s} style={{padding:14}}><div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:6}}><span style={{fontSize:13,fontWeight:600}}>{s}</span><input className="inp" type="number" value={v} onChange={e=>up(s,e.target.value)} style={{width:55,textAlign:"center",padding:"4px 6px"}}/></div><div className="pb"><div className="pbf" style={{width:v+"%",background:v>=70?"#059669":v>=50?"#d97706":"#dc2626"}}/></div></div>})}</div>
   </div>;
 }
-
 // ═══ POMODORO ═══
 function Pomo({d,sv}){
   const M=[{l:"Foco",d:1800,c:"#dc2626"},{l:"Pausa",d:300,c:"#059669"},{l:"Longa",d:900,c:"#2563eb"}];
@@ -417,7 +396,6 @@ function Pomo({d,sv}){
     <div className="g2" style={{marginTop:16}}><div className="cd tc" style={{padding:16}}><div style={{fontSize:28,fontWeight:800,color:"#dc2626"}}>{d.pomodoro?.sessions||0}</div><div style={{fontSize:12,color:"#888"}}>Sessoes</div></div><div className="cd tc" style={{padding:16}}><div style={{fontSize:28,fontWeight:800,color:"#2563eb"}}>{d.pomodoro?.totalMinutes||0}</div><div style={{fontSize:12,color:"#888"}}>Min. Foco</div></div></div>
   </div>;
 }
-
 ReactDOM.render(<Root/>,document.getElementById("root"));
 </script>
 </body>
