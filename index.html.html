@@ -134,6 +134,70 @@ const CUR=[
 {s:"Redacao Oficial",c:"#0d9488",t:[["Principios da Redacao",1],["Padrao Oficio",2],["Comunicacoes Oficiais",1],["Atos Normativos",2],["Tecnica Legislativa",2]]},
 ];
 const SUBS=CUR.map(c=>c.s);const TTOT=CUR.reduce((a,c)=>a+c.t.length,0);
+
+// ═══ LEI SECA - Cronograma de Leitura estruturado ═══
+// Cada lei dividida em blocos de ~20 min de leitura, em ordem didatica
+const LEIS_CONTENT=[
+  {id:"cf88",nome:"CF/88",clr:"#2563eb",full:"Constituicao Federal de 1988",
+    blocos:[
+      {id:"cf_01",titulo:"Preambulo + Titulo I (art 1-4)",artigos:"Preambulo, arts 1 a 4",foco:"Principios Fundamentais. Decore SOCIDIVAPLU e CONGAERRA PRO."},
+      {id:"cf_02",titulo:"Titulo II Cap I (art 5, incisos I-XL)",artigos:"art 5, I a XL",foco:"Direitos Individuais basicos. Ponto mais cobrado da CF."},
+      {id:"cf_03",titulo:"Titulo II Cap I (art 5, incisos XLI-LXXVIII)",artigos:"art 5, XLI a LXXVIII",foco:"Remedios constitucionais (HC, MS, MI, HD, AP). Decore quem impetra."},
+      {id:"cf_04",titulo:"Titulo II Cap II-V (art 6-17)",artigos:"arts 6 a 17",foco:"Direitos Sociais, Nacionalidade, Dir. Politicos, Partidos."},
+      {id:"cf_05",titulo:"Titulo III Cap I-III (art 18-35)",artigos:"arts 18 a 35",foco:"Organizacao do Estado, Uniao, Estados, Municipios."},
+      {id:"cf_06",titulo:"Titulo III Cap IV-V (art 36-43)",artigos:"arts 36 a 43",foco:"Intervencao Federal. DF. Regioes."},
+      {id:"cf_07",titulo:"Titulo III Cap VII (art 37-41)",artigos:"arts 37 a 41",foco:"Administracao Publica. Art. 37 e o CORACAO do edital. LIMPE."},
+      {id:"cf_08",titulo:"Titulo IV Cap I Secao I-III (art 44-52)",artigos:"arts 44 a 52",foco:"Poder Legislativo. Congresso Nacional, CD, SF."},
+      {id:"cf_09",titulo:"Titulo IV Cap I Secao IV-VII (art 53-58)",artigos:"arts 53 a 58",foco:"Imunidades Parlamentares. Deputados e Senadores. Comissoes."},
+      {id:"cf_10",titulo:"Titulo IV Cap I Secao VIII (art 59-69)",artigos:"arts 59 a 69",foco:"Processo Legislativo. Especies normativas. EC, LC, LO, MP."},
+      {id:"cf_11",titulo:"Titulo IV Cap I Secao IX (art 70-75)",artigos:"arts 70 a 75",foco:"Fiscalizacao Contabil, Financeira e Orcamentaria. TCU."},
+      {id:"cf_12",titulo:"Titulo IV Cap II-III (art 76-91)",artigos:"arts 76 a 91",foco:"Poder Executivo. Atribuicoes do Presidente."},
+      {id:"cf_13",titulo:"Titulo IV Cap IV (art 92-126)",artigos:"arts 92 a 126",foco:"Poder Judiciario. STF, STJ, TRFs."},
+      {id:"cf_14",titulo:"Titulo IV Cap IV (art 127-135)",artigos:"arts 127 a 135",foco:"Funcoes essenciais a Justica. MP, AGU, Defensoria."},
+      {id:"cf_15",titulo:"Titulo V (art 136-144)",artigos:"arts 136 a 144",foco:"Defesa do Estado. Estado de defesa, sitio, FFAA, Seg Publica."},
+    ]},
+  {id:"8112",nome:"Lei 8.112/90",clr:"#059669",full:"Regime Juridico dos Servidores Publicos Federais",
+    blocos:[
+      {id:"l8_01",titulo:"Disposicoes Preliminares + Provimento (art 1-12)",artigos:"arts 1 a 12",foco:"Formas de provimento. Decore as 7 formas."},
+      {id:"l8_02",titulo:"Nomeacao, Posse, Exercicio (art 13-21)",artigos:"arts 13 a 21",foco:"Prazos: 30d posse, 15d exercicio. Estagio probatorio."},
+      {id:"l8_03",titulo:"Estabilidade, Transferencia, Readaptacao (art 22-30)",artigos:"arts 22 a 30",foco:"Estabilidade (3 anos). Formas de provimento derivado."},
+      {id:"l8_04",titulo:"Vacancia, Remocao, Redistribuicao (art 33-38)",artigos:"arts 33 a 38",foco:"Formas de vacancia. Diferenca entre remocao e redistribuicao."},
+      {id:"l8_05",titulo:"Direitos e Vantagens - Vencimento (art 40-68)",artigos:"arts 40 a 68",foco:"Vencimento, remuneracao, vantagens. Indenizacoes."},
+      {id:"l8_06",titulo:"Ferias e Licencas (art 76-96)",artigos:"arts 76 a 96",foco:"Todos os tipos de licenca. Prazos e condicoes."},
+      {id:"l8_07",titulo:"Afastamentos, Tempo de Servico (art 93-103)",artigos:"arts 93 a 103",foco:"Afastamentos especiais. Contagem de tempo."},
+      {id:"l8_08",titulo:"Concessoes, Direito de Peticao (art 104-115)",artigos:"arts 104 a 115",foco:"Concessoes diversas. Direito de peticao e prazos."},
+      {id:"l8_09",titulo:"Regime Disciplinar - Deveres e Proibicoes (art 116-132)",artigos:"arts 116 a 132",foco:"Deveres, proibicoes, acumulacao, responsabilidades. FUNDAMENTAL."},
+      {id:"l8_10",titulo:"Penalidades (art 127-142)",artigos:"arts 127 a 142",foco:"Penalidades: advertencia, suspensao, demissao, cassacao, destituicao."},
+      {id:"l8_11",titulo:"PAD - Processo Administrativo Disciplinar (art 143-173)",artigos:"arts 143 a 173",foco:"Fases do PAD. Prazos. Comissao processante. Amplamente cobrado."},
+      {id:"l8_12",titulo:"Revisao do Processo + Seg. Social (art 174-253)",artigos:"arts 174 a 253",foco:"Revisao do processo. Beneficios. Aposentadoria."},
+    ]},
+  {id:"14133",nome:"Lei 14.133/21",clr:"#d97706",full:"Nova Lei de Licitacoes e Contratos",
+    blocos:[
+      {id:"l4_01",titulo:"Disposicoes Preliminares (art 1-5)",artigos:"arts 1 a 5",foco:"Abrangencia, principios, definicoes. Vedacoes."},
+      {id:"l4_02",titulo:"Agentes Publicos (art 6-10)",artigos:"arts 6 a 10",foco:"Agente de contratacao. Pregoeiro. Comissao."},
+      {id:"l4_03",titulo:"Fase Preparatoria (art 18-27)",artigos:"arts 18 a 27",foco:"Estudo tecnico preliminar. Termo de referencia. Anteprojeto."},
+      {id:"l4_04",titulo:"Modalidades de Licitacao (art 28-33)",artigos:"arts 28 a 33",foco:"5 modalidades: pregao, concorrencia, concurso, leilao, dialogo competitivo. DECORAR."},
+      {id:"l4_05",titulo:"Criterios de Julgamento (art 33-38)",artigos:"arts 33 a 38",foco:"Menor preco, melhor tecnica, maior desconto, etc."},
+      {id:"l4_06",titulo:"Procedimento (art 54-73)",artigos:"arts 54 a 73",foco:"Fase de lances, habilitacao, adjudicacao, homologacao."},
+      {id:"l4_07",titulo:"Contratacao Direta (art 74-75)",artigos:"arts 74 a 75",foco:"Inexigibilidade (art 74) vs Dispensa (art 75). FUNDAMENTAL."},
+      {id:"l4_08",titulo:"Contratos - Disposicoes Gerais (art 89-100)",artigos:"arts 89 a 100",foco:"Clausulas obrigatorias. Garantias. Duracao."},
+      {id:"l4_09",titulo:"Execucao, Alteracoes, Recebimento (art 115-140)",artigos:"arts 115 a 140",foco:"Alteracoes unilaterais e bilaterais. Extincao contratual."},
+      {id:"l4_10",titulo:"Pagamentos, Sancoes, Controles (art 141-174)",artigos:"arts 141 a 174",foco:"Sancoes administrativas. Controle externo. Meios alternativos."},
+    ]},
+  {id:"lrf",nome:"LC 101/00 (LRF)",clr:"#7c3aed",full:"Lei de Responsabilidade Fiscal",
+    blocos:[
+      {id:"lrf_01",titulo:"Disposicoes Preliminares (art 1-4)",artigos:"arts 1 a 4",foco:"Principios. Definicoes. Abrangencia."},
+      {id:"lrf_02",titulo:"Planejamento - PPA, LDO, LOA (art 5-10)",artigos:"arts 5 a 10",foco:"Conteudo adicional do PPA, LDO e LOA. Anexo de Metas Fiscais."},
+      {id:"lrf_03",titulo:"Receita Publica (art 11-14)",artigos:"arts 11 a 14",foco:"Previsao e arrecadacao. Renuncia de receita."},
+      {id:"lrf_04",titulo:"Despesa Publica (art 15-17)",artigos:"arts 15 a 17",foco:"Despesa nao autorizada. Despesa obrigatoria de carater continuado."},
+      {id:"lrf_05",titulo:"Despesa com Pessoal (art 18-23)",artigos:"arts 18 a 23",foco:"LIMITES: Uniao 50%, E/M 60% da RCL. DECORAR. Limite prudencial."},
+      {id:"lrf_06",titulo:"Seguridade Social e Transferencias (art 24-28)",artigos:"arts 24 a 28",foco:"Seguridade social. Transferencias voluntarias."},
+      {id:"lrf_07",titulo:"Divida e Endividamento (art 29-33)",artigos:"arts 29 a 33",foco:"Limites de divida. Operacoes de credito. ARO."},
+      {id:"lrf_08",titulo:"Gestao Patrimonial (art 44-47)",artigos:"arts 44 a 47",foco:"Alienacao de ativos. Preservacao do patrimonio."},
+      {id:"lrf_09",titulo:"Transparencia e Controle (art 48-59)",artigos:"arts 48 a 59",foco:"Transparencia. Relatorio de Gestao Fiscal (RGF). RREO."},
+      {id:"lrf_10",titulo:"Disposicoes Finais (art 60-75)",artigos:"arts 60 a 75",foco:"Limites em anos eleitorais. Sancoes. Disposicoes transitorias."},
+    ]},
+];
 function tN(ci,ti){return CUR[ci].t[ti][0]}function tW(ci,ti){return CUR[ci].t[ti][1]}function tid(ci,ti){return"t"+ci+"_"+ti}
 function pC(k){return{E:"#2563eb",A:"#059669",R:"#d97706",A2:"#7c3aed",SIM:"#b45309",LS:"#0f766e"}[k]||"#888"}
 function eaD(w){return w===3?{e:40,a:50}:w===2?{e:30,a:45}:{e:25,a:35}}
@@ -214,7 +278,7 @@ function Login(){
 
 // ═══ MAIN APP with floating pomodoro ═══
 function App({d,sv}){
-  const[tab,setTab]=useState("plano");const[so,setSo]=useState(window.innerWidth>700);
+  const[tab,setTab]=useState("dashboard");const[so,setSo]=useState(window.innerWidth>700);
   const[pomVis,setPomVis]=useState(false);
   const[openMeta,setOpenMeta]=useState(null);// meta detail view
   // Pomodoro at app level
@@ -224,8 +288,8 @@ function App({d,sv}){
   const pSw=m=>{clearInterval(pIv.current);setPMd(m);setPTl(PM[m].d);setPRn(false)};
   const pMn=Math.floor(pTl/60);const pSc=pTl%60;const pPc=((PM[pMd].d-pTl)/PM[pMd].d)*100;
 
-  const tabs=[{id:"plano",icon:"book",label:"Cronograma"},{id:"questoes",icon:"check",label:"Questoes"},{id:"flash",icon:"flash",label:"Flashcards"},{id:"diag",icon:"diag",label:"Diagnostico"}];
-  const pg={plano:<Plano d={d} sv={sv} onOpenMeta={setOpenMeta}/>,questoes:<Quest d={d} sv={sv}/>,flash:<Flash d={d} sv={sv}/>,diag:<Diag d={d} sv={sv}/>};
+  const tabs=[{id:"dashboard",icon:"dashboard",label:"Dashboard"},{id:"plano",icon:"book",label:"Cronograma"},{id:"leiseca",icon:"target",label:"Lei Seca"},{id:"questoes",icon:"check",label:"Questoes"},{id:"flash",icon:"flash",label:"Flashcards"},{id:"diag",icon:"diag",label:"Diagnostico"}];
+  const pg={dashboard:<Dash d={d} sv={sv} go={setTab}/>,plano:<Plano d={d} sv={sv} onOpenMeta={setOpenMeta}/>,leiseca:<LeiSeca d={d} sv={sv}/>,questoes:<Quest d={d} sv={sv}/>,flash:<Flash d={d} sv={sv}/>,diag:<Diag d={d} sv={sv}/>};
 
   // If a meta is open, show meta detail instead of tab content
   const mainContent=openMeta?<MetaDetail meta={openMeta} d={d} sv={sv} onBack={()=>setOpenMeta(null)} pRn={pRn} setPRn={setPRn} pTl={pTl} setPTl={setPTl} pMd={pMd} setPMd={setPMd} pSw={pSw} PM={PM} pMn={pMn} pSc={pSc} pPc={pPc}/>:pg[tab];
@@ -260,20 +324,126 @@ function App({d,sv}){
 }
 
 // ═══ WEEKLY CALENDAR PLANO ═══
+// ═══ DASHBOARD — visao geral ═══
+function Dash({d,sv,go}){
+  const q=fixArr(d.questions);const tQ=q.length;const cor=q.filter(x=>x.correct).length;const pct=tQ>0?Math.round(cor/tQ*100):0;
+  const td=d.td||{};const dn=Object.keys(td).filter(k=>td[k]).length;
+  const today=lT();const sp=fixArr(d.studyPlan);const tp=sp.filter(s=>s.date===today);
+  const fc=fixArr(d.flashcards);
+  const dueF=fc.filter(f=>f&&isDueCard(f)).length;
+  const newF=fc.filter(f=>f&&isNewCard(f)).length;
+  const todayF=dueF+Math.min(newF,NEW_PER_DAY);
+  // Lei Seca progress
+  const lr=d.leiReading||{};const totalBlocos=LEIS_CONTENT.reduce((a,l)=>a+l.blocos.length,0);
+  const doneBlocos=Object.keys(lr).filter(k=>lr[k]).length;
+  const leiPct=totalBlocos>0?Math.round(doneBlocos/totalBlocos*100):0;
+  // Phase counts today
+  const todayPh={E:0,A:0,R:0,A2:0,LS:0,SIM:0};const todayPhDone={E:0,A:0,R:0,A2:0,LS:0,SIM:0};
+  tp.forEach(s=>{if(todayPh[s.phase]!==undefined){todayPh[s.phase]++;if(s.done)todayPhDone[s.phase]++}});
+  const doneToday=tp.filter(s=>s.done).length;const totalToday=tp.length;
+
+  return<div>
+    <h2 style={{fontSize:24,fontWeight:800,marginBottom:4}}>Dashboard</h2>
+    <p style={{color:"#888",fontSize:13,marginBottom:20}}>Ciclo EARA · Estudo · Atividade · Revisao · Aprofundamento</p>
+    <div className="g4" style={{marginBottom:20}}>
+      {[{l:"Questoes",v:tQ,c:"#2563eb"},{l:"Acerto",v:pct+"%",c:"#059669"},{l:"Topicos",v:dn+"/"+TTOT,c:"#7c3aed"},{l:"Lei Seca",v:leiPct+"%",c:"#0f766e"},{l:"Flash hoje",v:todayF,c:"#d97706"},{l:"Pomodoros",v:d.pomodoro?.sessions||0,c:"#dc2626"}].map((s,i)=>
+        <div className="cd" key={i} style={{padding:12}}><div style={{fontSize:10,color:"#999",fontWeight:600,textTransform:"uppercase"}}>{s.l}</div><div style={{fontSize:22,fontWeight:800,color:s.c,marginTop:4}}>{s.v}</div></div>)}
+    </div>
+    {tp.length>0&&<div className="cd" style={{marginBottom:14}}>
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}>
+        <h3 style={{fontSize:15,fontWeight:700}}>Metas de Hoje</h3>
+        <span style={{fontSize:13,fontWeight:700,color:doneToday===totalToday?"#059669":"#888"}}>{doneToday}/{totalToday}</span>
+      </div>
+      {tp.map((s,i)=><div key={s.id} style={{display:"flex",alignItems:"center",gap:8,padding:"7px 0",borderBottom:i<tp.length-1?"1px solid #f0eeea":"none"}}>
+        <div style={{width:4,height:32,background:pC(s.phase),borderRadius:2,flexShrink:0}}/>
+        <span className={`pt p${s.phase}`}>{s.phase}</span>
+        <div style={{flex:1,minWidth:0}}>
+          <div style={{fontSize:13,fontWeight:600,textDecoration:s.done?"line-through":"none",color:s.done?"#aaa":"#1a1a2e"}}>{s.tn}</div>
+          <div style={{fontSize:11,color:"#999"}}>{s.subject}</div>
+        </div>
+        <span style={{fontSize:11,color:"#aaa"}}>{s.dur}min</span>
+        <div style={{width:12,height:12,borderRadius:6,background:s.done?"#059669":"#ddd",flexShrink:0}}/>
+      </div>)}
+    </div>}
+    <div className="cd">
+      <h3 style={{fontSize:15,fontWeight:700,marginBottom:14}}>Progresso por Materia</h3>
+      {CUR.map((c,ci)=>{const done=c.t.filter((_,ti)=>td[tid(ci,ti)]).length;const tot=c.t.length;const p=Math.round(done/tot*100);
+        return<div key={ci} style={{marginBottom:12}}>
+          <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:4}}><div className="sd" style={{background:c.c}}/><span style={{flex:1,fontSize:13,fontWeight:600}}>{c.s}</span><span style={{fontSize:12,fontWeight:700,color:c.c}}>{done}/{tot}</span></div>
+          <div className="pb"><div className="pbf" style={{width:p+"%",background:c.c}}/></div>
+        </div>})}
+    </div>
+    <div style={{display:"flex",gap:8,flexWrap:"wrap",marginTop:16}}>
+      <button className="btn bs2 bsm" onClick={()=>go("plano")}>Cronograma</button>
+      <button className="btn bs2 bsm" onClick={()=>go("leiseca")}>Lei Seca</button>
+      <button className="btn bs2 bsm" onClick={()=>go("questoes")}>Questoes</button>
+      <button className="btn bs2 bsm" onClick={()=>go("flash")}>Flashcards</button>
+    </div>
+  </div>;
+}
+
+// ═══ LEI SECA — modulo dedicado com checkbox por bloco de artigos ═══
+function LeiSeca({d,sv}){
+  const lr=d.leiReading||{};
+  const[expanded,setExpanded]=useState(null);
+  const toggle=(bid)=>{const n={...lr,[bid]:!lr[bid]};sv({...d,leiReading:n,xp:(d.xp||0)+(n[bid]?5:-5)})};
+  const totalBlocos=LEIS_CONTENT.reduce((a,l)=>a+l.blocos.length,0);
+  const doneBlocos=Object.keys(lr).filter(k=>lr[k]).length;
+  const globalPct=totalBlocos>0?Math.round(doneBlocos/totalBlocos*100):0;
+
+  return<div>
+    <h2 style={{fontSize:24,fontWeight:800,marginBottom:4}}>Lei Seca</h2>
+    <p style={{color:"#888",fontSize:13,marginBottom:20}}>Leitura sistematica das 4 principais leis · 20min/dia</p>
+    <div className="cd" style={{display:"flex",alignItems:"center",gap:16,marginBottom:20}}>
+      <div className="tc"><div style={{fontSize:38,fontWeight:800,color:globalPct>=70?"#059669":globalPct>=30?"#d97706":"#dc2626"}}>{globalPct}%</div><div style={{fontSize:11,color:"#888",fontWeight:600}}>CONCLUIDO</div></div>
+      <div style={{flex:1}}>
+        <div style={{fontSize:13,fontWeight:600,marginBottom:4}}>{doneBlocos} de {totalBlocos} blocos de leitura</div>
+        <div className="pb" style={{height:8}}><div className="pbf" style={{width:globalPct+"%",background:globalPct>=70?"#059669":globalPct>=30?"#d97706":"#dc2626"}}/></div>
+      </div>
+    </div>
+    {LEIS_CONTENT.map(lei=>{
+      const blocosFeitos=lei.blocos.filter(b=>lr[b.id]).length;
+      const pctLei=Math.round(blocosFeitos/lei.blocos.length*100);
+      const isExp=expanded===lei.id;
+      return<div className="cd" key={lei.id} style={{padding:0,overflow:"hidden"}}>
+        <div style={{padding:"16px 18px",cursor:"pointer",display:"flex",alignItems:"center",gap:10,background:lei.clr+"10",borderLeft:"5px solid "+lei.clr}} onClick={()=>setExpanded(isExp?null:lei.id)}>
+          <div style={{flex:1}}>
+            <div style={{fontSize:15,fontWeight:800,color:lei.clr}}>{lei.nome}</div>
+            <div style={{fontSize:12,color:"#666",marginTop:2}}>{lei.full}</div>
+          </div>
+          <div className="tc">
+            <div style={{fontSize:16,fontWeight:800,color:lei.clr}}>{pctLei}%</div>
+            <div style={{fontSize:10,color:"#888"}}>{blocosFeitos}/{lei.blocos.length}</div>
+          </div>
+          <span style={{display:"flex",transition:"transform .2s",transform:isExp?"rotate(180deg)":"rotate(0)",color:"#888"}}><Ic name="chevD" size={18}/></span>
+        </div>
+        <div style={{padding:"0 18px"}}>
+          <div className="pb" style={{height:4,borderRadius:0,margin:0}}><div className="pbf" style={{width:pctLei+"%",background:lei.clr}}/></div>
+        </div>
+        {isExp&&<div style={{padding:"14px 18px"}}>
+          {lei.blocos.map((b,i)=>{const done=!!lr[b.id];return<div key={b.id} style={{display:"flex",alignItems:"flex-start",gap:10,padding:"10px 0",borderBottom:i<lei.blocos.length-1?"1px solid #f0eeea":"none"}}>
+            <div style={{width:22,height:22,borderRadius:6,background:done?lei.clr:"transparent",border:done?"none":"2px solid #ccc",cursor:"pointer",flexShrink:0,display:"flex",alignItems:"center",justifyContent:"center",marginTop:2}} onClick={()=>toggle(b.id)}>{done&&<Ic name="check" size={14} color="#fff"/>}</div>
+            <div style={{flex:1}}>
+              <div style={{fontSize:13,fontWeight:700,color:done?"#aaa":"#1a1a2e",textDecoration:done?"line-through":"none"}}>{b.titulo}</div>
+              <div style={{fontSize:11,color:"#888",fontFamily:"'JetBrains Mono',monospace",marginTop:2}}>{b.artigos}</div>
+              <div style={{fontSize:12,color:"#555",marginTop:4,lineHeight:1.5}}>{b.foco}</div>
+            </div>
+          </div>})}
+        </div>}
+      </div>;
+    })}
+  </div>;
+}
+
+
+// ═══ CRONOGRAMA (Plano EARA) ═══
 function Plano({d,sv,onOpenMeta}){
   const[weekOff,setWeekOff]=useState(0);
   const[gW,sGW]=useState("8");const MAX=210;
+  const[showMarkDone,setShowMarkDone]=useState(false);
   const sp=fixArr(d.studyPlan);
   const today=lT();const weekStart=aD(getWeekStart(today),weekOff*7);
   const days=Array.from({length:7},(_,i)=>aD(weekStart,i));
-
-  // Lei Seca: 4 leis principais, 2 por semana em rotacao (20min/dia em dias alternados)
-  const LEIS=[
-    {nome:"CF/88",ementa:"Constituicao Federal - Titulos I a IV",clr:"#2563eb"},
-    {nome:"Lei 8.112/90",ementa:"Regime Juridico dos Servidores",clr:"#059669"},
-    {nome:"Lei 14.133/21",ementa:"Nova Lei de Licitacoes e Contratos",clr:"#d97706"},
-    {nome:"LC 101/00 (LRF)",ementa:"Lei de Responsabilidade Fiscal",clr:"#7c3aed"},
-  ];
 
   const gen=()=>{
     const weeks=parseInt(gW);const pl=[];const sd=lT();let uid=Date.now();
@@ -289,55 +459,95 @@ function Plano({d,sv,onOpenMeta}){
     const tp={};CUR.forEach((c,ci)=>{tp[ci]=0;while(tp[ci]<c.t.length&&completedTopics.has(tid(ci,tp[ci])))tp[ci]++;});
     const studied=[];
 
+    // LEI SECA: build a flat sequential list of blocks (skip already-done)
+    const leiReading=d.leiReading||{};
+    const leiBlocosPlanos=[];
+    LEIS_CONTENT.forEach((lei,leiIdx)=>{
+      lei.blocos.forEach(bloco=>{
+        if(!leiReading[bloco.id]){leiBlocosPlanos.push({leiIdx,bloco})}
+      });
+    });
+    let leiGlobalIdx=0;
+
     for(let dy=0;dy<weeks*7;dy++){
       const ds=aD(sd,dy);const dow0=dw(ds);
-      // DOMINGO = Simulado
+      // DOMINGO = Simulado (dia dedicado)
       if(dow0===0){pl.push({id:"m_"+(uid++),subject:"SIMULADO",tn:"Simulado CEBRASPE 180q",tkey:"sim_"+dy,phase:"SIM",date:ds,dur:300,done:false,clr:"#b45309"});continue;}
-      // SABADO = Aprofundamento (A2) dos topicos da semana
-      if(dow0===6){
-        const wk=studied.filter(s=>s.dy>dy-7&&s.dy<dy);let dm=0;const seen=new Set();
-        wk.forEach(it=>{if(!seen.has(it.tkey)&&dm<MAX){seen.add(it.tkey);pl.push({id:"m_"+(uid++),subject:CUR[it.ci].s,tn:tN(it.ci,it.ti),tkey:it.tkey,phase:"A2",date:ds,dur:30,done:false,clr:CUR[it.ci].c,ci:it.ci,ti:it.ti});dm+=30}});
-        // Add Lei Seca also on Saturday (revisao da lei da semana)
-        const weekNum=Math.floor(dy/7);const leiIdx=(weekNum*2)%LEIS.length;const lei=LEIS[leiIdx];
-        if(dm<MAX)pl.push({id:"m_"+(uid++),subject:"LEI SECA",tn:"Revisao: "+lei.nome,tkey:"ls_rev_"+dy,phase:"LS",date:ds,dur:20,done:false,clr:lei.clr});
-        continue;
-      }
+
       let dm=0;
-      // REVISAO diaria: ultimos 3 dias + 1 antigo aleatorio
+
+      // REVISAO — TODOS OS DIAS (inclusive sabado). Parte do ciclo EARA.
       const recent=studied.filter(s=>s.dy<dy&&s.dy>=dy-3);const older=studied.filter(s=>s.dy<dy-3);
       let revT=recent.map(s=>tN(s.ci,s.ti));
       if(older.length>0){const r=older[Math.random()*older.length|0];revT.push(tN(r.ci,r.ti))}
-      // Also add recently-completed topics from PREVIOUS plan (to keep revising what was studied before)
-      if(dy<7){const prevDone=Array.from(completedTopics).slice(-3).map(k=>{const[,ci,ti]=k.match(/t(\d+)_(\d+)/)||[];return ci&&ti?tN(parseInt(ci),parseInt(ti)):null}).filter(Boolean);revT=[...prevDone,...revT]}
-      if(revT.length>0){pl.push({id:"m_"+(uid++),subject:"REVISAO",tn:revT.slice(0,4).join(", "),tkey:"rev_"+dy,phase:"R",date:ds,dur:15,done:false,clr:"#d97706"});dm+=15}
-
-      // LEI SECA: 20min/dia em dias alternados (seg, qua, sex)
-      // 2 leis por semana em rotacao: weeks 0-1 = leis[0,1], weeks 2-3 = leis[2,3], etc.
-      if(dow0===1||dow0===3||dow0===5){
-        const weekNum=Math.floor(dy/7);const leiIdx=(weekNum*2+(dow0===1?0:dow0===3?1:0))%LEIS.length;const lei=LEIS[leiIdx];
-        pl.push({id:"m_"+(uid++),subject:"LEI SECA",tn:lei.nome+" - "+lei.ementa,tkey:"ls_"+dy,phase:"LS",date:ds,dur:20,done:false,clr:lei.clr});
-        dm+=20;
+      // On first week, also pull recently-completed topics from previous cycles
+      if(dy<7&&completedTopics.size>0){
+        const prevDone=Array.from(completedTopics).slice(-3).map(k=>{const m=k.match(/t(\d+)_(\d+)/);return m?tN(parseInt(m[1]),parseInt(m[2])):null}).filter(Boolean);
+        revT=[...prevDone,...revT];
+      }
+      if(revT.length>0){
+        pl.push({id:"m_"+(uid++),subject:"REVISAO",tn:revT.slice(0,4).join(", "),tkey:"rev_"+dy,phase:"R",date:ds,dur:15,done:false,clr:"#d97706"});
+        dm+=15;
       }
 
-      // ESTUDO + ATIVIDADE: rotaciona entre materias, pula topicos ja concluidos
-      let si=dy%CUR.length;let attempts=0;
-      while(dm<MAX-30&&attempts<CUR.length*3){
-        attempts++;
-        const ci=si%CUR.length;
-        // Skip if all topics in subject are done
-        if(tp[ci]>=CUR[ci].t.length){si++;continue}
-        // Skip already-completed topics
-        while(tp[ci]<CUR[ci].t.length&&completedTopics.has(tid(ci,tp[ci])))tp[ci]++;
-        if(tp[ci]>=CUR[ci].t.length){si++;continue}
-        const ti=tp[ci];const dur=eaD(tW(ci,ti));
-        if(dm+dur.e+dur.a>MAX+20)break;
-        const tkey=tid(ci,ti);
-        pl.push({id:"m_"+(uid++),subject:CUR[ci].s,tn:tN(ci,ti),tkey,phase:"E",date:ds,dur:dur.e,done:false,clr:CUR[ci].c,ci,ti});
-        pl.push({id:"m_"+(uid++),subject:CUR[ci].s,tn:tN(ci,ti),tkey,phase:"A",date:ds,dur:dur.a,done:false,clr:CUR[ci].c,ci,ti});
-        dm+=dur.e+dur.a;
-        studied.push({dy,ci,ti,tkey});
-        tp[ci]++;
-        si++;
+      // SABADO = Aprofundamento (A2) dos topicos da semana + Lei Seca
+      if(dow0===6){
+        const wk=studied.filter(s=>s.dy>dy-7&&s.dy<dy);const seen=new Set();
+        wk.forEach(it=>{if(!seen.has(it.tkey)&&dm<MAX-20){seen.add(it.tkey);pl.push({id:"m_"+(uid++),subject:CUR[it.ci].s,tn:tN(it.ci,it.ti),tkey:it.tkey,phase:"A2",date:ds,dur:30,done:false,clr:CUR[it.ci].c,ci:it.ci,ti:it.ti});dm+=30}});
+        // Lei Seca: revisao do bloco da semana (2 blocos por semana = 40 min no sabado)
+        for(let k=0;k<2&&dm<MAX-20;k++){
+          if(leiGlobalIdx<leiBlocosPlanos.length){
+            const {leiIdx,bloco}=leiBlocosPlanos[leiGlobalIdx];const lei=LEIS_CONTENT[leiIdx];
+            pl.push({id:"m_"+(uid++),subject:"LEI SECA",tn:lei.nome+" - "+bloco.titulo,tkey:"ls_rev_"+bloco.id,leiBlocoId:bloco.id,phase:"LS",date:ds,dur:20,done:false,clr:lei.clr,isReview:true});
+            dm+=20;
+            leiGlobalIdx++;
+          }
+        }
+        continue;
+      }
+
+      // LEI SECA — segunda, quarta e sexta (20min/dia, blocos sequenciais)
+      if((dow0===1||dow0===3||dow0===5)&&leiGlobalIdx<leiBlocosPlanos.length){
+        const {leiIdx,bloco}=leiBlocosPlanos[leiGlobalIdx];const lei=LEIS_CONTENT[leiIdx];
+        pl.push({id:"m_"+(uid++),subject:"LEI SECA",tn:lei.nome+" - "+bloco.titulo,tkey:"ls_"+bloco.id,leiBlocoId:bloco.id,phase:"LS",date:ds,dur:20,done:false,clr:lei.clr});
+        dm+=20;
+        leiGlobalIdx++;
+      }
+
+      // ESTUDO + ATIVIDADE: rotaciona entre materias, PULA topicos ja concluidos
+      // Check how many subjects still have topics to study
+      const subjectsLeft=CUR.map((c,ci)=>({ci,left:c.t.length-tp[ci]})).filter(x=>x.left>0);
+
+      if(subjectsLeft.length===0){
+        // ALL topics done! Focus 100% on revision of all completed topics
+        const allDone=Array.from(completedTopics);
+        if(allDone.length>0){
+          while(dm<MAX-20){
+            const k=allDone[Math.floor(Math.random()*allDone.length)];
+            const m=k.match(/t(\d+)_(\d+)/);if(!m)break;
+            const ci=parseInt(m[1]);const ti=parseInt(m[2]);
+            pl.push({id:"m_"+(uid++),subject:CUR[ci].s,tn:"Revisao aprofundada: "+tN(ci,ti),tkey:"revdeep_"+dy+"_"+ci+"_"+ti,phase:"R",date:ds,dur:30,done:false,clr:CUR[ci].c,ci,ti});
+            dm+=30;
+          }
+        }
+      }else{
+        let si=dy%Math.max(subjectsLeft.length,1);let attempts=0;
+        while(dm<MAX-30&&attempts<CUR.length*3){
+          attempts++;
+          const ci=si%CUR.length;
+          if(tp[ci]>=CUR[ci].t.length){si++;continue}
+          while(tp[ci]<CUR[ci].t.length&&completedTopics.has(tid(ci,tp[ci])))tp[ci]++;
+          if(tp[ci]>=CUR[ci].t.length){si++;continue}
+          const ti=tp[ci];const dur=eaD(tW(ci,ti));
+          if(dm+dur.e+dur.a>MAX+20)break;
+          const tkey=tid(ci,ti);
+          pl.push({id:"m_"+(uid++),subject:CUR[ci].s,tn:tN(ci,ti),tkey,phase:"E",date:ds,dur:dur.e,done:false,clr:CUR[ci].c,ci,ti});
+          pl.push({id:"m_"+(uid++),subject:CUR[ci].s,tn:tN(ci,ti),tkey,phase:"A",date:ds,dur:dur.a,done:false,clr:CUR[ci].c,ci,ti});
+          dm+=dur.e+dur.a;
+          studied.push({dy,ci,ti,tkey});
+          tp[ci]++;
+          si++;
+        }
       }
     }
     // PRESERVE already-done items from existing plan
@@ -345,13 +555,14 @@ function Plano({d,sv,onOpenMeta}){
     sv({...d,studyPlan:[...donePreserved,...pl]});
   };
 
-  const tog=id=>{const p=sp.map(s=>s.id===id?{...s,done:!s.done}:s);const f=p.find(s=>s.id===id);const td={...(d.td||{})};if(f&&f.done&&f.phase==="A2")td[f.tkey]=true;sv({...d,studyPlan:p,td,xp:(d.xp||0)+(f.done?10:-10)})};
+  const tog=id=>{const p=sp.map(s=>s.id===id?{...s,done:!s.done}:s);const f=p.find(s=>s.id===id);const td={...(d.td||{})};if(f&&f.done&&f.phase==="A2")td[f.tkey]=true;const lr={...(d.leiReading||{})};if(f&&f.leiBlocoId)lr[f.leiBlocoId]=f.done;sv({...d,studyPlan:p,td,leiReading:lr,xp:(d.xp||0)+(f.done?10:-10)})};
 
   return<div>
     <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8,flexWrap:"wrap",gap:8}}>
       <div><h2 style={{fontSize:24,fontWeight:800}}>Meu Cronograma</h2><p style={{color:"#888",fontSize:13}}>Metodo EARA | 8 materias + Lei Seca | ~3h30/dia</p></div>
       <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
         <div style={{display:"flex",alignItems:"center",gap:4}}><span className="lb" style={{margin:0}}>Semanas</span><input className="inp" type="number" value={gW} onChange={e=>sGW(e.target.value)} style={{width:50,padding:"4px 8px"}}/></div>
+        <button className="btn bs2 bsm" onClick={()=>setShowMarkDone(true)} title="Marcar topicos ja estudados para que o cronograma coloque so em revisao">Topicos feitos</button>
         <button className="btn bp bsm" onClick={gen} title="Gera sem apagar o que ja foi feito, pulando topicos concluidos">{sp.length>0?"Continuar plano":"Gerar plano"}</button>
         {sp.length>0&&<button className="btn bdn bsm" onClick={()=>{if(confirm("Apagar TODO o cronograma (inclusive o que ja foi feito)?"))sv({...d,studyPlan:[]})}}>Zerar tudo</button>}
       </div>
@@ -394,6 +605,44 @@ function Plano({d,sv,onOpenMeta}){
         </div>})}
     </div>
     {sp.length===0&&<div className="cd tc" style={{marginTop:20,padding:32}}><h3 style={{fontSize:18,marginBottom:8}}>Gere seu cronograma!</h3><p style={{color:"#888",fontSize:14}}>Clique em "Gerar" para criar seu plano de estudos EARA personalizado.</p></div>}
+
+    {/* Modal: mark topics as already studied */}
+    {showMarkDone&&<div className="modal-bg" onClick={()=>setShowMarkDone(false)}>
+      <div className="modal" onClick={e=>e.stopPropagation()} style={{maxWidth:520,maxHeight:"85vh",overflowY:"auto"}}>
+        <h3 style={{fontSize:18,fontWeight:800,marginBottom:4}}>Topicos ja estudados</h3>
+        <p style={{color:"#888",fontSize:12,marginBottom:14}}>Marque o que ja estudou. O cronograma vai PULAR esses topicos e colocar apenas em Revisao.</p>
+        <div style={{display:"flex",gap:6,marginBottom:14,flexWrap:"wrap"}}>
+          <button className="btn bs2 bsm" onClick={()=>{
+            // Preset: the 5 topics you mentioned
+            const preset=["t0_0","t1_0","t2_1","t3_1","t3_2"];
+            const td={...(d.td||{})};preset.forEach(k=>td[k]=true);sv({...d,td});
+          }}>Marcar os 5 topicos da semana passada</button>
+          <button className="btn bdn bsm" onClick={()=>{if(confirm("Desmarcar TODOS?"))sv({...d,td:{}})}}>Limpar tudo</button>
+        </div>
+        {CUR.map((c,ci)=>{
+          const td=d.td||{};const doneCount=c.t.filter((_,ti)=>td[tid(ci,ti)]).length;
+          return<div key={ci} style={{marginBottom:14}}>
+            <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:6}}>
+              <div className="sd" style={{background:c.c}}/>
+              <span style={{fontSize:13,fontWeight:700}}>{c.s}</span>
+              <span style={{fontSize:11,color:"#888",marginLeft:"auto"}}>{doneCount}/{c.t.length}</span>
+            </div>
+            {c.t.map((t,ti)=>{const k=tid(ci,ti);const done=!!(d.td||{})[k];
+              return<div key={k} style={{display:"flex",alignItems:"center",gap:8,padding:"4px 0 4px 18px",cursor:"pointer"}} onClick={()=>{
+                const td={...(d.td||{})};td[k]=!done;sv({...d,td});
+              }}>
+                <div style={{width:18,height:18,borderRadius:4,background:done?c.c:"transparent",border:done?"none":"2px solid #ccc",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>{done&&<Ic name="check" size={12} color="#fff"/>}</div>
+                <span style={{fontSize:12,color:done?"#aaa":"#1a1a2e",textDecoration:done?"line-through":"none"}}>{t[0]}</span>
+              </div>;
+            })}
+          </div>;
+        })}
+        <div style={{display:"flex",gap:8,marginTop:12,position:"sticky",bottom:0,background:"#fff",padding:"10px 0"}}>
+          <button className="btn bp" onClick={()=>{setShowMarkDone(false);gen()}} style={{flex:1}}>Salvar e gerar cronograma</button>
+          <button className="btn bs2" onClick={()=>setShowMarkDone(false)}>Fechar</button>
+        </div>
+      </div>
+    </div>}
   </div>;
 }
 
@@ -401,16 +650,27 @@ function Plano({d,sv,onOpenMeta}){
 function MetaDetail({meta,d,sv,onBack,pRn,setPRn,pTl,setPTl,pMd,setPMd,pSw,PM,pMn,pSc,pPc}){
   const sp=fixArr(d.studyPlan);
   const isDone=sp.find(s=>s.id===meta.id)?.done;
-  const tog=()=>{const p=sp.map(s=>s.id===meta.id?{...s,done:!s.done}:s);const f=p.find(s=>s.id===meta.id);const td={...(d.td||{})};if(f&&f.done&&f.phase==="A2")td[f.tkey]=true;sv({...d,studyPlan:p,td,xp:(d.xp||0)+(f.done?10:-10)})};
-  // Try exact match, then for LEI SECA revision day strip the "Revisao: " prefix
-  let orient=ORIENT[meta.subject+"::"+meta.tn];
-  if(!orient&&meta.subject==="LEI SECA"){
-    const cleanTn=meta.tn.replace(/^Revisao:\s*/,"");
-    // Try to match by lei name prefix
-    const match=Object.keys(ORIENT).find(k=>k.startsWith("LEI SECA::")&&k.includes(cleanTn));
-    if(match)orient=ORIENT[match];
+  const tog=()=>{
+    const p=sp.map(s=>s.id===meta.id?{...s,done:!s.done}:s);
+    const f=p.find(s=>s.id===meta.id);
+    const td={...(d.td||{})};
+    if(f&&f.done&&f.phase==="A2")td[f.tkey]=true;
+    // Sync Lei Seca reading progress: if this is a Lei Seca meta with leiBlocoId, toggle that block
+    const lr={...(d.leiReading||{})};
+    if(f&&meta.leiBlocoId){lr[meta.leiBlocoId]=f.done}
+    sv({...d,studyPlan:p,td,leiReading:lr,xp:(d.xp||0)+(f.done?10:-10)})
+  };
+
+  // Orientation lookup: for Lei Seca, use the bloco.foco field directly
+  let orient;
+  if(meta.subject==="LEI SECA"&&meta.leiBlocoId){
+    let bloco=null;
+    for(const lei of LEIS_CONTENT){const b=lei.blocos.find(bl=>bl.id===meta.leiBlocoId);if(b){bloco=b;break}}
+    if(bloco)orient="Artigos: "+bloco.artigos+".\n\nFoco: "+bloco.foco+"\n\nLeia com atencao, sublinhe pontos importantes, e anote duvidas. "+(meta.isReview?"Hoje e dia de REVISAO deste bloco — releia o que marcou e faca um resumo mental.":"Primeira leitura — nao precisa decorar tudo, apenas entender a logica dos artigos.");
   }
+  if(!orient)orient=ORIENT[meta.subject+"::"+meta.tn];
   if(!orient)orient="Estude este topico com atencao. Faca anotacoes dos pontos principais e resolva questoes CEBRASPE para fixar o conteudo.";
+
   const phaseLabel={E:"Estudo Teorico",A:"Atividade (Questoes)",R:"Revisao Espacada",A2:"Aprofundamento",SIM:"Simulado Completo",LS:"Leitura de Lei Seca"};
 
   return<div className="meta-detail">
@@ -571,7 +831,7 @@ function Flash({d,sv}){
           const subCards=bySubject[sub];
           const curMatch=CUR.find(c=>c.s===sub);
           const clr=curMatch?curMatch.c:"#888";
-          const isOrphan=!curMatch;
+          const isOrphan=!curMatch&&(sub.toLowerCase().includes("regimento")||sub.toLowerCase().includes("ricd")||sub.toLowerCase().includes("regc"));
           const byTopic={};subCards.forEach(f=>{const t=f.topic||"Sem topico";if(!byTopic[t])byTopic[t]=[];byTopic[t].push(f)});
           return<div key={sub} className="cd">
             <h3 style={{fontSize:14,fontWeight:700,marginBottom:10,display:"flex",alignItems:"center",gap:8}}>
