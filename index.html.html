@@ -54,7 +54,7 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:var(--bg);color:var(-
 .week-day.saturday{background:#faf5ff;border-color:#7c3aed}
 .wd-header{font-size:11px;font-weight:700;text-transform:uppercase;color:#999;margin-bottom:4px;text-align:center}
 .wd-num{font-size:20px;font-weight:800;text-align:center;margin-bottom:8px}
-.meta-card{padding:8px 10px;border-radius:8px;margin-bottom:6px;cursor:pointer;border-left:4px solid;transition:all .15s;font-size:11px}
+.meta-card{padding:8px 10px 8px 12px;border-radius:8px;margin-bottom:6px;cursor:pointer;border-left:5px solid;transition:all .15s;font-size:11px;position:relative}
 .meta-card:hover{opacity:.85;transform:translateY(-1px)}
 .meta-card .mc-phase{font-size:9px;font-weight:700;opacity:.8}
 .meta-card .mc-topic{font-weight:600;margin-top:2px;line-height:1.3}
@@ -135,7 +135,7 @@ const CUR=[
 ];
 const SUBS=CUR.map(c=>c.s);const TTOT=CUR.reduce((a,c)=>a+c.t.length,0);
 function tN(ci,ti){return CUR[ci].t[ti][0]}function tW(ci,ti){return CUR[ci].t[ti][1]}function tid(ci,ti){return"t"+ci+"_"+ti}
-function pC(k){return{E:"#2563eb",A:"#059669",R:"#d97706",A2:"#7c3aed",SIM:"#b45309"}[k]||"#888"}
+function pC(k){return{E:"#2563eb",A:"#059669",R:"#d97706",A2:"#7c3aed",SIM:"#b45309",LS:"#0f766e"}[k]||"#888"}
 function eaD(w){return w===3?{e:40,a:50}:w===2?{e:30,a:45}:{e:25,a:35}}
 
 // ═══ STRATEGIC ORIENTATIONS per topic ═══
@@ -158,6 +158,13 @@ ORIENT["Adm. Publica::PDRAE"]="Bresser-Pereira, 1995. 4 setores: nucleo estrateg
 ORIENT["Raciocinio Logico::Logica Proposicional"]="Domine conectivos: E (conjuncao), OU (disjuncao), SE...ENTAO (condicional), SE E SOMENTE SE (bicondicional). P->Q so e FALSA quando V->F. Negacao de P->Q = P^~Q. Contrapositiva: P->Q equivale a ~Q->~P.";
 ORIENT["Nocoes de TI::Seguranca da Informacao"]="Pilares: confidencialidade, integridade, disponibilidade (CID). Criptografia simetrica (mesma chave) vs assimetrica (publica+privada). Phishing = engenharia social. Firewall filtra trafego, NAO e antivirus.";
 ORIENT["Redacao Oficial::Padrao Oficio"]="MRPR 2018 unificou oficio, memorando e aviso. Fecho: Respeitosamente (superior), Atenciosamente (igual/inferior). Vossa Excelencia = 3a pessoa. Formatacao: justificado, recuo 2,5cm, Times/Calibri 12.";
+// Lei Seca orientations
+ORIENT["LEI SECA::CF/88 - Constituicao Federal - Titulos I a IV"]="Leia a CF/88 do caput ao art. 144 com atencao redobrada. Foco: Principios Fundamentais (art 1-4), Direitos e Garantias (art 5), Organizacao do Estado (art 18-43), Poder Legislativo (art 44-75). Sublinhe artigos com listas (ex: art 5, art 7, art 37) — a banca ama trocar palavras. Faca resumos com as suas palavras ao final de cada titulo.";
+ORIENT["LEI SECA::Lei 8.112/90 - Regime Juridico dos Servidores"]="Leia a Lei 8.112 com atencao especial nos arts: 8-34 (provimento/vacancia/remocao), 40-99 (direitos e vantagens), 116-142 (deveres, proibicoes, responsabilidades), 143-182 (PAD). Decore os 7 tipos de provimento (nomeacao, promocao, readaptacao, reversao, aproveitamento, reintegracao, reconducao). Decore os prazos do PAD.";
+ORIENT["LEI SECA::Lei 14.133/21 - Nova Lei de Licitacoes e Contratos"]="Leia os capitulos fundamentais: Disposicoes Gerais (art 1-20), Agentes Publicos (art 5-10), Principios (art 5), Modalidades (art 28-32), Criterios de Julgamento, Fase Preparatoria, Dispensa e Inexigibilidade (art 74-75). As 5 modalidades sao: pregao, concorrencia, concurso, leilao, dialogo competitivo. Tomada de precos e convite FORAM EXTINTOS.";
+ORIENT["LEI SECA::LC 101/00 (LRF) - Lei de Responsabilidade Fiscal"]="Leia a LRF com foco em: Planejamento (art 4-10), Receita Publica (art 11-14), Despesa Publica (art 15-24), Despesa com Pessoal (art 18-23: limites 50% Uniao, 60% E/M), Transferencias Voluntarias (art 25), Gestao Patrimonial (art 34-37), Transparencia (art 48). Decore os limites de despesa com pessoal.";
+// Generic orientations for LEI SECA revision days (Saturday)
+CUR.forEach(c=>{c.t.forEach(([tn])=>{if(!ORIENT[c.s+"::"+tn])ORIENT[c.s+"::"+tn]="Estude este topico com foco na banca CEBRASPE. Leia o material teorico, faca anotacoes e resolva questoes."})});
 
 function Ic({name,size=18,color}){
   const p={fill:"none",stroke:color||"currentColor",strokeWidth:"2",strokeLinecap:"round",strokeLinejoin:"round"};
@@ -260,31 +267,103 @@ function Plano({d,sv,onOpenMeta}){
   const today=lT();const weekStart=aD(getWeekStart(today),weekOff*7);
   const days=Array.from({length:7},(_,i)=>aD(weekStart,i));
 
-  const gen=()=>{const weeks=parseInt(gW),pl=[];const sd=lT();let tp={};CUR.forEach((_,i)=>tp[i]=0);const studied=[];let uid=1;
-    for(let dy=0;dy<weeks*7;dy++){const ds=aD(sd,dy);const dow0=dw(ds);
-      if(dow0===0){pl.push({id:"m_"+uid++,subject:"SIMULADO",tn:"Simulado CEBRASPE 180q",tkey:"sim",phase:"SIM",date:ds,dur:300,done:false,clr:"#b45309"});continue;}
-      if(dow0===6){const wk=studied.filter(s=>s.dy>dy-7&&s.dy<dy);let dm=0;const seen=new Set();wk.forEach(it=>{if(!seen.has(it.tkey)&&dm<MAX){seen.add(it.tkey);pl.push({id:"m_"+uid++,subject:CUR[it.ci].s,tn:tN(it.ci,it.ti),tkey:it.tkey,phase:"A2",date:ds,dur:30,done:false,clr:CUR[it.ci].c});dm+=30;}});continue;}
-      let dm=0;const recent=studied.filter(s=>s.dy<dy&&s.dy>=dy-3);const older=studied.filter(s=>s.dy<dy-3);
-      let revT=recent.map(s=>tN(s.ci,s.ti));if(older.length>0){const r=older[Math.random()*older.length|0];revT.push(tN(r.ci,r.ti));}
-      if(revT.length>0){pl.push({id:"m_"+uid++,subject:"REVISAO",tn:revT.slice(0,4).join(", "),tkey:"rev_"+dy,phase:"R",date:ds,dur:15,done:false,clr:"#d97706"});dm+=15;}
-      let si=dy%CUR.length;
-      while(dm<MAX-30){const ci=si%CUR.length;if(tp[ci]>=CUR[ci].t.length)tp[ci]=0;const ti=tp[ci];const dur=eaD(tW(ci,ti));
-        if(dm+dur.e+dur.a>MAX+20)break;const tkey=tid(ci,ti);
-        pl.push({id:"m_"+uid++,subject:CUR[ci].s,tn:tN(ci,ti),tkey,phase:"E",date:ds,dur:dur.e,done:false,clr:CUR[ci].c,ci,ti});
-        pl.push({id:"m_"+uid++,subject:CUR[ci].s,tn:tN(ci,ti),tkey,phase:"A",date:ds,dur:dur.a,done:false,clr:CUR[ci].c,ci,ti});
-        dm+=dur.e+dur.a;studied.push({dy,ci,ti,tkey});tp[ci]++;si++;}
-    }sv({...d,studyPlan:pl});};
+  // Lei Seca: 4 leis principais, 2 por semana em rotacao (20min/dia em dias alternados)
+  const LEIS=[
+    {nome:"CF/88",ementa:"Constituicao Federal - Titulos I a IV",clr:"#2563eb"},
+    {nome:"Lei 8.112/90",ementa:"Regime Juridico dos Servidores",clr:"#059669"},
+    {nome:"Lei 14.133/21",ementa:"Nova Lei de Licitacoes e Contratos",clr:"#d97706"},
+    {nome:"LC 101/00 (LRF)",ementa:"Lei de Responsabilidade Fiscal",clr:"#7c3aed"},
+  ];
+
+  const gen=()=>{
+    const weeks=parseInt(gW);const pl=[];const sd=lT();let uid=Date.now();
+    // INCREMENTAL: find topics already completed (from td map or done A2 items)
+    const td=d.td||{};
+    const completedTopics=new Set(Object.keys(td).filter(k=>td[k]));
+    // Also consider topics where both E and A are done in existing plan
+    const existingStudied={};
+    sp.forEach(s=>{if(s.done&&s.tkey&&(s.phase==="E"||s.phase==="A")){if(!existingStudied[s.tkey])existingStudied[s.tkey]={e:false,a:false};if(s.phase==="E")existingStudied[s.tkey].e=true;if(s.phase==="A")existingStudied[s.tkey].a=true;}});
+    Object.entries(existingStudied).forEach(([k,v])=>{if(v.e&&v.a)completedTopics.add(k)});
+
+    // Track which topic index to use next per subject (skip completed ones)
+    const tp={};CUR.forEach((c,ci)=>{tp[ci]=0;while(tp[ci]<c.t.length&&completedTopics.has(tid(ci,tp[ci])))tp[ci]++;});
+    const studied=[];
+
+    for(let dy=0;dy<weeks*7;dy++){
+      const ds=aD(sd,dy);const dow0=dw(ds);
+      // DOMINGO = Simulado
+      if(dow0===0){pl.push({id:"m_"+(uid++),subject:"SIMULADO",tn:"Simulado CEBRASPE 180q",tkey:"sim_"+dy,phase:"SIM",date:ds,dur:300,done:false,clr:"#b45309"});continue;}
+      // SABADO = Aprofundamento (A2) dos topicos da semana
+      if(dow0===6){
+        const wk=studied.filter(s=>s.dy>dy-7&&s.dy<dy);let dm=0;const seen=new Set();
+        wk.forEach(it=>{if(!seen.has(it.tkey)&&dm<MAX){seen.add(it.tkey);pl.push({id:"m_"+(uid++),subject:CUR[it.ci].s,tn:tN(it.ci,it.ti),tkey:it.tkey,phase:"A2",date:ds,dur:30,done:false,clr:CUR[it.ci].c,ci:it.ci,ti:it.ti});dm+=30}});
+        // Add Lei Seca also on Saturday (revisao da lei da semana)
+        const weekNum=Math.floor(dy/7);const leiIdx=(weekNum*2)%LEIS.length;const lei=LEIS[leiIdx];
+        if(dm<MAX)pl.push({id:"m_"+(uid++),subject:"LEI SECA",tn:"Revisao: "+lei.nome,tkey:"ls_rev_"+dy,phase:"LS",date:ds,dur:20,done:false,clr:lei.clr});
+        continue;
+      }
+      let dm=0;
+      // REVISAO diaria: ultimos 3 dias + 1 antigo aleatorio
+      const recent=studied.filter(s=>s.dy<dy&&s.dy>=dy-3);const older=studied.filter(s=>s.dy<dy-3);
+      let revT=recent.map(s=>tN(s.ci,s.ti));
+      if(older.length>0){const r=older[Math.random()*older.length|0];revT.push(tN(r.ci,r.ti))}
+      // Also add recently-completed topics from PREVIOUS plan (to keep revising what was studied before)
+      if(dy<7){const prevDone=Array.from(completedTopics).slice(-3).map(k=>{const[,ci,ti]=k.match(/t(\d+)_(\d+)/)||[];return ci&&ti?tN(parseInt(ci),parseInt(ti)):null}).filter(Boolean);revT=[...prevDone,...revT]}
+      if(revT.length>0){pl.push({id:"m_"+(uid++),subject:"REVISAO",tn:revT.slice(0,4).join(", "),tkey:"rev_"+dy,phase:"R",date:ds,dur:15,done:false,clr:"#d97706"});dm+=15}
+
+      // LEI SECA: 20min/dia em dias alternados (seg, qua, sex)
+      // 2 leis por semana em rotacao: weeks 0-1 = leis[0,1], weeks 2-3 = leis[2,3], etc.
+      if(dow0===1||dow0===3||dow0===5){
+        const weekNum=Math.floor(dy/7);const leiIdx=(weekNum*2+(dow0===1?0:dow0===3?1:0))%LEIS.length;const lei=LEIS[leiIdx];
+        pl.push({id:"m_"+(uid++),subject:"LEI SECA",tn:lei.nome+" - "+lei.ementa,tkey:"ls_"+dy,phase:"LS",date:ds,dur:20,done:false,clr:lei.clr});
+        dm+=20;
+      }
+
+      // ESTUDO + ATIVIDADE: rotaciona entre materias, pula topicos ja concluidos
+      let si=dy%CUR.length;let attempts=0;
+      while(dm<MAX-30&&attempts<CUR.length*3){
+        attempts++;
+        const ci=si%CUR.length;
+        // Skip if all topics in subject are done
+        if(tp[ci]>=CUR[ci].t.length){si++;continue}
+        // Skip already-completed topics
+        while(tp[ci]<CUR[ci].t.length&&completedTopics.has(tid(ci,tp[ci])))tp[ci]++;
+        if(tp[ci]>=CUR[ci].t.length){si++;continue}
+        const ti=tp[ci];const dur=eaD(tW(ci,ti));
+        if(dm+dur.e+dur.a>MAX+20)break;
+        const tkey=tid(ci,ti);
+        pl.push({id:"m_"+(uid++),subject:CUR[ci].s,tn:tN(ci,ti),tkey,phase:"E",date:ds,dur:dur.e,done:false,clr:CUR[ci].c,ci,ti});
+        pl.push({id:"m_"+(uid++),subject:CUR[ci].s,tn:tN(ci,ti),tkey,phase:"A",date:ds,dur:dur.a,done:false,clr:CUR[ci].c,ci,ti});
+        dm+=dur.e+dur.a;
+        studied.push({dy,ci,ti,tkey});
+        tp[ci]++;
+        si++;
+      }
+    }
+    // PRESERVE already-done items from existing plan
+    const donePreserved=sp.filter(s=>s.done);
+    sv({...d,studyPlan:[...donePreserved,...pl]});
+  };
 
   const tog=id=>{const p=sp.map(s=>s.id===id?{...s,done:!s.done}:s);const f=p.find(s=>s.id===id);const td={...(d.td||{})};if(f&&f.done&&f.phase==="A2")td[f.tkey]=true;sv({...d,studyPlan:p,td,xp:(d.xp||0)+(f.done?10:-10)})};
 
   return<div>
     <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8,flexWrap:"wrap",gap:8}}>
-      <div><h2 style={{fontSize:24,fontWeight:800}}>Meu Cronograma</h2><p style={{color:"#888",fontSize:13}}>Metodo EARA | 8 materias base | ~3h30/dia</p></div>
-      <div style={{display:"flex",gap:6}}>
+      <div><h2 style={{fontSize:24,fontWeight:800}}>Meu Cronograma</h2><p style={{color:"#888",fontSize:13}}>Metodo EARA | 8 materias + Lei Seca | ~3h30/dia</p></div>
+      <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
         <div style={{display:"flex",alignItems:"center",gap:4}}><span className="lb" style={{margin:0}}>Semanas</span><input className="inp" type="number" value={gW} onChange={e=>sGW(e.target.value)} style={{width:50,padding:"4px 8px"}}/></div>
-        <button className="btn bp bsm" onClick={gen}>Gerar</button>
-        {sp.length>0&&<button className="btn bdn bsm" onClick={()=>sv({...d,studyPlan:[]})}>Limpar</button>}
+        <button className="btn bp bsm" onClick={gen} title="Gera sem apagar o que ja foi feito, pulando topicos concluidos">{sp.length>0?"Continuar plano":"Gerar plano"}</button>
+        {sp.length>0&&<button className="btn bdn bsm" onClick={()=>{if(confirm("Apagar TODO o cronograma (inclusive o que ja foi feito)?"))sv({...d,studyPlan:[]})}}>Zerar tudo</button>}
       </div>
+    </div>
+    {/* Legend */}
+    <div style={{display:"flex",gap:6,flexWrap:"wrap",marginBottom:8,fontSize:11}}>
+      <span style={{display:"flex",alignItems:"center",gap:4}}><span style={{width:10,height:10,background:"#2563eb",borderRadius:2}}/>Estudo</span>
+      <span style={{display:"flex",alignItems:"center",gap:4}}><span style={{width:10,height:10,background:"#059669",borderRadius:2}}/>Questoes</span>
+      <span style={{display:"flex",alignItems:"center",gap:4}}><span style={{width:10,height:10,background:"#d97706",borderRadius:2}}/>Revisao</span>
+      <span style={{display:"flex",alignItems:"center",gap:4}}><span style={{width:10,height:10,background:"#7c3aed",borderRadius:2}}/>Aprofund.</span>
+      <span style={{display:"flex",alignItems:"center",gap:4}}><span style={{width:10,height:10,background:"#0f766e",borderRadius:2}}/>Lei Seca</span>
+      <span style={{display:"flex",alignItems:"center",gap:4}}><span style={{width:10,height:10,background:"#b45309",borderRadius:2}}/>Simulado</span>
     </div>
     {/* Week navigation */}
     <div className="week-nav">
@@ -302,13 +381,16 @@ function Plano({d,sv,onOpenMeta}){
           <div className="wd-header">{dayName(ds)}</div>
           <div className="wd-num" style={{color:isToday?"#2563eb":isSun?"#b45309":isSat?"#7c3aed":"#1a1a2e"}}>{dayNum(ds)}</div>
           {items.length===0&&<div style={{fontSize:11,color:"#ccc",textAlign:"center",padding:"8px 0"}}>Sem metas</div>}
-          {items.map(s=><div key={s.id} className={`meta-card ${s.done?"done":""}`}
-            style={{background:(s.clr||"#888")+"12",borderColor:s.clr||"#888",color:s.clr}}
+          {items.map(s=>{const phClr=pC(s.phase);const subClr=s.clr||"#888";return<div key={s.id} className={`meta-card ${s.done?"done":""}`}
+            style={{background:subClr+"15",borderLeftColor:phClr,color:"#1a1a2e"}}
             onClick={()=>onOpenMeta(s)}>
-            <div className="mc-phase">{s.phase==="E"?"Estudo":s.phase==="A"?"Atividade":s.phase==="R"?"Revisao":s.phase==="A2"?"Aprofundamento":s.phase==="SIM"?"Simulado":s.phase}</div>
-            <div className="mc-topic" style={{color:"#1a1a2e"}}>{s.tn}</div>
-            <div className="mc-time">{s.dur}min</div>
-          </div>)}
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:4}}>
+              <span className="mc-phase" style={{color:phClr,fontWeight:800,fontSize:9,letterSpacing:.5,textTransform:"uppercase"}}>{s.phase==="E"?"ESTUDO":s.phase==="A"?"QUESTOES":s.phase==="R"?"REVISAO":s.phase==="A2"?"APROFUND.":s.phase==="SIM"?"SIMULADO":s.phase==="LS"?"LEI SECA":s.phase}</span>
+              <span style={{fontSize:9,color:"#999"}}>{s.dur}min</span>
+            </div>
+            <div className="mc-topic" style={{color:subClr,fontSize:11,fontWeight:700,marginTop:2}}>{s.subject==="REVISAO"||s.subject==="SIMULADO"?"":s.subject}</div>
+            <div className="mc-topic" style={{color:"#1a1a2e",fontSize:11,marginTop:1,lineHeight:1.3}}>{s.tn}</div>
+          </div>})}
         </div>})}
     </div>
     {sp.length===0&&<div className="cd tc" style={{marginTop:20,padding:32}}><h3 style={{fontSize:18,marginBottom:8}}>Gere seu cronograma!</h3><p style={{color:"#888",fontSize:14}}>Clique em "Gerar" para criar seu plano de estudos EARA personalizado.</p></div>}
@@ -320,8 +402,16 @@ function MetaDetail({meta,d,sv,onBack,pRn,setPRn,pTl,setPTl,pMd,setPMd,pSw,PM,pM
   const sp=fixArr(d.studyPlan);
   const isDone=sp.find(s=>s.id===meta.id)?.done;
   const tog=()=>{const p=sp.map(s=>s.id===meta.id?{...s,done:!s.done}:s);const f=p.find(s=>s.id===meta.id);const td={...(d.td||{})};if(f&&f.done&&f.phase==="A2")td[f.tkey]=true;sv({...d,studyPlan:p,td,xp:(d.xp||0)+(f.done?10:-10)})};
-  const orient=ORIENT[meta.subject+"::"+meta.tn]||"Estude este topico com atencao. Faca anotacoes dos pontos principais e resolva questoes CEBRASPE para fixar o conteudo.";
-  const phaseLabel={E:"Estudo Teorico",A:"Atividade (Questoes)",R:"Revisao Espacada",A2:"Aprofundamento",SIM:"Simulado Completo"};
+  // Try exact match, then for LEI SECA revision day strip the "Revisao: " prefix
+  let orient=ORIENT[meta.subject+"::"+meta.tn];
+  if(!orient&&meta.subject==="LEI SECA"){
+    const cleanTn=meta.tn.replace(/^Revisao:\s*/,"");
+    // Try to match by lei name prefix
+    const match=Object.keys(ORIENT).find(k=>k.startsWith("LEI SECA::")&&k.includes(cleanTn));
+    if(match)orient=ORIENT[match];
+  }
+  if(!orient)orient="Estude este topico com atencao. Faca anotacoes dos pontos principais e resolva questoes CEBRASPE para fixar o conteudo.";
+  const phaseLabel={E:"Estudo Teorico",A:"Atividade (Questoes)",R:"Revisao Espacada",A2:"Aprofundamento",SIM:"Simulado Completo",LS:"Leitura de Lei Seca"};
 
   return<div className="meta-detail">
     <button onClick={onBack} className="btn bs2" style={{marginBottom:16,display:"flex",alignItems:"center",gap:6}}><Ic name="back" size={16}/>Voltar ao Cronograma</button>
@@ -471,18 +561,42 @@ function Flash({d,sv}){
       </div>
       {impMsg&&<div style={{padding:"10px",background:"#dcfce7",borderRadius:8,color:"#059669",fontWeight:600,fontSize:13}}>{impMsg}</div>}
     </div>}
-    {vw==="list"&&<div>{CUR.map((c,ci)=>{const subCards=fc.filter(f=>f&&f.subject===c.s);if(!subCards.length)return null;
-      const byTopic={};subCards.forEach(f=>{const t=f.topic||"?";if(!byTopic[t])byTopic[t]=[];byTopic[t].push(f)});
-      return<div key={ci} className="cd"><h3 style={{fontSize:14,fontWeight:700,marginBottom:10}}>{c.s} ({subCards.length})</h3>
-        {Object.entries(byTopic).map(([topic,cards])=><div key={topic} style={{marginBottom:10}}>
-          <div style={{display:"flex",justifyContent:"space-between",marginBottom:4}}><span style={{fontSize:12,fontWeight:700}}>{topic} ({cards.length})</span><button className="btn bdn bsm" onClick={()=>delTopic(c.s,topic)}>Excluir</button></div>
-          {cards.slice(0,5).map(f=><div key={f.id} style={{display:"flex",justifyContent:"space-between",padding:"4px 0",borderBottom:"1px solid #f5f4f0",fontSize:11}}>
-            <div><strong>{f.front}</strong> <span style={{color:"#888"}}>{f.back}</span></div>
-            <button onClick={()=>delOne(f.id)} style={{background:"none",border:"none",cursor:"pointer",color:"#ccc"}}><Ic name="trash" size={12}/></button>
-          </div>)}
-          {cards.length>5&&<div style={{fontSize:10,color:"#aaa"}}>+{cards.length-5} mais</div>}
-        </div>)}
-      </div>})}{fc.length===0&&<p style={{color:"#bbb",textAlign:"center",marginTop:40}}>Nenhum</p>}</div>}
+    {vw==="list"&&<div>
+      {(()=>{
+        // Group by subject, including subjects not in CUR (e.g., Regimento Interno)
+        const bySubject={};
+        fc.forEach(f=>{if(!f)return;const s=f.subject||"Sem materia";if(!bySubject[s])bySubject[s]=[];bySubject[s].push(f)});
+        const allSubjects=Object.keys(bySubject).sort();
+        return allSubjects.map(sub=>{
+          const subCards=bySubject[sub];
+          const curMatch=CUR.find(c=>c.s===sub);
+          const clr=curMatch?curMatch.c:"#888";
+          const isOrphan=!curMatch;
+          const byTopic={};subCards.forEach(f=>{const t=f.topic||"Sem topico";if(!byTopic[t])byTopic[t]=[];byTopic[t].push(f)});
+          return<div key={sub} className="cd">
+            <h3 style={{fontSize:14,fontWeight:700,marginBottom:10,display:"flex",alignItems:"center",gap:8}}>
+              <div className="sd" style={{background:clr}}/>{sub} ({subCards.length})
+              {isOrphan&&<span style={{fontSize:10,background:"#fef3c7",color:"#92400e",padding:"2px 8px",borderRadius:8,fontWeight:700}}>MATERIA REMOVIDA</span>}
+              <button className="btn bdn bsm" style={{marginLeft:"auto"}} onClick={()=>{if(confirm("Excluir TODOS os "+subCards.length+" cartoes de "+sub+"?"))sv({...d,flashcards:fc.filter(f=>f.subject!==sub)})}}>Excluir todos</button>
+            </h3>
+            {Object.entries(byTopic).map(([topic,cards])=><div key={topic} style={{marginBottom:14,paddingBottom:10,borderBottom:"1px solid #f0eeea"}}>
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:6}}>
+                <span style={{fontSize:12,fontWeight:700,color:"#555"}}>{topic} ({cards.length})</span>
+                <button className="btn bdn bsm" onClick={()=>{if(confirm("Excluir "+cards.length+" cartoes de "+topic+"?"))sv({...d,flashcards:fc.filter(f=>!(f.subject===sub&&f.topic===topic))})}}>Excluir topico</button>
+              </div>
+              {cards.map(f=><div key={f.id} style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",padding:"6px 0",borderBottom:"1px solid #f5f4f0",gap:8}}>
+                <div style={{flex:1,fontSize:12}}>
+                  <strong>{f.front}</strong>
+                  <div style={{color:"#888",marginTop:2,fontSize:11}}>{f.back}</div>
+                </div>
+                <button onClick={()=>delOne(f.id)} style={{background:"none",border:"none",cursor:"pointer",color:"#ccc",flexShrink:0}} title="Excluir"><Ic name="trash" size={14}/></button>
+              </div>)}
+            </div>)}
+          </div>
+        });
+      })()}
+      {fc.length===0&&<p style={{color:"#bbb",textAlign:"center",marginTop:40}}>Nenhum cartao</p>}
+    </div>}
   </div>;
 }
 
