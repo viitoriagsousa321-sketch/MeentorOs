@@ -254,7 +254,7 @@ function Ic({name,size=18,color}){
 // ═══ ROOT + AUTH ═══
 function Root(){
   const[user,setUser]=useState(undefined);const[data,setData]=useState(null);const[saving,setSaving]=useState(false);const stRef=useRef(null);
-  useEffect(()=>{auth.onAuthStateChanged(u=>{setUser(u||null);if(u){FB.init(u.uid);FB.g().then(raw=>{const d=fixData(raw);setData(d||{studyPlan:[],questions:[],questionStats:{},flashcards:[],diagnosis:{scores:{}},simulados:[],pomodoro:{sessions:0,totalMinutes:0},xp:0,td:{}})})}})},[]);
+  useEffect(()=>{auth.onAuthStateChanged(u=>{setUser(u||null);if(u){FB.init(u.uid);FB.g().then(raw=>{const d=fixData(raw);setData(d||{studyPlan:[],questions:[],questionStats:{},flashcards:[],diagnosis:{scores:{}},simulados:[],pomodoro:{sessions:0,totalMinutes:0},xp:0,td:{},leiReading:{}})})}})},[]);
   const sv=useCallback(d=>{setData(d);setSaving(true);clearTimeout(stRef.current);stRef.current=setTimeout(()=>{FB.s(d);setSaving(false)},800)},[]);
   if(user===undefined)return<div style={{display:"flex",alignItems:"center",justifyContent:"center",height:"100vh"}}><h1 style={{fontSize:36,fontWeight:800}}>MentorOS</h1></div>;
   if(!user)return<Login/>;
