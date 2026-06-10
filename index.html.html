@@ -154,6 +154,12 @@ input:focus,select:focus{border-color:var(--gold)}
   .bnav button.on{color:var(--gold)}
   .bnav .ic{font-size:17px}
 }
+.pomobar{position:fixed;right:18px;bottom:18px;z-index:60;display:flex;align-items:center;gap:12px;background:var(--panel2);border:1px solid var(--line);border-radius:13px;padding:10px 14px;box-shadow:0 8px 30px rgba(0,0,0,.45)}
+.pomobar .pt{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:19px;letter-spacing:1px;min-width:62px}
+.pomobar .pdot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.pomobar button{font-size:13px;color:var(--mut);padding:5px 9px;border-radius:8px;border:1px solid var(--line)}
+.pomobar button:hover{color:var(--gold);border-color:var(--gold)}
+@media(max-width:920px){.pomobar{right:10px;bottom:96px;left:10px;justify-content:center}}
 @media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 </head>
@@ -501,12 +507,15 @@ function Kanban({state,up}){
 }
 
 function Questoes({state,up}){
-  const [disc,setDisc]=useState("LP"); const [total,setTotal]=useState(""); const [ac,setAc]=useState("");
+  const [disc,setDisc]=useState("LP");
+  const [topico,setTopico]=useState(SEQ.LP[0]);
+  const [total,setTotal]=useState(""); const [ac,setAc]=useState("");
+  const trocaDisc=d=>{setDisc(d); setTopico(SEQ[d][0]);};
   const add=()=>{
     const t=parseInt(total),c=parseInt(ac);
     if(!t||t<1||isNaN(c)||c<0||c>t) return;
-    const rec={id:Date.now(),d:new Date().toLocaleDateString("pt-BR",{day:"2-digit",month:"2-digit"}),disc,total:t,acertos:c};
-    up(s=>({...s,questoes:[rec,...s.questoes].slice(0,400),xp:s.xp+10}));
+    const rec={id:Date.now(),d:new Date().toLocaleDateString("pt-BR",{day:"2-digit",month:"2-digit"}),disc,topico,total:t,acertos:c};
+    up(s=>({...s,questoes:[rec,...s.questoes].slice(0,600),xp:s.xp+10}));
     setTotal("");setAc("");
   };
   const del=id=>up(s=>({...s,questoes:s.questoes.filter(q=>q.id!==id)}));
@@ -515,9 +524,18 @@ function Questoes({state,up}){
       <div className="card">
         <h3>REGISTRAR SESSÃO <span className="lbl">+10 xp</span></h3>
         <div style={{display:"flex",flexDirection:"column",gap:11}}>
-          <select value={disc} onChange={e=>setDisc(e.target.value)}>
-            {KANBAN_DISCS.map(d=><option key={d} value={d}>{DISC[d].nome}</option>)}
-          </select>
+          <div>
+            <span className="lbl" style={{display:"block",marginBottom:5}}>Disciplina</span>
+            <select value={disc} onChange={e=>trocaDisc(e.target.value)} style={{width:"100%"}}>
+              {KANBAN_DISCS.map(d=><option key={d} value={d}>{DISC[d].nome}</option>)}
+            </select>
+          </div>
+          <div>
+            <span className="lbl" style={{display:"block",marginBottom:5}}>Tópico</span>
+            <select value={topico} onChange={e=>setTopico(e.target.value)} style={{width:"100%"}}>
+              {SEQ[disc].map((t,i)=><option key={i} value={t}>{t}</option>)}
+            </select>
+          </div>
           <div style={{display:"flex",gap:10}}>
             <input type="number" min="1" placeholder="Total de questões" value={total} onChange={e=>setTotal(e.target.value)} style={{flex:1}}/>
             <input type="number" min="0" placeholder="Acertos" value={ac} onChange={e=>setAc(e.target.value)} style={{flex:1}}/>
@@ -528,10 +546,10 @@ function Questoes({state,up}){
       <div className="card">
         <h3>ÚLTIMAS SESSÕES</h3>
         {state.questoes.length===0 && <p style={{fontSize:13,color:"var(--mut2)"}}>Nenhuma sessão ainda. Registre a primeira ao lado — é daqui que o Diagnóstico nasce.</p>}
-        {state.questoes.slice(0,14).map(q=>(
+        {state.questoes.slice(0,16).map(q=>(
           <div key={q.id} className="qitem">
             <span className="qd">{q.d}</span>
-            <span className="qn">{DISC[q.disc]?DISC[q.disc].nome:q.disc}</span>
+            <span className="qn">{q.topico||(DISC[q.disc]?DISC[q.disc].nome:q.disc)}<small style={{display:"block",color:"var(--mut2)",fontSize:10.5,fontWeight:400}}>{DISC[q.disc]?DISC[q.disc].nome:q.disc}</small></span>
             <span className="qs">{q.acertos}/{q.total} · {Math.round(q.acertos/q.total*100)}%</span>
             <button className="del" onClick={()=>del(q.id)} aria-label="Excluir registro">×</button>
           </div>
@@ -547,8 +565,14 @@ function Diagnostico({state}){
     state.questoes.forEach(q=>{const x=a[q.disc]=a[q.disc]||{t:0,c:0}; x.t+=q.total; x.c+=q.acertos;});
     return Object.entries(a).map(([d,x])=>({d,t:x.t,p:Math.round(x.c/x.t*100)})).sort((m,n)=>m.p-n.p);
   },[state.questoes]);
-  if(agg.length===0) return <div className="card"><p style={{fontSize:13.5,color:"var(--mut)",lineHeight:1.7}}>Sem dados ainda. O Diagnóstico se constrói com os registros da aba Questões — a partir de 10 questões por disciplina ele já aponta seu alvo de sábado.</p></div>;
+  const topErr=useMemo(()=>{
+    const a={};
+    state.questoes.forEach(q=>{ if(!q.topico) return; const k=q.disc+"|"+q.topico; const x=a[k]=a[k]||{disc:q.disc,topico:q.topico,t:0,c:0}; x.t+=q.total; x.c+=q.acertos;});
+    return Object.values(a).filter(x=>x.t>=10).map(x=>({...x,p:Math.round(x.c/x.t*100)})).sort((m,n)=>m.p-n.p).slice(0,8);
+  },[state.questoes]);
+  if(agg.length===0) return <div className="card"><p style={{fontSize:13.5,color:"var(--mut)",lineHeight:1.7}}>Sem dados ainda. O Diagnóstico se constrói com os registros da aba Questões — a partir de 10 questões por tópico ele já aponta onde você erra mais.</p></div>;
   return (
+    <div style={{display:"flex",flexDirection:"column",gap:16}}>
     <div className="card">
       <h3>TAXA DE ACERTO POR DISCIPLINA <span className="lbl">ordenado da mais fraca</span></h3>
       {agg.map((x,i)=>(
@@ -559,6 +583,19 @@ function Diagnostico({state}){
         </div>
       ))}
       <p style={{fontSize:12,color:"var(--mut2)",marginTop:10}}>Banca C/E pune o chute: abaixo de 60% em vermelho, 60–74% em âmbar, 75%+ em verde. Amostras pequenas (&lt;10 questões) distorcem o percentual.</p>
+    </div>
+    <div className="card">
+      <h3>TÓPICOS MAIS FRACOS <span className="lbl">≥10 questões · onde atacar</span></h3>
+      {topErr.length===0
+        ? <p style={{fontSize:13,color:"var(--mut2)",lineHeight:1.7}}>Registre ao menos 10 questões num mesmo tópico para ele aparecer aqui. É esta lista que torna o rastreio de erro objetivo — tópico, não disciplina.</p>
+        : topErr.map((x,i)=>(
+          <div key={i} className="row">
+            <span className="rl" style={{width:260}}>{x.topico}<small style={{display:"block",color:"var(--mut2)",fontSize:10.5}}>{DISC[x.disc].nome}</small></span>
+            <div className="bar" style={{flex:1}}><i style={{width:x.p+"%",background:x.p<60?"var(--danger)":x.p<75?"var(--gold)":"var(--av)"}}></i></div>
+            <span className="rp">{x.p}%</span>
+          </div>
+        ))}
+    </div>
     </div>
   );
 }
@@ -592,17 +629,17 @@ function LeiSeca({state,up}){
   );
 }
 
-function Pomodoro({up}){
+/* hook global — vive no App, sobrevive à troca de abas */
+function usePomodoro(up){
   const [mins,setMins]=useState(25);
   const [left,setLeft]=useState(25*60);
   const [run,setRun]=useState(false);
   const [mode,setMode]=useState("foco");
   const iRef=useRef(null);
   useEffect(()=>{
-    if(!run) return;
+    if(!run){clearInterval(iRef.current);return;}
     iRef.current=setInterval(()=>setLeft(l=>{
       if(l<=1){
-        clearInterval(iRef.current); setRun(false);
         if(mode==="foco"){ up(s=>({...s,xp:s.xp+15,pomos:s.pomos+1})); setMode("pausa"); return 5*60; }
         setMode("foco"); return mins*60;
       }
@@ -610,21 +647,43 @@ function Pomodoro({up}){
     }),1000);
     return ()=>clearInterval(iRef.current);
   },[run,mode,mins,up]);
-  const mm=String(Math.floor(left/60)).padStart(2,"0"), ss=String(left%60).padStart(2,"0");
+  const reset=useCallback(()=>{setRun(false);setMode("foco");setLeft(mins*60);},[mins]);
+  const pick=useCallback(m=>{setMins(m); if(!run&&mode==="foco") setLeft(m*60);},[run,mode]);
+  return {mins,left,run,mode,setRun,reset,pick};
+}
+
+function PomodoroBar({p}){
+  if(!p.run && p.left===p.mins*60 && p.mode==="foco") return null; // só aparece após iniciar
+  const mm=String(Math.floor(p.left/60)).padStart(2,"0"), ss=String(p.left%60).padStart(2,"0");
+  const col=p.mode==="foco"?"var(--gold)":"var(--av)";
+  return (
+    <div className="pomobar">
+      <span className="pdot" style={{background:col,opacity:p.run?1:.4}}></span>
+      <span className="pt" style={{color:col}}>{mm}:{ss}</span>
+      <button onClick={()=>p.setRun(r=>!r)}>{p.run?"Pausar":"Retomar"}</button>
+      <button onClick={p.reset}>Zerar</button>
+    </div>
+  );
+}
+
+function Pomodoro({pomo}){
+  const p=pomo;
+  const mm=String(Math.floor(p.left/60)).padStart(2,"0"), ss=String(p.left%60).padStart(2,"0");
   return (
     <div className="card pomo">
-      <span className="lbl">{mode==="foco"?"Bloco de foco":"Pausa"} · ciclo completo = +15 xp</span>
-      <div className="pomotime" style={{color:mode==="foco"?"var(--text)":"var(--av)"}}>{mm}:{ss}</div>
+      <span className="lbl">{p.mode==="foco"?"Bloco de foco":"Pausa"} · ciclo completo = +15 xp</span>
+      <div className="pomotime" style={{color:p.mode==="foco"?"var(--text)":"var(--av)"}}>{mm}:{ss}</div>
       <div className="pomobtns">
-        <button className="btn solid" onClick={()=>setRun(r=>!r)}>{run?"Pausar":"Iniciar"}</button>
-        <button className="btn" onClick={()=>{setRun(false);setMode("foco");setLeft(mins*60);}}>Zerar</button>
+        <button className="btn solid" onClick={()=>p.setRun(r=>!r)}>{p.run?"Pausar":"Iniciar"}</button>
+        <button className="btn" onClick={p.reset}>Zerar</button>
       </div>
       <div style={{display:"flex",gap:8}}>
         {[25,50,75].map(m=>(
-          <button key={m} className="btn sm" style={mins===m?{borderColor:"var(--gold)",color:"var(--gold)"}:{}}
-            onClick={()=>{setMins(m); if(!run&&mode==="foco") setLeft(m*60);}}>{m===75?"1h15 (bloco)":m+"min"}</button>
+          <button key={m} className="btn sm" style={p.mins===m?{borderColor:"var(--gold)",color:"var(--gold)"}:{}}
+            onClick={()=>p.pick(m)}>{m===75?"1h15 (bloco)":m+"min"}</button>
         ))}
       </div>
+      <p style={{fontSize:12,color:"var(--mut2)",marginTop:4}}>O tempo continua rodando quando você troca de aba — a barrinha no canto mostra o andamento.</p>
     </div>
   );
 }
@@ -672,6 +731,7 @@ function App(){
     return auth.onAuthStateChanged(u=>{setUser(u);setAuthReady(true);});
   },[]);
   const [state,up,loaded]=useAppState(user);
+  const pomo=usePomodoro(up);
 
   if(!authReady) return <div className="gate"><div className="gatebox"><h1>MentorOS</h1><p>Carregando…</p></div></div>;
   if(FIREBASE_ON&&!user) return (
@@ -715,7 +775,7 @@ function App(){
           tab==="eara"?<Kanban state={state} up={up}/> :
           tab==="q"?<Questoes state={state} up={up}/> :
           tab==="lei"?<LeiSeca state={state} up={up}/> :
-          tab==="pomo"?<Pomodoro up={up}/> :
+          tab==="pomo"?<Pomodoro pomo={pomo}/> :
           tab==="diag"?<Diagnostico state={state}/> :
           <Ajustes state={state} user={user}/>
         )}
@@ -730,6 +790,7 @@ function App(){
           <span className="ic">◭</span>Mais
         </button>
       </nav>
+      <PomodoroBar p={pomo}/>
     </div>
   );
 }
