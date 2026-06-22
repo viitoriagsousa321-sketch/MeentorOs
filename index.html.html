@@ -191,9 +191,10 @@ if (FIREBASE_ON){
 /* ============================================================
    DADOS — Fase v5 · SEDES (08/06 → 06/09/2026, 13 semanas)
    ============================================================ */
-const START = new Date(2026,5,8);          // seg 08/06/2026
+const START = new Date(2026,5,22);         // seg 22/06/2026 (início do plano)
 const EXAM  = new Date(2026,8,6);          // dom 06/09/2026
 const DAY_MS = 864e5;
+const NWEEKS = 11;
 
 const DISC = {
   LP:    {nome:"Língua Portuguesa"},
@@ -210,9 +211,9 @@ const DISC = {
 };
 
 const PHASES = [
-  {n:1, nome:"Base",       ini:1,  fim:6,  cls:"f1", mix:"tronco 60% · SEDES 40%", eara:"E + A"},
-  {n:2, nome:"Viragem",    ini:7,  fim:10, cls:"f2", mix:"tronco 45% · SEDES 55%", eara:"A + R"},
-  {n:3, nome:"Reta final", ini:11, fim:13, cls:"f3", mix:"100% SEDES (+LP)",       eara:"R + Av"},
+  {n:1, nome:"Base",       ini:1, fim:5,  cls:"f1", mix:"tronco 60% · SEDES 40%", eara:"E + A"},
+  {n:2, nome:"Viragem",    ini:6, fim:8,  cls:"f2", mix:"tronco 45% · SEDES 55%", eara:"A + R"},
+  {n:3, nome:"Reta final", ini:9, fim:11, cls:"f3", mix:"100% SEDES (+LP)",       eara:"R + Av"},
 ];
 const phaseOf = w => PHASES.find(p=>w>=p.ini&&w<=p.fim);
 
@@ -251,18 +252,37 @@ const LEISECA = {
   6:{seg:"CF: arts. 39–41",ter:"LMP: arts. 1º–7º (formas de violência)",qua:"LOAS: arts. 27–30-A",qui:"LC 840: proibições",sex:"LC 94/1998 — RIDE"},
   7:{seg:"CF: arts. 193–195",ter:"LMP: arts. 8º–12 (atendimento)",qua:"PNAS: princípios, diretrizes e usuários",qui:"LC 840: Tít. VI — penalidades",sex:"Redação oficial — padrões (manual)"},
   8:{seg:"CF: arts. 203–204",ter:"LMP: arts. 18–24-A (medidas protetivas)",qua:"PNAS: proteções básica e especial",qui:"LC 840: responsabilidades",sex:"Lei 14.133: princípios e modalidades"},
-  9:{seg:"CF: art. 5º — releitura integral",ter:"Lei 7.484/2024 (íntegra)",qua:"NOB-SUAS: gestão e responsabilidades",qui:"LC 840: Tít. VII — PAD (rito)",sex:"PNAS: equipamentos — CRAS/CREAS"},
-  10:{seg:"CF: arts. 37–41 — releitura",ter:"PDPM: eixos (leitura dirigida)",qua:"NOB-SUAS: cofinanciamento",qui:"LC 840: PAD — prazos e revisão",sex:"NOB-SUAS: vigilância socioassistencial"},
-  11:{seg:"CF: giro art. 5º + 37–41",ter:"LODF Tít. VI — releitura",qua:"LOAS: releitura 1ª metade",qui:"LC 840: giro provimento → vacância",sex:"Quadros-resumo programas do DF"},
-  12:{seg:"CF: giro arts. 1º–11",ter:"LMP — releitura medidas protetivas",qua:"LOAS: releitura 2ª metade",qui:"LC 840: giro disciplinar + PAD",sex:"Quadros-resumo PNAS + NOB"},
-  13:{seg:"CF: artigos mais errados (seu caderno)",ter:"LODF VI / LMP: marcações finais",qua:"LOAS/PNAS: marcações finais",qui:"LC 840: marcações finais",sex:"Giro geral leve — véspera"},
+  9:{seg:"CF: art. 5º — releitura integral",ter:"Lei 7.484/2024 (íntegra) + PDPM eixos",qua:"NOB-SUAS: gestão, responsabilidades e cofinanciamento",qui:"LC 840: Tít. VII — PAD (rito e prazos)",sex:"PNAS: equipamentos — CRAS/CREAS"},
+  10:{seg:"CF: giro arts. 1º–11 + 37–41",ter:"LODF Tít. VI — releitura + LMP medidas protetivas",qua:"LOAS: releitura integral (1ª e 2ª metade)",qui:"LC 840: giro provimento → vacância → disciplinar",sex:"Quadros-resumo PNAS + NOB + programas do DF"},
+  11:{seg:"CF: artigos mais errados (seu caderno)",ter:"LODF VI / LMP: marcações finais",qua:"LOAS/PNAS: marcações finais",qui:"LC 840: marcações finais",sex:"Giro geral leve — véspera"},
 };
 
 const META = {E:"teoria 25min + ≥20 questões",A:"≥25 questões comentadas",R:"revisão ativa + ≥20 questões",AV:"bateria ≥30 questões"};
 
-const WEEKS = {}; const _cnt = {};
-const nextTopic = d => { const i = _cnt[d]||0; _cnt[d]=i+1; return (SEQ[d]&&SEQ[d][i])||DISC[d].nome; };
-for (let w=1; w<=13; w++){
+const WEEKS = {};
+/* passo 1: contar quantos slots cada disciplina recebe nas NWEEKS semanas */
+const _slots = {};
+for (let w=1; w<=NWEEKS; w++){
+  const f = phaseOf(w).n;
+  for (const d of ["seg","ter","qua","qui","sex"]) ROT[f][d].forEach(b=>_slots[b[0]]=(_slots[b[0]]||0)+1);
+}
+/* passo 2: pré-distribuir os temas de cada disciplina pelos slots (último absorve o excedente) */
+const _plan = {};   // disc -> array de strings (1 por slot), cada string pode ter 1+ temas
+for (const d of Object.keys(SEQ)){
+  const temas = SEQ[d], n = _slots[d]||temas.length, out = [];
+  if (temas.length <= n){
+    for (let i=0;i<temas.length;i++) out.push(temas[i]);          // 1 tema por slot
+    while (out.length < n) out.push(temas[temas.length-1]+" · aprofundar");
+  } else {
+    const base = Math.floor(temas.length/n), extra = temas.length%n;
+    let idx=0;
+    for (let s=0;s<n;s++){ const take = base + (s>=n-extra?1:0); out.push(temas.slice(idx,idx+take).join(" + ")); idx+=take; }
+  }
+  _plan[d]=out;
+}
+const _cnt = {};
+const nextTopic = d => { const i=_cnt[d]||0; _cnt[d]=i+1; return (_plan[d]&&_plan[d][i])||DISC[d].nome; };
+for (let w=1; w<=NWEEKS; w++){
   const f = phaseOf(w).n, rot = ROT[f], days = {};
   for (const d of ["seg","ter","qua","qui","sex"]){
     const [b1,b2] = rot[d];
@@ -284,11 +304,11 @@ for (let w=1; w<=13; w++){
   ];
   WEEKS[w] = days;
 }
-const WEEK_IDS = {}; for(let w=1;w<=13;w++) WEEK_IDS[w]=Object.values(WEEKS[w]).flat().map(b=>b.id);
+const WEEK_IDS = {}; for(let w=1;w<=NWEEKS;w++) WEEK_IDS[w]=Object.values(WEEKS[w]).flat().map(b=>b.id);
 
 const fmt = d => d.toLocaleDateString("pt-BR",{day:"2-digit",month:"2-digit"});
 const weekRange = w => {const a=new Date(START.getTime()+(w-1)*7*DAY_MS); const b=new Date(a.getTime()+6*DAY_MS); return `${fmt(a)} – ${fmt(b)}`;};
-function currentWeek(){const n=Math.floor((Date.now()-START.getTime())/(7*DAY_MS))+1; return Math.min(13,Math.max(1,n));}
+function currentWeek(){const n=Math.floor((Date.now()-START.getTime())/(7*DAY_MS))+1; return Math.min(NWEEKS,Math.max(1,n));}
 function todayKey(){const i=(new Date().getDay()+6)%7; return DAYS[i];}
 const daysToExam = () => Math.max(0,Math.ceil((EXAM-new Date())/DAY_MS));
 
@@ -362,7 +382,7 @@ function Rail({state,cw}){
   return (
     <div>
       <div className="rail">
-        {Array.from({length:13},(_,i)=>i+1).map(w=>{
+        {Array.from({length:NWEEKS},(_,i)=>i+1).map(w=>{
           const ids=WEEK_IDS[w], done=ids.filter(id=>state.blocks[id]).length;
           const pct=done/ids.length, p=phaseOf(w);
           return (
@@ -374,9 +394,9 @@ function Rail({state,cw}){
         })}
       </div>
       <div className="raillegend">
-        <span><i className="dot" style={{background:"var(--e)"}}></i>F1 · Base (S1–S6)</span>
-        <span><i className="dot" style={{background:"var(--a)"}}></i>F2 · Viragem (S7–S10)</span>
-        <span><i className="dot" style={{background:"var(--av)"}}></i>F3 · Reta final (S11–S13)</span>
+        <span><i className="dot" style={{background:"var(--e)"}}></i>F1 · Base (S1–S5)</span>
+        <span><i className="dot" style={{background:"var(--a)"}}></i>F2 · Viragem (S6–S8)</span>
+        <span><i className="dot" style={{background:"var(--av)"}}></i>F3 · Reta final (S9–S11)</span>
       </div>
     </div>
   );
@@ -389,7 +409,7 @@ function Dashboard({state,up}){
   const level=Math.floor(state.xp/250)+1;
   const weakest=useMemo(()=>{
     const agg={};
-    state.questoes.forEach(q=>{const a=agg[q.disc]=agg[q.disc]||{t:0,c:0}; a.t+=q.total; a.c+=q.acertos;});
+    state.questoes.forEach(q=>{if(!DISC[q.disc])return; const a=agg[q.disc]=agg[q.disc]||{t:0,c:0}; a.t+=q.total; a.c+=q.acertos;});
     let w=null,wp=2;
     Object.entries(agg).forEach(([d,a])=>{if(a.t>=10){const p=a.c/a.t; if(p<wp){wp=p;w=d;}}});
     return w?{d:w,p:Math.round(wp*100)}:null;
@@ -448,7 +468,7 @@ function Cronograma({state,up}){
       <div className="weeknav">
         <button className="wbtn" onClick={()=>setW(x=>Math.max(1,x-1))}>←</button>
         <div className="weektitle">Semana {w}<small>{weekRange(w)} · Fase {phase.n} — {phase.nome} · {phase.mix} · EARA {phase.eara}</small></div>
-        <button className="wbtn" onClick={()=>setW(x=>Math.min(13,x+1))}>→</button>
+        <button className="wbtn" onClick={()=>setW(x=>Math.min(NWEEKS,x+1))}>→</button>
         {!isCur && <button className="wbtn" onClick={()=>setW(currentWeek())}>hoje</button>}
       </div>
       <div className="daygrid">
@@ -562,12 +582,12 @@ function Questoes({state,up}){
 function Diagnostico({state}){
   const agg=useMemo(()=>{
     const a={};
-    state.questoes.forEach(q=>{const x=a[q.disc]=a[q.disc]||{t:0,c:0}; x.t+=q.total; x.c+=q.acertos;});
+    state.questoes.forEach(q=>{if(!DISC[q.disc])return; const x=a[q.disc]=a[q.disc]||{t:0,c:0}; x.t+=q.total; x.c+=q.acertos;});
     return Object.entries(a).map(([d,x])=>({d,t:x.t,p:Math.round(x.c/x.t*100)})).sort((m,n)=>m.p-n.p);
   },[state.questoes]);
   const topErr=useMemo(()=>{
     const a={};
-    state.questoes.forEach(q=>{ if(!q.topico) return; const k=q.disc+"|"+q.topico; const x=a[k]=a[k]||{disc:q.disc,topico:q.topico,t:0,c:0}; x.t+=q.total; x.c+=q.acertos;});
+    state.questoes.forEach(q=>{ if(!q.topico||!DISC[q.disc]) return; const k=q.disc+"|"+q.topico; const x=a[k]=a[k]||{disc:q.disc,topico:q.topico,t:0,c:0}; x.t+=q.total; x.c+=q.acertos;});
     return Object.values(a).filter(x=>x.t>=10).map(x=>({...x,p:Math.round(x.c/x.t*100)})).sort((m,n)=>m.p-n.p).slice(0,8);
   },[state.questoes]);
   if(agg.length===0) return <div className="card"><p style={{fontSize:13.5,color:"var(--mut)",lineHeight:1.7}}>Sem dados ainda. O Diagnóstico se constrói com os registros da aba Questões — a partir de 10 questões por tópico ele já aponta onde você erra mais.</p></div>;
