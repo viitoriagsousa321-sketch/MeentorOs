@@ -204,8 +204,10 @@ const defaultData=()=>({
   simulados:[],
   ciclo:{subjects:[],current:0},
   hoursGoal:{weekly:25},
+  questionsGoal:{weekly:150},
   streakDays:[],
-  notes:{}
+  notes:{},
+  rotina:{seg:[],ter:[],qua:[],qui:[],sex:[],sab:[],dom:[]}
 });
 function load(){try{const r=localStorage.getItem(STORAGE_KEY);return r?{...defaultData(),...JSON.parse(r)}:defaultData()}catch{return defaultData()}}
 function persist(d){try{localStorage.setItem(STORAGE_KEY,JSON.stringify(d))}catch{}}
@@ -663,6 +665,7 @@ function App(){
   // Nav items
   const NAV=[
     {id:"dashboard",icon:"📊",label:"Dashboard"},
+    {id:"rotina",icon:"📅",label:"Minha Rotina"},
     {id:"edital",icon:"📋",label:"Edital Verticalizado"},
     {id:"ciclo",icon:"🔄",label:"Ciclo de Estudos"},
     {id:"timer",icon:"⏱️",label:"Timer / Sessões"},
@@ -725,9 +728,31 @@ function App(){
 
     const maxDayMins=Math.max(...weekByDay.map(d=>d.mins),1);
 
+    const countdowns=useMemo(()=>CONCURSOS.filter(c=>c.prova.includes("/")).map(c=>{
+      const[dd,mm,yy]=c.prova.split("/");
+      const days=daysBetween(todayStr,`${yy}-${mm}-${dd}`);
+      return{...c,days};
+    }).filter(c=>c.days>=0),[todayStr]);
+
+    const weekQuestions=useMemo(()=>data.questions.filter(q=>weekDays.includes(q.date)).reduce((a,q)=>a+q.total,0),[data.questions,weekDays]);
+    const qGoal=data.questionsGoal?.weekly||150;
+
     return <>
       <div className="page-title">Dashboard</div>
       <div className="page-sub">{fmtDateFull(todayStr)} — {streak>0?`🔥 ${streak} dias seguidos`:"Comece hoje!"}</div>
+
+      {countdowns.length>0&&<div style={{display:"flex",gap:10,marginBottom:14,flexWrap:"wrap"}}>
+        {countdowns.map(c=><div key={c.id} style={{
+          flex:1,minWidth:200,display:"flex",alignItems:"center",gap:12,padding:"12px 16px",
+          background:"var(--card)",borderRadius:12,border:`2px solid ${c.color}`,
+        }}>
+          <div style={{fontSize:26,fontWeight:800,color:c.color,lineHeight:1}}>{c.days}</div>
+          <div>
+            <div style={{fontWeight:700,fontSize:13}}>{c.days===1?"dia para":"dias para"} {c.name}</div>
+            <div style={{fontSize:11,color:"var(--muted)"}}>{c.prova} • {c.banca}{c.days<=30?" • 🔥 RETA FINAL":""}</div>
+          </div>
+        </div>)}
+      </div>}
 
       <div className="grid-4" style={{marginBottom:14}}>
         <div className="stat-box">
@@ -741,8 +766,10 @@ function App(){
           <div style={{fontSize:10,color:"var(--muted)",marginTop:3}}>Meta: {data.hoursGoal.weekly}h</div>
         </div>
         <div className="stat-box">
-          <div className="stat-num" style={{color:qStats.pct>=70?"var(--green)":qStats.pct>=50?"var(--orange)":"var(--red)"}}>{qStats.pct}%</div>
-          <div className="stat-label">{qStats.total} questões</div>
+          <div className="stat-num" style={{color:weekQuestions>=qGoal?"var(--green)":"var(--ink)"}}>{weekQuestions}</div>
+          <div className="stat-label">Questões na semana</div>
+          <div className="progress" style={{marginTop:6}}><div className="progress-fill" style={{width:`${Math.min(100,weekQuestions/qGoal*100)}%`,background:weekQuestions>=qGoal?"var(--green)":"var(--orange)"}}></div></div>
+          <div style={{fontSize:10,color:"var(--muted)",marginTop:3}}>Meta: {qGoal} ({qStats.pct}% acerto geral)</div>
         </div>
         <div className="stat-box">
           <div className="stat-num">{editalStats.pct}%</div>
@@ -889,6 +916,242 @@ function App(){
   };
 
   // ══════════════════════════════════════════════════════════════
+  // ROTINA SEMANAL PAGE
+  // ══════════════════════════════════════════════════════════════
+  const DIAS_SEMANA=[
+    {key:"dom",label:"Domingo",short:"DOM",icon:"☀️"},
+    {key:"seg",label:"Segunda",short:"SEG",icon:"📗"},
+    {key:"ter",label:"Terça",short:"TER",icon:"📘"},
+    {key:"qua",label:"Quarta",short:"QUA",icon:"📙"},
+    {key:"qui",label:"Quinta",short:"QUI",icon:"📕"},
+    {key:"sex",label:"Sexta",short:"SEX",icon:"📓"},
+    {key:"sab",label:"Sábado",short:"SÁB",icon:"📔"},
+  ];
+  const TIPOS_ATIVIDADE=[
+    {id:"teoria",label:"📖 Teoria",color:"#2563eb"},
+    {id:"questoes",label:"📝 Questões",color:"#d97706"},
+    {id:"revisao",label:"🔁 Revisão",color:"#7c3aed"},
+    {id:"leiseca",label:"⚖️ Lei Seca",color:"#0f766e"},
+    {id:"simulado",label:"🎯 Simulado",color:"#b45309"},
+    {id:"redacao",label:"✍️ Redação/Discursiva",color:"#dc2626"},
+  ];
+
+  const RotinaPage=()=>{
+    const todayDow=new Date().getDay();
+    const todayKey=DIAS_SEMANA[todayDow].key;
+    const[selectedDay,setSelectedDay]=useState(todayKey);
+    const[showForm,setShowForm]=useState(false);
+    const[editIdx,setEditIdx]=useState(null);
+
+    const rotina=data.rotina||{seg:[],ter:[],qua:[],qui:[],sex:[],sab:[],dom:[]};
+    const dayBlocks=rotina[selectedDay]||[];
+    const selectedDia=DIAS_SEMANA.find(d=>d.key===selectedDay);
+
+    const totalDayMin=dayBlocks.reduce((a,b)=>a+b.minutes,0);
+
+    const addBlock=(block)=>{
+      const newRotina={...rotina,[selectedDay]:[...(rotina[selectedDay]||[]),block]};
+      setData(d=>({...d,rotina:newRotina}));
+      setShowForm(false);
+      showToast("✓ Bloco adicionado!");
+    };
+    const updateBlock=(idx,block)=>{
+      const newDay=[...(rotina[selectedDay]||[])];
+      newDay[idx]=block;
+      setData(d=>({...d,rotina:{...rotina,[selectedDay]:newDay}}));
+      setEditIdx(null);setShowForm(false);
+      showToast("✓ Bloco atualizado!");
+    };
+    const removeBlock=(idx)=>{
+      const newDay=(rotina[selectedDay]||[]).filter((_,i)=>i!==idx);
+      setData(d=>({...d,rotina:{...rotina,[selectedDay]:newDay}}));
+      showToast("Bloco removido");
+    };
+    const moveBlock=(idx,dir)=>{
+      const newDay=[...(rotina[selectedDay]||[])];
+      const target=idx+dir;
+      if(target<0||target>=newDay.length)return;
+      [newDay[idx],newDay[target]]=[newDay[target],newDay[idx]];
+      setData(d=>({...d,rotina:{...rotina,[selectedDay]:newDay}}));
+    };
+    const copyDayTo=(fromKey,toKey)=>{
+      if(!rotina[fromKey]||rotina[fromKey].length===0)return;
+      setData(d=>({...d,rotina:{...rotina,[toKey]:[...(rotina[fromKey]||[])]}}));
+      showToast(`✓ Copiado ${DIAS_SEMANA.find(d=>d.key===fromKey).label} → ${DIAS_SEMANA.find(d=>d.key===toKey).label}`);
+    };
+
+    const todayBlocks=rotina[todayKey]||[];
+    const todayTotal=todayBlocks.reduce((a,b)=>a+b.minutes,0);
+
+    return <>
+      <div className="page-title">Minha Rotina</div>
+      <div className="page-sub">Monte seu plano semanal. Saiba exatamente o que estudar cada dia.</div>
+
+      {todayBlocks.length>0&&selectedDay!==todayKey&&<div className="card" style={{borderLeft:"4px solid var(--accent)",cursor:"pointer"}} onClick={()=>setSelectedDay(todayKey)}>
+        <div style={{display:"flex",alignItems:"center",gap:10}}>
+          <span style={{fontSize:20}}>📌</span>
+          <div style={{flex:1}}>
+            <div style={{fontWeight:700,fontSize:14}}>Hoje — {DIAS_SEMANA[todayDow].label}</div>
+            <div style={{fontSize:12,color:"var(--muted)"}}>{todayBlocks.length} blocos • {fmtMin(todayTotal)}</div>
+          </div>
+          <span style={{fontSize:12,color:"var(--accent)",fontWeight:700}}>Ver ▸</span>
+        </div>
+      </div>}
+
+      <div style={{display:"flex",gap:4,marginBottom:16,flexWrap:"wrap"}}>
+        {DIAS_SEMANA.map(d=>{
+          const blocks=rotina[d.key]||[];
+          const isToday=d.key===todayKey;
+          const isSelected=d.key===selectedDay;
+          return <button key={d.key} onClick={()=>setSelectedDay(d.key)} style={{
+            padding:"10px 14px",borderRadius:10,border:isSelected?"2px solid var(--accent)":"2px solid var(--border)",
+            background:isSelected?"#eff6ff":"var(--card)",cursor:"pointer",textAlign:"center",
+            flex:1,minWidth:80,fontFamily:"inherit",position:"relative"
+          }}>
+            <div style={{fontSize:10,fontWeight:800,color:isSelected?"var(--accent)":"var(--muted)",letterSpacing:1}}>{d.short}</div>
+            <div style={{fontSize:12,fontWeight:600,marginTop:2}}>{blocks.length>0?`${blocks.length} blocos`:"-"}</div>
+            {blocks.length>0&&<div style={{fontSize:10,color:"var(--muted)"}}>{fmtMin(blocks.reduce((a,b)=>a+b.minutes,0))}</div>}
+            {isToday&&<div style={{position:"absolute",top:4,right:4,width:6,height:6,borderRadius:3,background:"var(--accent)"}}></div>}
+          </button>
+        })}
+      </div>
+
+      <div className="card">
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}>
+          <div className="card-title" style={{marginBottom:0}}>
+            {selectedDia.icon} {selectedDia.label} — {dayBlocks.length} blocos ({fmtMin(totalDayMin)})
+          </div>
+          <div style={{display:"flex",gap:6}}>
+            <button className="btn btn-primary btn-sm" onClick={()=>{setShowForm(true);setEditIdx(null)}}>+ Bloco</button>
+          </div>
+        </div>
+
+        {dayBlocks.length===0&&!showForm?
+          <div style={{textAlign:"center",padding:32,color:"var(--muted)"}}>
+            <div style={{fontSize:32,marginBottom:8}}>📅</div>
+            <div style={{fontSize:13}}>Nenhum bloco definido para {selectedDia.label}.</div>
+            <div style={{fontSize:12,marginTop:4}}>Clique em "+ Bloco" para montar seu dia.</div>
+          </div>
+        :dayBlocks.map((block,idx)=>{
+          const tipo=TIPOS_ATIVIDADE.find(t=>t.id===block.tipo)||TIPOS_ATIVIDADE[0];
+          const subData=EDITAL.find(e=>e.s===block.subject);
+          if(editIdx===idx)return <div key={idx} className="card" style={{background:"#fafaf8",marginBottom:8}}>
+            <RotinaBlockForm initial={block} onSave={b=>updateBlock(idx,b)} onCancel={()=>setEditIdx(null)}/>
+          </div>;
+          return <div key={idx} style={{
+            display:"flex",alignItems:"center",gap:12,padding:"12px 14px",
+            background:"#fafaf8",borderRadius:10,marginBottom:6,
+            borderLeft:`5px solid ${tipo.color}`
+          }}>
+            <div style={{fontSize:16}}>{tipo.label.split(" ")[0]}</div>
+            <div style={{flex:1}}>
+              <div style={{fontWeight:600,fontSize:13,display:"flex",alignItems:"center",gap:6}}>
+                {block.subject}
+                <span style={{fontSize:10,color:tipo.color,fontWeight:700}}>{tipo.label.split(" ").slice(1).join(" ")}</span>
+              </div>
+              {block.topic&&<div style={{fontSize:11,color:"#555",marginTop:1}}>{block.topic}</div>}
+              {block.notes&&<div style={{fontSize:10,color:"var(--muted)",marginTop:1,fontStyle:"italic"}}>{block.notes}</div>}
+            </div>
+            <div style={{fontWeight:700,fontSize:13,color:subData?.c||"#888",whiteSpace:"nowrap"}}>{fmtMin(block.minutes)}</div>
+            <div style={{display:"flex",flexDirection:"column",gap:2}}>
+              <button className="btn btn-secondary" style={{padding:"2px 6px",fontSize:10}} onClick={()=>moveBlock(idx,-1)}>▲</button>
+              <button className="btn btn-secondary" style={{padding:"2px 6px",fontSize:10}} onClick={()=>moveBlock(idx,1)}>▼</button>
+            </div>
+            <button className="btn btn-secondary btn-sm" onClick={()=>{setEditIdx(idx);setShowForm(false)}}>✏️</button>
+            <button className="btn btn-danger btn-sm" onClick={()=>removeBlock(idx)}>✕</button>
+          </div>
+        })}
+
+        {showForm&&editIdx===null&&<div className="card" style={{background:"#fafaf8",marginTop:10}}>
+          <RotinaBlockForm onSave={addBlock} onCancel={()=>setShowForm(false)}/>
+        </div>}
+      </div>
+
+      <div className="card">
+        <div className="card-title">📋 Copiar dia</div>
+        <div style={{display:"flex",gap:8,alignItems:"center",flexWrap:"wrap"}}>
+          <span style={{fontSize:12,fontWeight:600}}>Copiar {selectedDia.label} para:</span>
+          {DIAS_SEMANA.filter(d=>d.key!==selectedDay).map(d=>
+            <button key={d.key} className="btn btn-secondary btn-sm" onClick={()=>copyDayTo(selectedDay,d.key)}>{d.short}</button>
+          )}
+        </div>
+      </div>
+
+      {todayBlocks.length>0&&selectedDay===todayKey&&<div className="card" style={{borderLeft:"4px solid var(--green)"}}>
+        <div className="card-title">▶ Começar a estudar</div>
+        <div style={{fontSize:12,color:"var(--muted)",marginBottom:10}}>Clique num bloco para iniciar o timer com a matéria e tópico já configurados.</div>
+        {todayBlocks.map((block,idx)=>{
+          const tipo=TIPOS_ATIVIDADE.find(t=>t.id===block.tipo)||TIPOS_ATIVIDADE[0];
+          return <button key={idx} style={{
+            display:"flex",alignItems:"center",gap:10,padding:"10px 14px",width:"100%",
+            background:"#fff",borderRadius:8,border:"1px solid var(--border)",marginBottom:4,
+            cursor:"pointer",textAlign:"left",fontFamily:"inherit",transition:"all .15s"
+          }} onClick={()=>{
+            setTimerSubject(block.subject);setTimerTopic(block.topic||"");setTimerSeconds(0);navigate("timer");
+          }}>
+            <span>{tipo.label.split(" ")[0]}</span>
+            <div style={{flex:1}}>
+              <div style={{fontWeight:600,fontSize:13}}>{block.subject}</div>
+              {block.topic&&<div style={{fontSize:11,color:"#555"}}>{block.topic}</div>}
+            </div>
+            <div style={{fontSize:12,fontWeight:700,color:"var(--muted)"}}>{fmtMin(block.minutes)}</div>
+            <span style={{color:"var(--accent)",fontWeight:700,fontSize:12}}>▶</span>
+          </button>
+        })}
+      </div>}
+    </>
+  };
+
+  function RotinaBlockForm({initial,onSave,onCancel}){
+    const[sub,setSub]=useState(initial?.subject||"");
+    const[topic,setTopic]=useState(initial?.topic||"");
+    const[tipo,setTipo]=useState(initial?.tipo||"teoria");
+    const[mins,setMins]=useState(initial?.minutes||60);
+    const[notes,setNotes]=useState(initial?.notes||"");
+
+    const topicsForSub=sub?EDITAL.find(e=>e.s===sub)?.topics||[]:[];
+
+    return <div>
+      <div className="grid-2">
+        <div className="form-row">
+          <label className="label">Matéria *</label>
+          <select className="select" value={sub} onChange={e=>{setSub(e.target.value);setTopic("")}}>
+            <option value="">Selecione...</option>
+            {EDITAL.map(e=><option key={e.s} value={e.s}>{e.s}</option>)}
+          </select>
+        </div>
+        <div className="form-row">
+          <label className="label">Tópico *</label>
+          <select className="select" value={topic} onChange={e=>setTopic(e.target.value)} disabled={!sub}>
+            <option value="">Selecione o tópico...</option>
+            {topicsForSub.map((t,i)=><option key={i} value={t}>{t}</option>)}
+          </select>
+        </div>
+        <div className="form-row">
+          <label className="label">Tipo de atividade</label>
+          <select className="select" value={tipo} onChange={e=>setTipo(e.target.value)}>
+            {TIPOS_ATIVIDADE.map(t=><option key={t.id} value={t.id}>{t.label}</option>)}
+          </select>
+        </div>
+        <div className="form-row">
+          <label className="label">Tempo (minutos)</label>
+          <input className="input" type="number" value={mins} min={5} step={5} onChange={e=>setMins(parseInt(e.target.value)||5)}/>
+        </div>
+      </div>
+      <div className="form-row">
+        <label className="label">Observações (opcional)</label>
+        <input className="input" value={notes} onChange={e=>setNotes(e.target.value)} placeholder="Ex: Focar nas pegadinhas do CEBRASPE"/>
+      </div>
+      <div style={{display:"flex",gap:8}}>
+        <button className="btn btn-primary" disabled={!sub} onClick={()=>{
+          onSave({subject:sub,topic,tipo,minutes:mins,notes});
+        }}>{initial?"Salvar":"Adicionar"}</button>
+        <button className="btn btn-secondary" onClick={onCancel}>Cancelar</button>
+      </div>
+    </div>
+  }
+
+  // ══════════════════════════════════════════════════════════════
   // CICLO DE ESTUDOS PAGE
   // ══════════════════════════════════════════════════════════════
   const CicloPage=()=>{
@@ -896,7 +1159,7 @@ function App(){
     const[tempCiclo,setTempCiclo]=useState([...data.ciclo.subjects]);
 
     const addToCiclo=()=>{
-      setTempCiclo([...tempCiclo,{subject:EDITAL[0].s,minutes:90}]);
+      setTempCiclo([...tempCiclo,{subject:EDITAL[0].s,topic:"",minutes:90}]);
     };
     const removeCiclo=idx=>{
       setTempCiclo(tempCiclo.filter((_,i)=>i!==idx));
@@ -928,17 +1191,25 @@ function App(){
       :editMode?
         <div className="card">
           <div className="card-title">✏️ Editar Ciclo</div>
-          {tempCiclo.map((item,i)=><div key={i} style={{display:"flex",gap:10,alignItems:"center",marginBottom:8}}>
-            <select className="select" style={{flex:1}} value={item.subject} onChange={e=>{
-              const n=[...tempCiclo];n[i]={...n[i],subject:e.target.value};setTempCiclo(n);
+          {tempCiclo.map((item,i)=>{
+            const topicsFor=EDITAL.find(e=>e.s===item.subject)?.topics||[];
+            return <div key={i} style={{display:"flex",gap:8,alignItems:"center",marginBottom:8,flexWrap:"wrap"}}>
+            <select className="select" style={{flex:1,minWidth:160}} value={item.subject} onChange={e=>{
+              const n=[...tempCiclo];n[i]={...n[i],subject:e.target.value,topic:""};setTempCiclo(n);
             }}>
               {EDITAL.map(e=><option key={e.s} value={e.s}>{e.s}</option>)}
             </select>
-            <input className="input" type="number" style={{width:80}} value={item.minutes} min={15} step={15}
+            <select className="select" style={{flex:2,minWidth:200}} value={item.topic||""} onChange={e=>{
+              const n=[...tempCiclo];n[i]={...n[i],topic:e.target.value};setTempCiclo(n);
+            }}>
+              <option value="">Tópico (todos)</option>
+              {topicsFor.map((t,ti)=><option key={ti} value={t}>{t}</option>)}
+            </select>
+            <input className="input" type="number" style={{width:70}} value={item.minutes} min={15} step={15}
               onChange={e=>{const n=[...tempCiclo];n[i]={...n[i],minutes:parseInt(e.target.value)||15};setTempCiclo(n)}}/>
             <span style={{fontSize:11,color:"var(--muted)"}}>min</span>
             <button className="btn btn-danger btn-sm" onClick={()=>removeCiclo(i)}>✕</button>
-          </div>)}
+          </div>})}
           <div style={{display:"flex",gap:8,marginTop:12}}>
             <button className="btn btn-secondary" onClick={addToCiclo}>+ Matéria</button>
             <button className="btn btn-primary" onClick={saveCiclo}>Salvar Ciclo</button>
@@ -962,7 +1233,7 @@ function App(){
               fontWeight:isCurrent?700:400
             }}>
               <div style={{width:6,height:6,borderRadius:3,background:subData?.c||"#888",flexShrink:0}}></div>
-              <div style={{flex:1,fontSize:13}}>{item.subject}</div>
+              <div style={{flex:1,fontSize:13}}>{item.subject}{item.topic?<span style={{fontSize:11,color:"var(--muted)",marginLeft:6}}>— {item.topic}</span>:""}</div>
               <div style={{fontSize:12,color:"var(--muted)"}}>{fmtMin(item.minutes)}</div>
               {isCurrent&&<span style={{fontSize:10,color:"var(--accent)",fontWeight:800}}>◄ ATUAL</span>}
             </div>
@@ -970,7 +1241,7 @@ function App(){
           <div style={{display:"flex",gap:8,marginTop:12}}>
             <button className="btn btn-primary" onClick={()=>{
               const current=data.ciclo.subjects[currentIdx];
-              if(current){setTimerSubject(current.subject);setTimerTopic("Ciclo");setTimerSeconds(0);navigate("timer")}
+              if(current){setTimerSubject(current.subject);setTimerTopic(current.topic||"");setTimerSeconds(0);navigate("timer")}
             }}>▶ Iniciar matéria atual</button>
             <button className="btn btn-secondary" onClick={advanceCiclo}>Avançar ▸</button>
           </div>
@@ -994,14 +1265,17 @@ function App(){
           <div className="grid-2" style={{maxWidth:500,margin:"0 auto",marginBottom:16}}>
             <div className="form-row">
               <label className="label">Matéria</label>
-              <select className="select" value={timerSubject} onChange={e=>setTimerSubject(e.target.value)} disabled={timerRunning}>
+              <select className="select" value={timerSubject} onChange={e=>{setTimerSubject(e.target.value);setTimerTopic("")}} disabled={timerRunning}>
                 <option value="">Selecione...</option>
                 {EDITAL.map(e=><option key={e.s} value={e.s}>{e.s}</option>)}
               </select>
             </div>
             <div className="form-row">
-              <label className="label">Tópico (opcional)</label>
-              <input className="input" value={timerTopic} onChange={e=>setTimerTopic(e.target.value)} placeholder="Ex: Art. 5º" disabled={timerRunning}/>
+              <label className="label">Tópico</label>
+              <select className="select" value={timerTopic} onChange={e=>setTimerTopic(e.target.value)} disabled={timerRunning||!timerSubject}>
+                <option value="">Selecione o tópico...</option>
+                {(EDITAL.find(e=>e.s===timerSubject)?.topics||[]).map((t,i)=><option key={i} value={t}>{t}</option>)}
+              </select>
             </div>
           </div>
         </div>
@@ -1057,17 +1331,22 @@ function App(){
     const[mins,setMins]=useState(60);
     const[date,setDate]=useState(todayStr);
 
+    const topicsForSub=sub?EDITAL.find(e=>e.s===sub)?.topics||[]:[];
+
     return <div className="grid-2" style={{alignItems:"end"}}>
       <div className="form-row">
         <label className="label">Matéria</label>
-        <select className="select" value={sub} onChange={e=>setSub(e.target.value)}>
+        <select className="select" value={sub} onChange={e=>{setSub(e.target.value);setTopic("")}}>
           <option value="">Selecione...</option>
           {EDITAL.map(e=><option key={e.s} value={e.s}>{e.s}</option>)}
         </select>
       </div>
       <div className="form-row">
         <label className="label">Tópico</label>
-        <input className="input" value={topic} onChange={e=>setTopic(e.target.value)} placeholder="Opcional"/>
+        <select className="select" value={topic} onChange={e=>setTopic(e.target.value)} disabled={!sub}>
+          <option value="">Selecione o tópico...</option>
+          {topicsForSub.map((t,i)=><option key={i} value={t}>{t}</option>)}
+        </select>
       </div>
       <div className="form-row">
         <label className="label">Minutos</label>
@@ -1171,16 +1450,20 @@ function App(){
     const[sub,setSub]=useState(EDITAL[0].s);
     const[topic,setTopic]=useState("");
     const[due,setDue]=useState(addDays(todayStr,1));
+    const topicsForSub=EDITAL.find(e=>e.s===sub)?.topics||[];
     return <div className="grid-2" style={{alignItems:"end"}}>
       <div className="form-row">
         <label className="label">Matéria</label>
-        <select className="select" value={sub} onChange={e=>setSub(e.target.value)}>
+        <select className="select" value={sub} onChange={e=>{setSub(e.target.value);setTopic("")}}>
           {EDITAL.map(e=><option key={e.s} value={e.s}>{e.s}</option>)}
         </select>
       </div>
       <div className="form-row">
         <label className="label">Tópico</label>
-        <input className="input" value={topic} onChange={e=>setTopic(e.target.value)} placeholder="O que revisar"/>
+        <select className="select" value={topic} onChange={e=>setTopic(e.target.value)}>
+          <option value="">Selecione o tópico...</option>
+          {topicsForSub.map((t,i)=><option key={i} value={t}>{t}</option>)}
+        </select>
       </div>
       <div className="form-row">
         <label className="label">Data da revisão</label>
@@ -1208,6 +1491,28 @@ function App(){
         map[q.subject].total+=q.total;map[q.subject].acertos+=q.acertos;map[q.subject].sessions++;
       });
       return Object.entries(map).map(([s,v])=>({subject:s,...v,pct:v.total?Math.round((v.acertos/v.total)*100):0})).sort((a,b)=>a.pct-b.pct);
+    },[data.questions]);
+
+    const byTopic=useMemo(()=>{
+      const map={};
+      data.questions.filter(q=>q.topic).forEach(q=>{
+        const key=`${q.subject}::${q.topic}`;
+        if(!map[key])map[key]={subject:q.subject,topic:q.topic,total:0,acertos:0};
+        map[key].total+=q.total;map[key].acertos+=q.acertos;
+      });
+      return Object.values(map).map(v=>({...v,pct:v.total?Math.round((v.acertos/v.total)*100):0}))
+        .filter(v=>v.total>=5).sort((a,b)=>a.pct-b.pct);
+    },[data.questions]);
+
+    const evolution=useMemo(()=>{
+      const map={};
+      data.questions.forEach(q=>{
+        const ws=weekStart(q.date);
+        if(!map[ws])map[ws]={total:0,acertos:0};
+        map[ws].total+=q.total;map[ws].acertos+=q.acertos;
+      });
+      return Object.entries(map).sort((a,b)=>a[0].localeCompare(b[0])).slice(-8)
+        .map(([ws,v])=>({week:ws,total:v.total,pct:v.total?Math.round((v.acertos/v.total)*100):0}));
     },[data.questions]);
 
     return <>
@@ -1252,6 +1557,32 @@ function App(){
             <td>{s.sessions}</td>
           </tr>)}</tbody>
         </table>
+      </div>}
+
+      {byTopic.length>0&&<div className="card">
+        <div className="card-title"><span className="ct-icon">🎯</span> Pontos fracos por tópico (mín. 5 questões)</div>
+        <div style={{fontSize:11,color:"var(--muted)",marginBottom:10}}>Seus piores tópicos primeiro — é aqui que você ganha pontos. Ataque os vermelhos.</div>
+        <table className="tbl">
+          <thead><tr><th>Tópico</th><th>Matéria</th><th>Questões</th><th>%</th></tr></thead>
+          <tbody>{byTopic.slice(0,12).map(t=><tr key={t.subject+t.topic}>
+            <td style={{fontWeight:600,fontSize:12}}>{t.topic}</td>
+            <td style={{fontSize:11,color:EDITAL.find(e=>e.s===t.subject)?.c||"var(--muted)"}}>{t.subject}</td>
+            <td>{t.acertos}/{t.total}</td>
+            <td style={{fontWeight:700,color:t.pct>=70?"var(--green)":t.pct>=50?"var(--orange)":"var(--red)"}}>{t.pct}%</td>
+          </tr>)}</tbody>
+        </table>
+      </div>}
+
+      {evolution.length>1&&<div className="card">
+        <div className="card-title"><span className="ct-icon">📈</span> Evolução do aproveitamento (por semana)</div>
+        <div className="chart-bar" style={{height:120}}>
+          {evolution.map(e=><div key={e.week} className="chart-col">
+            <div className="bar-value" style={{fontWeight:700,color:e.pct>=70?"var(--green)":e.pct>=50?"var(--orange)":"var(--red)"}}>{e.pct}%</div>
+            <div className="bar" style={{height:`${Math.max(8,e.pct)}%`,background:e.pct>=70?"var(--green)":e.pct>=50?"#fbbf24":"#fca5a5"}}></div>
+            <div className="bar-label">{fmtDate(e.week)}</div>
+          </div>)}
+        </div>
+        <div style={{fontSize:11,color:"var(--muted)",textAlign:"center",marginTop:6}}>Meta Fase 1: 65% • Fase 2: 75%+ • {evolution.map(e=>e.total).reduce((a,b)=>a+b,0)} questões no período</div>
       </div>}
 
       <div className="card">
@@ -1560,6 +1891,7 @@ function App(){
   // ══════════════════════════════════════════════════════════════
   const ConfigPage=()=>{
     const[weeklyGoal,setWeeklyGoal]=useState(data.hoursGoal.weekly);
+    const[qGoal,setQGoal]=useState(data.questionsGoal?.weekly||150);
 
     const totalSessions=data.sessions.length;
     const totalMinutes=data.sessions.reduce((a,s)=>a+s.minutes,0);
@@ -1596,6 +1928,20 @@ function App(){
       </div>
 
       <div className="card">
+        <div className="card-title">📝 Meta semanal de questões</div>
+        <div style={{display:"flex",gap:10,alignItems:"center"}}>
+          <input className="input" type="number" style={{width:80}} value={qGoal} min={10} max={1000} step={10}
+            onChange={e=>setQGoal(parseInt(e.target.value)||10)}/>
+          <span style={{fontSize:12,color:"var(--muted)"}}>questões por semana</span>
+          <button className="btn btn-primary btn-sm" onClick={()=>{
+            setData(d=>({...d,questionsGoal:{weekly:qGoal}}));
+            showToast("✓ Meta atualizada!");
+          }}>Salvar</button>
+        </div>
+        <div style={{fontSize:11,color:"var(--muted)",marginTop:8}}>Sugestão do cronograma: Fase 1 = 150 • Fase 2 = 250 • Reta final = 150</div>
+      </div>
+
+      <div className="card">
         <div className="card-title">📦 Dados armazenados</div>
         <div className="grid-3" style={{marginBottom:14}}>
           <div className="stat-box"><div className="stat-num">{totalSessions}</div><div className="stat-label">Sessões</div></div>
@@ -1626,6 +1972,7 @@ function App(){
   const renderPage=()=>{
     switch(page){
       case "dashboard":return <DashboardPage/>;
+      case "rotina":return <RotinaPage/>;
       case "edital":return <EditalPage/>;
       case "ciclo":return <CicloPage/>;
       case "timer":return <TimerPage/>;

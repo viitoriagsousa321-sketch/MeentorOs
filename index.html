@@ -1,0 +1,2030 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Estudo Pro — Painel de Concursos</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎯</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#f5f5f0;--card:#fff;--border:#e2e0db;--text:#1a1a2e;--muted:#888;--hover:#f0eeea;
+  --accent:#2563eb;--green:#059669;--red:#dc2626;--orange:#d97706;--purple:#7c3aed;
+  --sedes:#0891b2;--arr:#7c3aed;--prf:#16a34a;
+}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);overflow:hidden;height:100vh}
+::-webkit-scrollbar{width:6px}::-webkit-scrollbar-thumb{background:#ccc;border-radius:3px}
+button{font-family:inherit;cursor:pointer;border:none;background:none}
+input,select,textarea{font-family:inherit;outline:none}
+.app{display:flex;height:100vh}
+
+/* ═══ SIDEBAR ═══ */
+.sidebar{width:240px;min-width:240px;background:var(--card);border-right:1px solid var(--border);display:flex;flex-direction:column;height:100vh;overflow:hidden;transition:width .2s}
+.sidebar.collapsed{width:56px;min-width:56px}
+.sb-header{padding:16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+.sb-header h1{font-size:17px;font-weight:800;letter-spacing:-.5px;white-space:nowrap}
+.sb-header .logo{font-size:22px}
+.sb-toggle{background:none;border:none;cursor:pointer;color:var(--muted);padding:4px;margin-left:auto;display:flex;font-size:18px}
+.sb-nav{flex:1;padding:8px;display:flex;flex-direction:column;gap:2px;overflow-y:auto}
+.nav-btn{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;font-size:13px;font-weight:500;color:#666;transition:all .15s;white-space:nowrap;overflow:hidden;position:relative}
+.nav-btn:hover{background:var(--hover)}.nav-btn.active{background:var(--text);color:#fff;font-weight:600}
+.nav-btn .nav-icon{font-size:16px;width:20px;text-align:center;flex-shrink:0}
+.nav-btn .badge{background:var(--red);color:#fff;font-size:9px;font-weight:800;padding:1px 6px;border-radius:8px;margin-left:auto}
+.sidebar.collapsed .nav-btn{justify-content:center;padding:9px 0}.sidebar.collapsed .nav-btn span:not(.nav-icon):not(.badge){display:none}
+.sidebar.collapsed .badge{position:absolute;top:2px;right:2px}
+.sidebar.collapsed .sb-header h1,.sidebar.collapsed .sb-toggle{display:none}
+.sb-section{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);padding:16px 12px 6px;white-space:nowrap}
+.sidebar.collapsed .sb-section{display:none}
+.sb-footer{padding:10px;border-top:1px solid var(--border);display:flex;gap:6px;flex-wrap:wrap}
+.sb-footer button{font-size:11px;padding:5px 10px;border-radius:6px;background:var(--hover);color:var(--text);font-weight:600;flex:1}
+.sb-footer button:hover{background:#e5e3de}
+
+/* ═══ MAIN ═══ */
+.main{flex:1;overflow-y:auto;padding:28px 32px;min-width:0}
+.main-inner{max-width:1100px;margin:0 auto}
+.page-title{font-size:22px;font-weight:800;margin-bottom:4px;letter-spacing:-.5px}
+.page-sub{font-size:13px;color:var(--muted);margin-bottom:20px}
+
+/* ═══ CARDS ═══ */
+.card{background:var(--card);border-radius:12px;border:1px solid var(--border);padding:20px;margin-bottom:14px}
+.card-title{font-size:14px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.card-title .ct-icon{font-size:16px}
+
+/* ═══ GRID ═══ */
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+.grid-4{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+
+/* ═══ STAT BOXES ═══ */
+.stat-box{background:var(--card);border-radius:10px;border:1px solid var(--border);padding:16px;text-align:center}
+.stat-num{font-size:28px;font-weight:800;letter-spacing:-1px}
+.stat-label{font-size:11px;color:var(--muted);font-weight:600;margin-top:2px}
+
+/* ═══ BUTTONS ═══ */
+.btn{padding:8px 16px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;border:none;transition:all .15s;display:inline-flex;align-items:center;gap:6px}
+.btn-primary{background:var(--text);color:#fff}.btn-primary:hover{opacity:.9}
+.btn-secondary{background:var(--hover);color:var(--text);border:1px solid var(--border)}.btn-secondary:hover{background:#e5e3de}
+.btn-danger{background:#fef2f2;color:var(--red);border:1px solid #fecaca}
+.btn-success{background:#ecfdf5;color:var(--green);border:1px solid #a7f3d0}
+.btn-sm{padding:5px 10px;font-size:11px}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+
+/* ═══ INPUTS ═══ */
+.input,.select,.textarea{padding:8px 12px;border-radius:8px;border:1px solid var(--border);font-size:13px;background:#fafaf8;width:100%}
+.input:focus,.select:focus,.textarea:focus{border-color:var(--accent)}
+.textarea{resize:vertical;min-height:80px;line-height:1.6}
+.label{font-size:11px;font-weight:600;color:var(--muted);display:block;margin-bottom:4px}
+.form-row{margin-bottom:12px}
+
+/* ═══ PROGRESS BAR ═══ */
+.progress{height:6px;border-radius:6px;background:#e8e6e1;overflow:hidden}
+.progress-fill{height:100%;border-radius:6px;transition:width .4s}
+
+/* ═══ BADGE ═══ */
+.bdg{display:inline-block;padding:2px 9px;border-radius:20px;font-size:10px;font-weight:700}
+.bdg-sedes{background:#0891b218;color:var(--sedes)}.bdg-arr{background:#7c3aed18;color:var(--arr)}.bdg-prf{background:#16a34a18;color:var(--prf)}
+.bdg-tronco{background:#64748b18;color:#64748b}
+
+/* ═══ TABLE ═══ */
+.tbl{width:100%;border-collapse:collapse;font-size:12px}
+.tbl th{text-align:left;font-weight:700;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:1px;padding:8px 10px;border-bottom:2px solid var(--border)}
+.tbl td{padding:8px 10px;border-bottom:1px solid #f0eeea;vertical-align:middle}
+.tbl tr:hover td{background:#fafaf8}
+
+/* ═══ TABS ═══ */
+.tabs{display:flex;gap:4px;background:#f0eeea;border-radius:8px;padding:3px;margin-bottom:16px;flex-wrap:wrap}
+.tab-btn{padding:7px 14px;border-radius:6px;font-size:12px;font-weight:600;color:var(--muted);transition:all .15s}
+.tab-btn.active{background:var(--card);color:var(--text);box-shadow:0 1px 3px rgba(0,0,0,.08)}
+
+/* ═══ CONCURSO SELECTOR ═══ */
+.concurso-bar{display:flex;gap:6px;margin-bottom:16px}
+.conc-btn{padding:6px 14px;border-radius:8px;font-size:12px;font-weight:700;border:2px solid transparent;transition:all .15s}
+.conc-btn.sel-todos{background:#64748b18;color:#64748b;border-color:#64748b}
+.conc-btn.sel-sedes{background:#0891b218;color:var(--sedes);border-color:var(--sedes)}
+.conc-btn.sel-arr{background:#7c3aed18;color:var(--arr);border-color:var(--arr)}
+.conc-btn.sel-prf{background:#16a34a18;color:var(--prf);border-color:var(--prf)}
+.conc-btn:not([class*="sel-"]){opacity:.5}
+
+/* ═══ STATUS TAGS ═══ */
+.status-tag{display:inline-flex;padding:2px 8px;border-radius:12px;font-size:10px;font-weight:700}
+.st-pendente{background:#f1f5f9;color:#64748b}
+.st-estudando{background:#dbeafe;color:#2563eb}
+.st-questoes{background:#fef3c7;color:#b45309}
+.st-revisado{background:#ede9fe;color:#7c3aed}
+.st-dominado{background:#dcfce7;color:#059669}
+
+/* ═══ TIMER ═══ */
+.timer-display{font-size:48px;font-weight:800;letter-spacing:-2px;font-variant-numeric:tabular-nums}
+.timer-card{text-align:center;padding:32px}
+.timer-controls{display:flex;gap:10px;justify-content:center;margin-top:16px}
+
+/* ═══ REVIEW ITEM ═══ */
+.review-item{display:flex;align-items:center;gap:12px;padding:10px 14px;background:#fafaf8;border-radius:8px;margin-bottom:6px;border-left:4px solid}
+.review-item .ri-subject{font-weight:600;font-size:13px}
+.review-item .ri-topic{font-size:12px;color:#555}
+.review-item .ri-due{font-size:11px;font-weight:700;margin-left:auto;white-space:nowrap}
+
+/* ═══ QUESTION LOG ═══ */
+.q-row{display:flex;align-items:center;gap:10px;padding:10px;background:#fafaf8;border-radius:8px;margin-bottom:6px}
+.q-row .q-pct{font-size:18px;font-weight:800;width:60px;text-align:center}
+.q-row .q-info{flex:1}
+
+/* ═══ ERROR ITEM ═══ */
+.error-item{background:#fafaf8;border-left:4px solid var(--red);border-radius:8px;padding:14px;margin-bottom:10px}
+.error-item .ei-head{display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap}
+.error-item .ei-question{font-size:13px;line-height:1.5;margin-bottom:8px}
+.error-item .ei-explanation{font-size:12px;color:var(--orange);background:#fef3c7;padding:8px 10px;border-radius:6px;line-height:1.5}
+
+/* ═══ MODAL ═══ */
+.modal-bg{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.35);display:flex;align-items:center;justify-content:center;z-index:100}
+.modal{background:var(--card);border-radius:14px;padding:24px;max-width:520px;width:92%;max-height:85vh;overflow-y:auto;box-shadow:0 16px 48px rgba(0,0,0,.15)}
+.modal-title{font-size:16px;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+
+/* ═══ FLOATING TIMER ═══ */
+.float-timer{position:fixed;bottom:20px;right:20px;background:var(--card);border-radius:14px;border:1px solid var(--border);box-shadow:0 8px 32px rgba(0,0,0,.12);padding:16px;width:200px;z-index:50;text-align:center}
+.float-timer .ft-time{font-size:28px;font-weight:800;letter-spacing:-1px;font-variant-numeric:tabular-nums}
+.float-timer .ft-subject{font-size:11px;font-weight:600;color:var(--muted);margin-bottom:4px}
+.float-timer .ft-controls{display:flex;gap:6px;justify-content:center;margin-top:8px}
+
+/* ═══ TOAST ═══ */
+.toast{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:var(--text);color:#fff;padding:8px 18px;border-radius:8px;font-size:12px;font-weight:600;z-index:200;opacity:0;transition:opacity .3s;pointer-events:none}
+.toast.show{opacity:.9}
+
+/* ═══ CHART BAR ═══ */
+.chart-bar{display:flex;align-items:end;gap:6px;height:120px;padding:0 4px}
+.chart-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px}
+.chart-col .bar{width:100%;border-radius:4px 4px 0 0;min-height:2px;transition:height .4s}
+.chart-col .bar-label{font-size:9px;font-weight:600;color:var(--muted)}
+.chart-col .bar-value{font-size:10px;font-weight:700}
+
+/* ═══ LEI SECA ═══ */
+.lei-card{background:#fafaf8;border-radius:10px;padding:14px;margin-bottom:8px;cursor:pointer;transition:all .15s}
+.lei-card:hover{background:#f0eeea}
+.lei-card .lc-name{font-weight:700;font-size:14px}
+.lei-card .lc-desc{font-size:11px;color:var(--muted);margin-top:2px}
+.lei-bloco{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:6px;margin:4px 0;transition:all .15s}
+.lei-bloco:hover{background:#f0eeea}
+.lei-bloco .lb-check{width:20px;height:20px;border-radius:6px;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:12px;flex-shrink:0;transition:all .15s}
+.lei-bloco .lb-check.done{background:var(--green);border-color:var(--green);color:#fff}
+.lei-bloco .lb-title{font-size:12px;font-weight:500;flex:1}
+.lei-bloco .lb-focus{font-size:10px;color:var(--orange);font-weight:600}
+
+/* ═══ RESPONSIVE ═══ */
+@media(max-width:768px){
+  .sidebar{position:fixed;left:0;top:0;z-index:20;transform:translateX(-100%);transition:transform .25s}
+  .sidebar.mobile-open{transform:translateX(0)}
+  .sidebar.collapsed{transform:translateX(-100%)}
+  .main{padding:16px 14px}
+  .grid-2,.grid-3{grid-template-columns:1fr}
+  .mobile-menu-btn{display:block!important}
+}
+.mobile-menu-btn{display:none;position:fixed;top:12px;left:12px;z-index:15;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-size:18px}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>
+<script type="text/babel">
+const {useState,useEffect,useCallback,useRef,useMemo}=React;
+
+// ═══════════════════════════════════════════════════════════════
+// STORAGE
+// ═══════════════════════════════════════════════════════════════
+const STORAGE_KEY="estudopro-v1";
+const defaultData=()=>({
+  editalStatus:{},
+  sessions:[],
+  questions:[],
+  errors:[],
+  leiSeca:{},
+  reviews:[],
+  simulados:[],
+  ciclo:{subjects:[],current:0},
+  hoursGoal:{weekly:25},
+  questionsGoal:{weekly:150},
+  streakDays:[],
+  notes:{},
+  rotina:{seg:[],ter:[],qua:[],qui:[],sex:[],sab:[],dom:[]}
+});
+function load(){try{const r=localStorage.getItem(STORAGE_KEY);return r?{...defaultData(),...JSON.parse(r)}:defaultData()}catch{return defaultData()}}
+function persist(d){try{localStorage.setItem(STORAGE_KEY,JSON.stringify(d))}catch{}}
+
+// ═══════════════════════════════════════════════════════════════
+// DATE HELPERS
+// ═══════════════════════════════════════════════════════════════
+const today=()=>new Date().toISOString().slice(0,10);
+const daysBetween=(a,b)=>Math.round((new Date(b)-new Date(a))/864e5);
+const addDays=(ds,n)=>{const d=new Date(ds+"T12:00:00");d.setDate(d.getDate()+n);return d.toISOString().slice(0,10)};
+const fmtDate=ds=>{const[y,m,d]=ds.split("-");return new Date(y,m-1,d).toLocaleDateString("pt-BR",{day:"numeric",month:"short"})};
+const fmtDateFull=ds=>{const[y,m,d]=ds.split("-");return new Date(y,m-1,d).toLocaleDateString("pt-BR",{weekday:"long",day:"numeric",month:"long"})};
+const fmtMin=m=>{const h=Math.floor(m/60);const min=m%60;return h>0?`${h}h${min>0?String(min).padStart(2,"0"):""}`:min+"min"};
+const weekStart=ds=>{const d=new Date(ds+"T12:00:00");d.setDate(d.getDate()-d.getDay());return d.toISOString().slice(0,10)};
+const thisWeekDays=()=>{const ws=weekStart(today());return Array.from({length:7},(_,i)=>addDays(ws,i))};
+
+// ═══════════════════════════════════════════════════════════════
+// CURRICULUM — EDITAL VERTICALIZADO
+// ═══════════════════════════════════════════════════════════════
+const CONCURSOS=[
+  {id:"sedes",name:"SEDES-DF",color:"#0891b2",prova:"06/09/2026",banca:"Quadrix"},
+  {id:"arr",name:"Câmara (ARR)",color:"#7c3aed",prova:"A definir",banca:"CEBRASPE"},
+  {id:"prf",name:"PRF Adm",color:"#16a34a",prova:"A definir",banca:"CEBRASPE"},
+];
+
+const EDITAL=[
+// ─── TRONCO COMUM (SEDES + ARR + PRF) ───
+{s:"Língua Portuguesa",c:"#dc2626",conc:["sedes","arr","prf"],peso:"alto",topics:[
+  "Interpretação de texto: inferência, ideia central, reescritura",
+  "Tipologia e gêneros textuais",
+  "Ortografia e acentuação gráfica",
+  "Classes de palavras: substantivo, adjetivo, verbo, pronome, advérbio",
+  "Sintaxe do período simples: termos essenciais, integrantes e acessórios",
+  "Sintaxe do período composto: subordinação e coordenação",
+  "Concordância verbal e nominal",
+  "Regência verbal e nominal",
+  "Crase: casos obrigatórios, proibidos e facultativos",
+  "Pontuação: vírgula, ponto e vírgula, dois-pontos",
+  "Coesão e coerência textual",
+  "Reescritura de frases com manutenção de sentido",
+  "Semântica: polissemia, sinonímia, antonímia",
+  "Vozes verbais e funções do 'se'",
+  "Colocação pronominal: próclise, mesóclise, ênclise",
+  "Figuras de linguagem",
+]},
+{s:"Direito Constitucional",c:"#2563eb",conc:["sedes","arr","prf"],peso:"alto",topics:[
+  "Princípios fundamentais (arts. 1º a 4º)",
+  "Poder constituinte: originário, derivado, decorrente",
+  "Direitos individuais (art. 5º, I a XL)",
+  "Direitos individuais (art. 5º, XLI a LXXVIII) e remédios constitucionais",
+  "Direitos sociais (arts. 6º a 11)",
+  "Nacionalidade (art. 12) e perda",
+  "Direitos políticos (arts. 14 a 16) e partidos",
+  "Organização do Estado: competências da União (arts. 21-24)",
+  "Estados, DF e Municípios (arts. 25-35)",
+  "Administração pública na CF (arts. 37-41)",
+  "Poder Legislativo: CN, Câmara, Senado (arts. 44-58)",
+  "Processo legislativo constitucional (arts. 59-69)",
+  "Poder Executivo: Presidente, atribuições (arts. 76-91)",
+  "Poder Judiciário: organização (arts. 92-126)",
+  "Funções essenciais à Justiça: MP, AGU, Defensoria",
+  "Fiscalização e TCU (arts. 70-75)",
+  "Controle de constitucionalidade: ADI, ADC, ADPF",
+  "Defesa do Estado: estado de defesa e sítio",
+  "Ordem social e econômica",
+]},
+{s:"Direito Administrativo",c:"#059669",conc:["sedes","arr","prf"],peso:"alto",topics:[
+  "Regime jurídico-administrativo: supremacia e indisponibilidade",
+  "Princípios expressos (LIMPE) e implícitos",
+  "Organização administrativa: direta e indireta, desconcentração vs descentralização",
+  "Autarquias, fundações, EP e SEM",
+  "Poderes administrativos: vinculado, discricionário, hierárquico, disciplinar",
+  "Poder regulamentar e poder de polícia (DAC)",
+  "Atos administrativos: requisitos (CO-FI-FO-MO-OB)",
+  "Atos: atributos (PATI), classificação, extinção",
+  "Anulação vs revogação: Súmula 473 STF",
+  "Licitações Lei 14.133: princípios e modalidades",
+  "Licitações: dispensa e inexigibilidade",
+  "Contratos administrativos: cláusulas e garantias",
+  "Servidores: provimento, vacância, estabilidade (Lei 8.112)",
+  "Servidores: direitos, vantagens e licenças",
+  "Servidores: regime disciplinar e PAD",
+  "Responsabilidade civil do Estado: objetiva e omissão",
+  "Improbidade administrativa (Lei 8.429)",
+  "LAI e LGPD na administração pública",
+  "Controle da administração: interno e externo",
+  "Serviços públicos: princípios, concessão, permissão",
+  "Processo administrativo federal (Lei 9.784)",
+]},
+
+// ─── SEDES ESPECÍFICAS ───
+{s:"SUAS / PNAS / NOB-SUAS",c:"#0891b2",conc:["sedes"],peso:"alto",topics:[
+  "PNAS/2004: princípios, diretrizes, público-alvo",
+  "Proteção social básica e especial (média e alta complexidade)",
+  "Matricialidade sociofamiliar e territorialização",
+  "SUAS: princípios organizativos",
+  "Seguranças sociais: acolhida, convívio, renda, autonomia, sobrevivência",
+  "NOB/SUAS 2012: responsabilidades dos entes",
+  "Cofinanciamento e repasses fundo a fundo",
+  "Vigilância socioassistencial",
+  "CRAS e CREAS: funções e serviços",
+  "Tipificação Nacional dos Serviços Socioassistenciais",
+]},
+{s:"Programas Sociais do DF",c:"#0e7490",conc:["sedes"],peso:"alto",topics:[
+  "Cartão Prato Cheio (Lei 7.009/2021)",
+  "Cartão Gás (Lei 6.938/2021)",
+  "Plano DF Social (Lei 7.008/2021)",
+  "Benefícios Eventuais (Lei 5.165/2013)",
+  "SISAN e Restaurante Comunitário (Decreto 33.329/2011)",
+  "Cadastro Único e integração com programas federais",
+]},
+{s:"Legislação do DF e Maria da Penha",c:"#be185d",conc:["sedes"],peso:"alto",topics:[
+  "LODF Título VI: Ordem Social e Meio Ambiente",
+  "LC 840/2011: provimento, vacância, direitos e deveres",
+  "LC 840/2011: responsabilidade e PAD",
+  "Lei Maria da Penha (11.340/2006): conceitos e tipos de violência",
+  "Lei Maria da Penha: medidas protetivas de urgência",
+  "Lei Maria da Penha: atendimento policial",
+  "Realidade do DF/RIDE (LC 94/1998, Decreto 7.469/2011)",
+  "PDPM — Plano Distrital de Política para Mulheres",
+  "Lei Distrital 7.484/2024",
+]},
+{s:"Atendimento e Rotinas Administrativas",c:"#4338ca",conc:["sedes"],peso:"medio",topics:[
+  "Qualidade no atendimento ao público",
+  "Trabalho em equipe e relações interpessoais",
+  "Redação oficial e comunicações administrativas",
+  "Protocolo: recebimento, registro, distribuição, expedição",
+  "Tipos de arquivo: corrente, intermediário, permanente",
+  "Métodos de arquivamento: alfabético, numérico, geográfico",
+  "Preservação e digitalização de documentos",
+]},
+{s:"Recursos Materiais e Patrimônio",c:"#1d4ed8",conc:["sedes"],peso:"medio",topics:[
+  "Administração de materiais: classificação ABC",
+  "Gestão de estoques: ponto de pedido, lote econômico",
+  "Armazenagem e movimentação de materiais",
+  "Gestão patrimonial: tombamento e registro",
+  "Controle patrimonial e inventário",
+  "Baixa e alienação de bens",
+  "Compras no setor público e Lei 14.133/2021",
+]},
+{s:"Primeiros Socorros",c:"#b91c1c",conc:["sedes"],peso:"baixo",topics:[
+  "Engasgo (manobra de Heimlich)",
+  "Sangramento: tipos e contenção",
+  "Fraturas: imobilização e transporte",
+  "Queimaduras: graus e cuidados",
+  "Desmaio e convulsão: procedimentos",
+  "Intoxicação e envenenamento",
+]},
+
+// ─── ARR (Câmara) ESPECÍFICAS ───
+{s:"Raciocínio Lógico",c:"#6d28d9",conc:["arr","prf"],peso:"alto",topics:[
+  "Lógica proposicional: conectivos e valores lógicos",
+  "Tabela-verdade: tautologia, contradição, contingência",
+  "Equivalências lógicas: contrapositiva, De Morgan",
+  "Negação de proposições compostas",
+  "Argumentação lógica: válido/inválido, silogismos",
+  "Conjuntos: operações e diagramas de Venn",
+  "Análise combinatória: arranjo, combinação, permutação",
+  "Probabilidade: espaço amostral, eventos, complementar",
+  "Proporcionalidade: razão, proporção, regra de três",
+  "Sequências e padrões lógicos",
+  "Associação lógica (tabelas): eliminação",
+]},
+{s:"Noções de TI",c:"#e11d48",conc:["arr","prf"],peso:"medio",topics:[
+  "Hardware e sistemas operacionais (Windows e Linux)",
+  "Redes: modelo OSI, TCP/IP, protocolos",
+  "Internet, navegadores e serviços web",
+  "Pacote Office: Word, Excel, PowerPoint",
+  "Segurança da informação: CID, malwares, criptografia",
+  "Banco de dados: conceitos, SQL básico",
+  "Computação em nuvem: IaaS, PaaS, SaaS",
+  "IA, machine learning e governo digital",
+  "Governança de TI: ITIL, COBIT",
+  "LGPD aplicada à TI",
+]},
+{s:"Regimento Interno da Câmara",c:"#7c3aed",conc:["arr"],peso:"alto",topics:[
+  "Disposições preliminares (arts. 1-3)",
+  "Posse dos Deputados (arts. 4-6)",
+  "Mesa Diretora: composição e eleição (arts. 7-13)",
+  "Mesa: atribuições do Presidente, VPs, Secretários (arts. 14-21)",
+  "Colégio de Líderes (arts. 20-22)",
+  "Comissões Permanentes: CCJC, CFT, proporcionalidade (arts. 32-40)",
+  "Comissões Temporárias e CPI (arts. 33-37)",
+  "Sessões da Câmara: tipos e quórum (arts. 65-86)",
+  "Pequeno e Grande Expediente (arts. 80-89)",
+  "Ordem do Dia: pauta e quórum (arts. 82-95)",
+  "Discussão das proposições (arts. 165-178)",
+  "Votação: simbólica, nominal, secreta (arts. 178-194)",
+  "Encaminhamento e destaque (arts. 161-170)",
+  "Pareceres e relatórios (arts. 126-134)",
+  "Requerimentos (arts. 113-117)",
+  "Recursos no Plenário (arts. 95-101)",
+]},
+{s:"Processo Legislativo",c:"#a78bfa",conc:["arr"],peso:"alto",topics:[
+  "Espécies normativas (art. 59 CF)",
+  "PEC: iniciativa, limites, cláusulas pétreas",
+  "Lei Complementar: hipóteses e quórum",
+  "Lei Ordinária: tramitação completa",
+  "Medida Provisória: requisitos, prazos, trancamento",
+  "Lei Delegada e seus limites",
+  "Decreto Legislativo e Resolução",
+  "Veto presidencial: total e parcial, derrubada",
+  "Processo orçamentário: PPA, LDO, LOA",
+  "Acordos internacionais",
+]},
+{s:"Técnica Legislativa",c:"#9333ea",conc:["arr"],peso:"medio",topics:[
+  "LC 95/98: estrutura da lei (preliminar, normativa, final)",
+  "Articulação: artigo, parágrafo, inciso, alínea, item",
+  "Ementa e preâmbulo",
+  "Linguagem normativa: clareza e precisão",
+  "Alteração e consolidação de leis",
+  "Manual de Técnica Legislativa da Câmara",
+]},
+{s:"Redação Oficial",c:"#0d9488",conc:["arr"],peso:"medio",topics:[
+  "Princípios da redação oficial (MRPR 2018)",
+  "Padrão Ofício: estrutura unificada",
+  "Pronomes de tratamento",
+  "Concordância em redação oficial",
+  "Fecho e identificação do signatário",
+  "Comunicações da Câmara dos Deputados",
+  "Atos normativos internos",
+  "Exposição de motivos e mensagem presidencial",
+]},
+{s:"Ética no Serviço Público",c:"#0891b2",conc:["arr","prf"],peso:"medio",topics:[
+  "Código de Ética (Decreto 1.171/94): deveres e vedações",
+  "Comissão de Ética Pública",
+  "Improbidade administrativa (Lei 8.429)",
+  "Conflito de interesses (Lei 12.813)",
+  "Lei Anticorrupção (Lei 12.846)",
+  "Lei de Acesso à Informação (LAI)",
+]},
+
+// ─── PRF ESPECÍFICAS ───
+{s:"Legislação de Trânsito (CTB)",c:"#16a34a",conc:["prf"],peso:"alto",topics:[
+  "SNT e competências (arts. 5-25): CONTRAN, PRF, DETRAN",
+  "Normas gerais de circulação (arts. 26-67)",
+  "Penalidades e infrações: classificação e pontuação",
+  "Suspensão e cassação da CNH",
+  "Crimes de trânsito (arts. 291-312)",
+  "Processo administrativo no CTB",
+  "Veículos: registro e licenciamento",
+  "Habilitação: categorias e renovação",
+  "Sinalização: tipos e hierarquia",
+  "Educação para o trânsito",
+]},
+{s:"Direitos Humanos",c:"#d97706",conc:["prf"],peso:"medio",topics:[
+  "Conceito e evolução histórica dos DH",
+  "Características: universais, indivisíveis, inalienáveis",
+  "Declaração Universal (1948)",
+  "Pacto de San José da Costa Rica",
+  "DH na CF/88",
+  "Sistema Interamericano de DH",
+  "DH e atividade policial",
+  "Lei Maria da Penha (11.340): aspectos de DH",
+  "Estatuto da Igualdade Racial",
+  "Pessoa com Deficiência: Estatuto",
+]},
+{s:"Geopolítica e Atualidades PRF",c:"#7c2d12",conc:["prf"],peso:"baixo",topics:[
+  "Geografia do Brasil: regiões e economia",
+  "Malha rodoviária federal",
+  "Faixa de fronteira",
+  "Tráfico e crime organizado nas rodovias",
+  "Atualidades em segurança pública",
+]},
+];
+
+// ═══════════════════════════════════════════════════════════════
+// LEIS PARA LEI SECA
+// ═══════════════════════════════════════════════════════════════
+const LEIS=[
+{id:"cf88",nome:"CF/88",color:"#2563eb",conc:["sedes","arr","prf"],blocos:[
+  {id:"cf01",t:"Título I — Princípios Fundamentais (arts. 1-4)",foco:"SOCIDIVAPLU + CONGAERRA-PRO"},
+  {id:"cf02",t:"Art. 5º, I a XL — Direitos Individuais",foco:"Ponto mais cobrado da CF"},
+  {id:"cf03",t:"Art. 5º, XLI a LXXVIII — Remédios Constitucionais",foco:"HC, MS, MI, HD, AP"},
+  {id:"cf04",t:"Arts. 6º a 17 — Dir. Sociais, Nacionalidade, Políticos",foco:"Art. 12 nato vs naturalizado"},
+  {id:"cf05",t:"Arts. 18-35 — Organização do Estado",foco:"Competências da União vs Estados"},
+  {id:"cf06",t:"Arts. 37-41 — Administração Pública",foco:"LIMPE. Art. 37 é o coração"},
+  {id:"cf07",t:"Arts. 44-58 — Poder Legislativo",foco:"CN, Câmara, Senado, imunidades"},
+  {id:"cf08",t:"Arts. 59-69 — Processo Legislativo",foco:"EC, LC, LO, MP, DL"},
+  {id:"cf09",t:"Arts. 70-75 — TCU e Fiscalização",foco:"Controle externo"},
+  {id:"cf10",t:"Arts. 76-91 — Poder Executivo",foco:"Atribuições do Presidente"},
+  {id:"cf11",t:"Arts. 92-135 — Judiciário e Funções Essenciais",foco:"MP, AGU, Defensoria"},
+  {id:"cf12",t:"Arts. 136-144 — Defesa do Estado e Seg. Pública",foco:"Estado de defesa/sítio, FFAA"},
+]},
+{id:"l8112",nome:"Lei 8.112/90",color:"#059669",conc:["sedes","arr"],blocos:[
+  {id:"l81",t:"Provimento e formas (arts. 1-12)",foco:"7 formas de provimento"},
+  {id:"l82",t:"Nomeação, posse e exercício (arts. 13-21)",foco:"30d posse, 15d exercício"},
+  {id:"l83",t:"Estabilidade e readaptação (arts. 22-30)",foco:"Estabilidade 3 anos"},
+  {id:"l84",t:"Vacância, remoção (arts. 33-38)",foco:"Formas de vacância"},
+  {id:"l85",t:"Direitos e vantagens (arts. 40-68)",foco:"Vencimento, indenizações"},
+  {id:"l86",t:"Férias e licenças (arts. 76-96)",foco:"Tipos de licença"},
+  {id:"l87",t:"Regime disciplinar (arts. 116-132)",foco:"Deveres e proibições"},
+  {id:"l88",t:"Penalidades (arts. 127-142)",foco:"Adv, susp, demissão"},
+  {id:"l89",t:"PAD (arts. 143-173)",foco:"3 fases: instauração, inquérito, julgamento"},
+]},
+{id:"l14133",nome:"Lei 14.133/21",color:"#d97706",conc:["sedes","arr","prf"],blocos:[
+  {id:"l41",t:"Princípios e definições (arts. 1-5)",foco:"Abrangência e conceitos"},
+  {id:"l42",t:"Agentes e fase preparatória (arts. 6-27)",foco:"ETP, TR, agente de contratação"},
+  {id:"l43",t:"Modalidades (arts. 28-33)",foco:"5 modalidades: decorar"},
+  {id:"l44",t:"Procedimento e julgamento (arts. 33-73)",foco:"Lances, habilitação"},
+  {id:"l45",t:"Contratação direta (arts. 74-75)",foco:"Inexigibilidade vs dispensa"},
+  {id:"l46",t:"Contratos e sanções (arts. 89-174)",foco:"Cláusulas, garantias, extinção"},
+]},
+{id:"lc840",nome:"LC 840/2011 (DF)",color:"#0891b2",conc:["sedes"],blocos:[
+  {id:"lc1",t:"Títulos I — Disposições preliminares",foco:"Servidor do DF"},
+  {id:"lc2",t:"Título V — Dos direitos e vantagens",foco:"Direitos específicos do DF"},
+  {id:"lc3",t:"Título VI — Do regime disciplinar",foco:"Deveres, proibições, penalidades"},
+  {id:"lc4",t:"Título VII — Do PAD",foco:"Sindicância e PAD no DF"},
+]},
+{id:"lmp",nome:"Lei 11.340/06 (Maria da Penha)",color:"#be185d",conc:["sedes","prf"],blocos:[
+  {id:"mp1",t:"Disposições preliminares (arts. 1-4)",foco:"Violência doméstica contra a mulher"},
+  {id:"mp2",t:"Tipos de violência (arts. 5-9)",foco:"Física, psicológica, sexual, patrimonial, moral"},
+  {id:"mp3",t:"Atendimento policial (arts. 10-12)",foco:"Medidas da autoridade policial"},
+  {id:"mp4",t:"Medidas protetivas (arts. 18-24)",foco:"Urgência — concessão 48h"},
+]},
+{id:"ricd",nome:"RICD (Res. 17/89)",color:"#7c3aed",conc:["arr"],blocos:[
+  {id:"ri1",t:"Disposições Preliminares (arts. 1-3)",foco:"Sede, sessão legislativa"},
+  {id:"ri2",t:"Posse e Mesa Diretora (arts. 4-21)",foco:"Mandato 2 anos, vedação recondução"},
+  {id:"ri3",t:"Comissões (arts. 22-40)",foco:"Permanentes, temporárias, CPI"},
+  {id:"ri4",t:"Sessões (arts. 65-95)",foco:"Tipos, quórum, ordem do dia"},
+  {id:"ri5",t:"Discussão e votação (arts. 165-194)",foco:"Simbólica, nominal, secreta"},
+  {id:"ri6",t:"Pareceres e requerimentos (arts. 113-134)",foco:"Voto em separado, vista coletiva"},
+]},
+{id:"ctb",nome:"CTB (Lei 9.503/97)",color:"#16a34a",conc:["prf"],blocos:[
+  {id:"ct1",t:"Disposições e SNT (arts. 1-25)",foco:"Composição e competências"},
+  {id:"ct2",t:"Normas de circulação (arts. 26-67)",foco:"Preferência, ultrapassagem, velocidade"},
+  {id:"ct3",t:"Sinalização (arts. 80-90)",foco:"Tipos e hierarquia"},
+  {id:"ct4",t:"Habilitação (arts. 140-160)",foco:"Categorias e renovação"},
+  {id:"ct5",t:"Infrações e penalidades (arts. 161-268)",foco:"Pontuação: 3-4-5-7"},
+  {id:"ct6",t:"Crimes de trânsito (arts. 291-312)",foco:"Homicídio, lesão, embriaguez"},
+]},
+{id:"l9784",nome:"Lei 9.784/99",color:"#f59e0b",conc:["arr","prf"],blocos:[
+  {id:"l97_1",t:"Disposições gerais e princípios (arts. 1-4)",foco:"Ampla defesa, contraditório"},
+  {id:"l97_2",t:"Direitos e deveres (arts. 3-4)",foco:"Direitos do administrado"},
+  {id:"l97_3",t:"Instrução e decisão (arts. 29-49)",foco:"Provas, audiência, motivação"},
+  {id:"l97_4",t:"Anulação, revogação e convalidação (arts. 53-55)",foco:"Prazo decadencial 5 anos"},
+  {id:"l97_5",t:"Recurso e revisão (arts. 56-65)",foco:"3 instâncias, efeito devolutivo"},
+]},
+];
+
+// ═══════════════════════════════════════════════════════════════
+// STATUS OPTIONS
+// ═══════════════════════════════════════════════════════════════
+const STATUS_OPTIONS=[
+  {id:"pendente",label:"Pendente",cls:"st-pendente",icon:"○"},
+  {id:"estudando",label:"Estudando",cls:"st-estudando",icon:"◐"},
+  {id:"questoes",label:"Questões feitas",cls:"st-questoes",icon:"◑"},
+  {id:"revisado",label:"Revisado",cls:"st-revisado",icon:"◕"},
+  {id:"dominado",label:"Dominado",cls:"st-dominado",icon:"●"},
+];
+
+// REVIEW INTERVALS (Fernando Mesquita style)
+const REVIEW_INTERVALS=[1,7,30];
+
+// ═══════════════════════════════════════════════════════════════
+// TOAST COMPONENT
+// ═══════════════════════════════════════════════════════════════
+let toastTimer=null;
+function showToast(msg){
+  const el=document.getElementById("toast");
+  if(el){el.textContent=msg;el.classList.add("show");clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove("show"),2000)}
+}
+
+// ═══════════════════════════════════════════════════════════════
+// APP
+// ═══════════════════════════════════════════════════════════════
+function App(){
+  const[data,setDataRaw]=useState(load);
+  const[page,setPage]=useState("dashboard");
+  const[sidebarOpen,setSidebarOpen]=useState(true);
+  const[mobileMenu,setMobileMenu]=useState(false);
+  const[modal,setModal]=useState(null);
+
+  // Timer state
+  const[timerRunning,setTimerRunning]=useState(false);
+  const[timerSeconds,setTimerSeconds]=useState(0);
+  const[timerSubject,setTimerSubject]=useState("");
+  const[timerTopic,setTimerTopic]=useState("");
+  const timerRef=useRef(null);
+  const timerStartRef=useRef(null);
+
+  const setData=useCallback(nd=>{
+    const d=typeof nd==="function"?nd(data):nd;
+    setDataRaw(d);persist(d);
+  },[data]);
+
+  // Timer effect
+  useEffect(()=>{
+    if(timerRunning){
+      timerRef.current=setInterval(()=>setTimerSeconds(s=>s+1),1000);
+      timerStartRef.current=Date.now();
+    }else{
+      clearInterval(timerRef.current);
+    }
+    return()=>clearInterval(timerRef.current);
+  },[timerRunning]);
+
+  const stopAndSaveTimer=useCallback(()=>{
+    if(timerSeconds<60)return;
+    const minutes=Math.round(timerSeconds/60);
+    const session={id:Date.now(),date:today(),subject:timerSubject,topic:timerTopic,minutes,timestamp:Date.now()};
+    setData(d=>({...d,sessions:[...d.sessions,session],streakDays:[...new Set([...d.streakDays,today()])]}));
+    setTimerRunning(false);setTimerSeconds(0);
+    showToast(`✓ ${fmtMin(minutes)} registrados em ${timerSubject}`);
+  },[timerSeconds,timerSubject,timerTopic,setData]);
+
+  // Computed stats
+  const todayStr=today();
+  const weekDays=thisWeekDays();
+  const weekSessions=useMemo(()=>data.sessions.filter(s=>weekDays.includes(s.date)),[data.sessions,weekDays]);
+  const todaySessions=useMemo(()=>data.sessions.filter(s=>s.date===todayStr),[data.sessions,todayStr]);
+  const todayMinutes=todaySessions.reduce((a,s)=>a+s.minutes,0);
+  const weekMinutes=weekSessions.reduce((a,s)=>a+s.minutes,0);
+  const weekHours=(weekMinutes/60).toFixed(1);
+
+  // Reviews due
+  const reviewsDue=useMemo(()=>{
+    return data.reviews.filter(r=>r.dueDate<=todayStr&&!r.done);
+  },[data.reviews,todayStr]);
+
+  // Streak
+  const streak=useMemo(()=>{
+    let s=0;const d=new Date();
+    for(let i=0;i<365;i++){
+      const ds=d.toISOString().slice(0,10);
+      if(data.streakDays.includes(ds))s++;
+      else if(ds!==todayStr)break;
+      d.setDate(d.getDate()-1);
+    }
+    return s;
+  },[data.streakDays,todayStr]);
+
+  // Edital stats
+  const editalStats=useMemo(()=>{
+    let total=0,dominado=0,pendente=0;
+    EDITAL.forEach(sub=>{
+      sub.topics.forEach((t,i)=>{
+        total++;
+        const key=`${sub.s}::${i}`;
+        const st=data.editalStatus[key]||"pendente";
+        if(st==="dominado")dominado++;
+        if(st==="pendente")pendente++;
+      });
+    });
+    return{total,dominado,pendente,pct:total?Math.round((dominado/total)*100):0};
+  },[data.editalStatus]);
+
+  // Question stats
+  const qStats=useMemo(()=>{
+    const total=data.questions.reduce((a,q)=>a+q.total,0);
+    const acertos=data.questions.reduce((a,q)=>a+q.acertos,0);
+    return{total,acertos,pct:total?Math.round((acertos/total)*100):0};
+  },[data.questions]);
+
+  // Nav items
+  const NAV=[
+    {id:"dashboard",icon:"📊",label:"Dashboard"},
+    {id:"rotina",icon:"📅",label:"Minha Rotina"},
+    {id:"edital",icon:"📋",label:"Edital Verticalizado"},
+    {id:"ciclo",icon:"🔄",label:"Ciclo de Estudos"},
+    {id:"timer",icon:"⏱️",label:"Timer / Sessões"},
+    {id:"revisoes",icon:"🔔",label:"Revisões",badge:reviewsDue.length||null},
+    {id:"questoes",icon:"📝",label:"Questões"},
+    {id:"erros",icon:"❌",label:"Caderno de Erros"},
+    {id:"leiseca",icon:"📖",label:"Lei Seca"},
+    {id:"simulados",icon:"🎯",label:"Simulados"},
+    {id:"config",icon:"⚙️",label:"Configurações"},
+  ];
+
+  const navigate=p=>{setPage(p);setMobileMenu(false)};
+
+  // ══════════ SCHEDULE REVIEW ══════════
+  const scheduleReviews=(subject,topic)=>{
+    const newReviews=REVIEW_INTERVALS.map(days=>({
+      id:Date.now()+days,subject,topic,
+      createdDate:todayStr,dueDate:addDays(todayStr,days),
+      interval:days,done:false
+    }));
+    setData(d=>({...d,reviews:[...d.reviews,...newReviews]}));
+    showToast(`📅 3 revisões agendadas para ${subject}`);
+  };
+
+  // ══════════ EXPORT / IMPORT ══════════
+  const exportData=()=>{
+    const blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});
+    const a=document.createElement("a");a.href=URL.createObjectURL(blob);
+    a.download=`estudopro-backup-${todayStr}.json`;a.click();
+    showToast("💾 Backup exportado!");
+  };
+  const importData=()=>{
+    const input=document.createElement("input");input.type="file";input.accept=".json";
+    input.onchange=e=>{
+      const file=e.target.files[0];if(!file)return;
+      const reader=new FileReader();
+      reader.onload=ev=>{
+        try{const d=JSON.parse(ev.target.result);setData({...defaultData(),...d});showToast("✓ Dados restaurados!")}
+        catch{showToast("❌ Arquivo inválido")}
+      };reader.readAsText(file);
+    };input.click();
+  };
+
+  // ══════════════════════════════════════════════════════════════
+  // DASHBOARD PAGE
+  // ══════════════════════════════════════════════════════════════
+  const DashboardPage=()=>{
+    const hoursPerSubject=useMemo(()=>{
+      const map={};
+      data.sessions.forEach(s=>{map[s.subject]=(map[s.subject]||0)+s.minutes});
+      return Object.entries(map).sort((a,b)=>b[1]-a[1]);
+    },[data.sessions]);
+
+    const weekByDay=useMemo(()=>{
+      return weekDays.map(d=>{
+        const mins=data.sessions.filter(s=>s.date===d).reduce((a,s)=>a+s.minutes,0);
+        return{date:d,mins};
+      });
+    },[weekDays,data.sessions]);
+
+    const maxDayMins=Math.max(...weekByDay.map(d=>d.mins),1);
+
+    const countdowns=useMemo(()=>CONCURSOS.filter(c=>c.prova.includes("/")).map(c=>{
+      const[dd,mm,yy]=c.prova.split("/");
+      const days=daysBetween(todayStr,`${yy}-${mm}-${dd}`);
+      return{...c,days};
+    }).filter(c=>c.days>=0),[todayStr]);
+
+    const weekQuestions=useMemo(()=>data.questions.filter(q=>weekDays.includes(q.date)).reduce((a,q)=>a+q.total,0),[data.questions,weekDays]);
+    const qGoal=data.questionsGoal?.weekly||150;
+
+    return <>
+      <div className="page-title">Dashboard</div>
+      <div className="page-sub">{fmtDateFull(todayStr)} — {streak>0?`🔥 ${streak} dias seguidos`:"Comece hoje!"}</div>
+
+      {countdowns.length>0&&<div style={{display:"flex",gap:10,marginBottom:14,flexWrap:"wrap"}}>
+        {countdowns.map(c=><div key={c.id} style={{
+          flex:1,minWidth:200,display:"flex",alignItems:"center",gap:12,padding:"12px 16px",
+          background:"var(--card)",borderRadius:12,border:`2px solid ${c.color}`,
+        }}>
+          <div style={{fontSize:26,fontWeight:800,color:c.color,lineHeight:1}}>{c.days}</div>
+          <div>
+            <div style={{fontWeight:700,fontSize:13}}>{c.days===1?"dia para":"dias para"} {c.name}</div>
+            <div style={{fontSize:11,color:"var(--muted)"}}>{c.prova} • {c.banca}{c.days<=30?" • 🔥 RETA FINAL":""}</div>
+          </div>
+        </div>)}
+      </div>}
+
+      <div className="grid-4" style={{marginBottom:14}}>
+        <div className="stat-box">
+          <div className="stat-num" style={{color:todayMinutes>0?"var(--green)":"var(--muted)"}}>{fmtMin(todayMinutes)}</div>
+          <div className="stat-label">Hoje</div>
+        </div>
+        <div className="stat-box">
+          <div className="stat-num">{weekHours}h</div>
+          <div className="stat-label">Esta semana</div>
+          <div className="progress" style={{marginTop:6}}><div className="progress-fill" style={{width:`${Math.min(100,weekMinutes/(data.hoursGoal.weekly*60)*100)}%`,background:"var(--accent)"}}></div></div>
+          <div style={{fontSize:10,color:"var(--muted)",marginTop:3}}>Meta: {data.hoursGoal.weekly}h</div>
+        </div>
+        <div className="stat-box">
+          <div className="stat-num" style={{color:weekQuestions>=qGoal?"var(--green)":"var(--ink)"}}>{weekQuestions}</div>
+          <div className="stat-label">Questões na semana</div>
+          <div className="progress" style={{marginTop:6}}><div className="progress-fill" style={{width:`${Math.min(100,weekQuestions/qGoal*100)}%`,background:weekQuestions>=qGoal?"var(--green)":"var(--orange)"}}></div></div>
+          <div style={{fontSize:10,color:"var(--muted)",marginTop:3}}>Meta: {qGoal} ({qStats.pct}% acerto geral)</div>
+        </div>
+        <div className="stat-box">
+          <div className="stat-num">{editalStats.pct}%</div>
+          <div className="stat-label">Edital dominado</div>
+        </div>
+      </div>
+
+      <div className="grid-2">
+        <div className="card">
+          <div className="card-title"><span className="ct-icon">📅</span> Horas na semana</div>
+          <div className="chart-bar">
+            {weekByDay.map((d,i)=>{
+              const dayName=new Date(d.date+"T12:00:00").toLocaleDateString("pt-BR",{weekday:"short"}).slice(0,3).toUpperCase();
+              const h=d.mins>0?Math.max(8,(d.mins/maxDayMins)*100):2;
+              const isToday=d.date===todayStr;
+              return <div key={i} className="chart-col">
+                <div className="bar-value">{d.mins>0?fmtMin(d.mins):""}</div>
+                <div className="bar" style={{height:`${h}%`,background:isToday?"var(--accent)":d.mins>0?"#93c5fd":"#e8e6e1"}}></div>
+                <div className="bar-label" style={{fontWeight:isToday?800:600,color:isToday?"var(--accent)":"var(--muted)"}}>{dayName}</div>
+              </div>
+            })}
+          </div>
+        </div>
+
+        <div className="card">
+          <div className="card-title"><span className="ct-icon">🔔</span> Revisões pendentes ({reviewsDue.length})</div>
+          {reviewsDue.length===0?<div style={{color:"var(--muted)",fontSize:12,textAlign:"center",padding:16}}>Nenhuma revisão pendente 🎉</div>:
+          reviewsDue.slice(0,5).map(r=><div key={r.id} className="review-item" style={{borderColor:EDITAL.find(e=>e.s===r.subject)?.c||"var(--muted)"}}>
+            <div>
+              <div className="ri-subject">{r.subject}</div>
+              <div className="ri-topic">{r.topic}</div>
+            </div>
+            <div className="ri-due" style={{color:r.dueDate<todayStr?"var(--red)":"var(--orange)"}}>
+              {r.dueDate===todayStr?"Hoje":r.dueDate<todayStr?"Atrasada":fmtDate(r.dueDate)}
+            </div>
+          </div>)}
+          {reviewsDue.length>5&&<div style={{fontSize:11,color:"var(--muted)",textAlign:"center",marginTop:6}}>+{reviewsDue.length-5} mais...</div>}
+        </div>
+      </div>
+
+      {hoursPerSubject.length>0&&<div className="card">
+        <div className="card-title"><span className="ct-icon">📊</span> Horas por matéria (total)</div>
+        <div style={{display:"flex",flexDirection:"column",gap:6}}>
+          {hoursPerSubject.slice(0,10).map(([sub,mins])=>{
+            const pct=(mins/hoursPerSubject[0][1])*100;
+            const subData=EDITAL.find(e=>e.s===sub);
+            return <div key={sub} style={{display:"flex",alignItems:"center",gap:10}}>
+              <div style={{width:160,fontSize:12,fontWeight:600,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{sub}</div>
+              <div className="progress" style={{flex:1}}><div className="progress-fill" style={{width:`${pct}%`,background:subData?.c||"#888"}}></div></div>
+              <div style={{width:50,textAlign:"right",fontSize:12,fontWeight:700,color:subData?.c||"#888"}}>{fmtMin(mins)}</div>
+            </div>
+          })}
+        </div>
+      </div>}
+    </>
+  };
+
+  // ══════════════════════════════════════════════════════════════
+  // EDITAL VERTICALIZADO PAGE
+  // ══════════════════════════════════════════════════════════════
+  const EditalPage=()=>{
+    const[filter,setFilter]=useState("todos");
+    const[expanded,setExpanded]=useState(null);
+    const[statusFilter,setStatusFilter]=useState("todos");
+
+    const filtered=EDITAL.filter(sub=>{
+      if(filter==="todos")return true;
+      return sub.conc.includes(filter);
+    });
+
+    const getStatus=(sub,idx)=>data.editalStatus[`${sub}::${idx}`]||"pendente";
+    const setStatus=(sub,idx,st)=>{
+      const key=`${sub}::${idx}`;
+      setData(d=>({...d,editalStatus:{...d.editalStatus,[key]:st}}));
+      if(st==="estudando"){
+        const topicName=EDITAL.find(e=>e.s===sub)?.topics[idx]||"";
+        scheduleReviews(sub,topicName);
+      }
+    };
+
+    const subjectStats=(sub)=>{
+      const total=sub.topics.length;
+      let counts={pendente:0,estudando:0,questoes:0,revisado:0,dominado:0};
+      sub.topics.forEach((_,i)=>{counts[getStatus(sub.s,i)]++});
+      return{total,...counts,pct:total?Math.round((counts.dominado/total)*100):0};
+    };
+
+    return <>
+      <div className="page-title">Edital Verticalizado</div>
+      <div className="page-sub">Mapeie cada tópico do edital. Quando marcar "Estudando", as revisões são agendadas automaticamente.</div>
+
+      <div className="concurso-bar">
+        {[{id:"todos",label:"Todos",cls:"sel-todos"},...CONCURSOS.map(c=>({id:c.id,label:c.name,cls:`sel-${c.id}`}))].map(c=>
+          <button key={c.id} className={`conc-btn ${filter===c.id?c.cls:""}`} onClick={()=>setFilter(c.id)}>{c.label}</button>
+        )}
+      </div>
+
+      <div className="tabs">
+        <button className={`tab-btn ${statusFilter==="todos"?"active":""}`} onClick={()=>setStatusFilter("todos")}>Todos</button>
+        {STATUS_OPTIONS.map(s=><button key={s.id} className={`tab-btn ${statusFilter===s.id?"active":""}`} onClick={()=>setStatusFilter(s.id)}>{s.icon} {s.label}</button>)}
+      </div>
+
+      {filtered.map(sub=>{
+        const stats=subjectStats(sub);
+        const isOpen=expanded===sub.s;
+        const filteredTopics=sub.topics.map((t,i)=>({t,i,status:getStatus(sub.s,i)}))
+          .filter(x=>statusFilter==="todos"||x.status===statusFilter);
+
+        return <div key={sub.s} className="card" style={{borderLeft:`4px solid ${sub.c}`}}>
+          <div style={{display:"flex",alignItems:"center",gap:10,cursor:"pointer"}} onClick={()=>setExpanded(isOpen?null:sub.s)}>
+            <div style={{flex:1}}>
+              <div style={{fontWeight:700,fontSize:14,display:"flex",alignItems:"center",gap:8}}>
+                {sub.s}
+                {sub.conc.map(c=><span key={c} className={`bdg bdg-${c}`}>{CONCURSOS.find(x=>x.id===c)?.name}</span>)}
+                {sub.peso==="alto"&&<span style={{fontSize:10,color:"var(--red)",fontWeight:800}}>★ PESO ALTO</span>}
+              </div>
+              <div style={{display:"flex",gap:12,marginTop:6,fontSize:11,color:"var(--muted)"}}>
+                <span>{stats.dominado}/{stats.total} dominados</span>
+                <span>•</span>
+                <span>{stats.pct}%</span>
+              </div>
+            </div>
+            <div className="progress" style={{width:120}}><div className="progress-fill" style={{width:`${stats.pct}%`,background:sub.c}}></div></div>
+            <span style={{fontSize:18,color:"var(--muted)"}}>{isOpen?"▾":"▸"}</span>
+          </div>
+
+          {isOpen&&<div style={{marginTop:14}}>
+            {filteredTopics.length===0?<div style={{fontSize:12,color:"var(--muted)",textAlign:"center",padding:12}}>Nenhum tópico com este filtro</div>:
+            filteredTopics.map(({t,i,status})=>{
+              const stObj=STATUS_OPTIONS.find(s=>s.id===status);
+              return <div key={i} style={{display:"flex",alignItems:"center",gap:10,padding:"8px 4px",borderBottom:"1px solid #f0eeea"}}>
+                <span style={{fontSize:12}}>{stObj.icon}</span>
+                <div style={{flex:1,fontSize:13}}>{t}</div>
+                <select className="select" style={{width:140,fontSize:11,padding:"4px 8px"}} value={status}
+                  onChange={e=>setStatus(sub.s,i,e.target.value)}>
+                  {STATUS_OPTIONS.map(s=><option key={s.id} value={s.id}>{s.label}</option>)}
+                </select>
+              </div>
+            })}
+          </div>}
+        </div>
+      })}
+    </>
+  };
+
+  // ══════════════════════════════════════════════════════════════
+  // ROTINA SEMANAL PAGE
+  // ══════════════════════════════════════════════════════════════
+  const DIAS_SEMANA=[
+    {key:"dom",label:"Domingo",short:"DOM",icon:"☀️"},
+    {key:"seg",label:"Segunda",short:"SEG",icon:"📗"},
+    {key:"ter",label:"Terça",short:"TER",icon:"📘"},
+    {key:"qua",label:"Quarta",short:"QUA",icon:"📙"},
+    {key:"qui",label:"Quinta",short:"QUI",icon:"📕"},
+    {key:"sex",label:"Sexta",short:"SEX",icon:"📓"},
+    {key:"sab",label:"Sábado",short:"SÁB",icon:"📔"},
+  ];
+  const TIPOS_ATIVIDADE=[
+    {id:"teoria",label:"📖 Teoria",color:"#2563eb"},
+    {id:"questoes",label:"📝 Questões",color:"#d97706"},
+    {id:"revisao",label:"🔁 Revisão",color:"#7c3aed"},
+    {id:"leiseca",label:"⚖️ Lei Seca",color:"#0f766e"},
+    {id:"simulado",label:"🎯 Simulado",color:"#b45309"},
+    {id:"redacao",label:"✍️ Redação/Discursiva",color:"#dc2626"},
+  ];
+
+  const RotinaPage=()=>{
+    const todayDow=new Date().getDay();
+    const todayKey=DIAS_SEMANA[todayDow].key;
+    const[selectedDay,setSelectedDay]=useState(todayKey);
+    const[showForm,setShowForm]=useState(false);
+    const[editIdx,setEditIdx]=useState(null);
+
+    const rotina=data.rotina||{seg:[],ter:[],qua:[],qui:[],sex:[],sab:[],dom:[]};
+    const dayBlocks=rotina[selectedDay]||[];
+    const selectedDia=DIAS_SEMANA.find(d=>d.key===selectedDay);
+
+    const totalDayMin=dayBlocks.reduce((a,b)=>a+b.minutes,0);
+
+    const addBlock=(block)=>{
+      const newRotina={...rotina,[selectedDay]:[...(rotina[selectedDay]||[]),block]};
+      setData(d=>({...d,rotina:newRotina}));
+      setShowForm(false);
+      showToast("✓ Bloco adicionado!");
+    };
+    const updateBlock=(idx,block)=>{
+      const newDay=[...(rotina[selectedDay]||[])];
+      newDay[idx]=block;
+      setData(d=>({...d,rotina:{...rotina,[selectedDay]:newDay}}));
+      setEditIdx(null);setShowForm(false);
+      showToast("✓ Bloco atualizado!");
+    };
+    const removeBlock=(idx)=>{
+      const newDay=(rotina[selectedDay]||[]).filter((_,i)=>i!==idx);
+      setData(d=>({...d,rotina:{...rotina,[selectedDay]:newDay}}));
+      showToast("Bloco removido");
+    };
+    const moveBlock=(idx,dir)=>{
+      const newDay=[...(rotina[selectedDay]||[])];
+      const target=idx+dir;
+      if(target<0||target>=newDay.length)return;
+      [newDay[idx],newDay[target]]=[newDay[target],newDay[idx]];
+      setData(d=>({...d,rotina:{...rotina,[selectedDay]:newDay}}));
+    };
+    const copyDayTo=(fromKey,toKey)=>{
+      if(!rotina[fromKey]||rotina[fromKey].length===0)return;
+      setData(d=>({...d,rotina:{...rotina,[toKey]:[...(rotina[fromKey]||[])]}}));
+      showToast(`✓ Copiado ${DIAS_SEMANA.find(d=>d.key===fromKey).label} → ${DIAS_SEMANA.find(d=>d.key===toKey).label}`);
+    };
+
+    const todayBlocks=rotina[todayKey]||[];
+    const todayTotal=todayBlocks.reduce((a,b)=>a+b.minutes,0);
+
+    return <>
+      <div className="page-title">Minha Rotina</div>
+      <div className="page-sub">Monte seu plano semanal. Saiba exatamente o que estudar cada dia.</div>
+
+      {todayBlocks.length>0&&selectedDay!==todayKey&&<div className="card" style={{borderLeft:"4px solid var(--accent)",cursor:"pointer"}} onClick={()=>setSelectedDay(todayKey)}>
+        <div style={{display:"flex",alignItems:"center",gap:10}}>
+          <span style={{fontSize:20}}>📌</span>
+          <div style={{flex:1}}>
+            <div style={{fontWeight:700,fontSize:14}}>Hoje — {DIAS_SEMANA[todayDow].label}</div>
+            <div style={{fontSize:12,color:"var(--muted)"}}>{todayBlocks.length} blocos • {fmtMin(todayTotal)}</div>
+          </div>
+          <span style={{fontSize:12,color:"var(--accent)",fontWeight:700}}>Ver ▸</span>
+        </div>
+      </div>}
+
+      <div style={{display:"flex",gap:4,marginBottom:16,flexWrap:"wrap"}}>
+        {DIAS_SEMANA.map(d=>{
+          const blocks=rotina[d.key]||[];
+          const isToday=d.key===todayKey;
+          const isSelected=d.key===selectedDay;
+          return <button key={d.key} onClick={()=>setSelectedDay(d.key)} style={{
+            padding:"10px 14px",borderRadius:10,border:isSelected?"2px solid var(--accent)":"2px solid var(--border)",
+            background:isSelected?"#eff6ff":"var(--card)",cursor:"pointer",textAlign:"center",
+            flex:1,minWidth:80,fontFamily:"inherit",position:"relative"
+          }}>
+            <div style={{fontSize:10,fontWeight:800,color:isSelected?"var(--accent)":"var(--muted)",letterSpacing:1}}>{d.short}</div>
+            <div style={{fontSize:12,fontWeight:600,marginTop:2}}>{blocks.length>0?`${blocks.length} blocos`:"-"}</div>
+            {blocks.length>0&&<div style={{fontSize:10,color:"var(--muted)"}}>{fmtMin(blocks.reduce((a,b)=>a+b.minutes,0))}</div>}
+            {isToday&&<div style={{position:"absolute",top:4,right:4,width:6,height:6,borderRadius:3,background:"var(--accent)"}}></div>}
+          </button>
+        })}
+      </div>
+
+      <div className="card">
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}>
+          <div className="card-title" style={{marginBottom:0}}>
+            {selectedDia.icon} {selectedDia.label} — {dayBlocks.length} blocos ({fmtMin(totalDayMin)})
+          </div>
+          <div style={{display:"flex",gap:6}}>
+            <button className="btn btn-primary btn-sm" onClick={()=>{setShowForm(true);setEditIdx(null)}}>+ Bloco</button>
+          </div>
+        </div>
+
+        {dayBlocks.length===0&&!showForm?
+          <div style={{textAlign:"center",padding:32,color:"var(--muted)"}}>
+            <div style={{fontSize:32,marginBottom:8}}>📅</div>
+            <div style={{fontSize:13}}>Nenhum bloco definido para {selectedDia.label}.</div>
+            <div style={{fontSize:12,marginTop:4}}>Clique em "+ Bloco" para montar seu dia.</div>
+          </div>
+        :dayBlocks.map((block,idx)=>{
+          const tipo=TIPOS_ATIVIDADE.find(t=>t.id===block.tipo)||TIPOS_ATIVIDADE[0];
+          const subData=EDITAL.find(e=>e.s===block.subject);
+          if(editIdx===idx)return <div key={idx} className="card" style={{background:"#fafaf8",marginBottom:8}}>
+            <RotinaBlockForm initial={block} onSave={b=>updateBlock(idx,b)} onCancel={()=>setEditIdx(null)}/>
+          </div>;
+          return <div key={idx} style={{
+            display:"flex",alignItems:"center",gap:12,padding:"12px 14px",
+            background:"#fafaf8",borderRadius:10,marginBottom:6,
+            borderLeft:`5px solid ${tipo.color}`
+          }}>
+            <div style={{fontSize:16}}>{tipo.label.split(" ")[0]}</div>
+            <div style={{flex:1}}>
+              <div style={{fontWeight:600,fontSize:13,display:"flex",alignItems:"center",gap:6}}>
+                {block.subject}
+                <span style={{fontSize:10,color:tipo.color,fontWeight:700}}>{tipo.label.split(" ").slice(1).join(" ")}</span>
+              </div>
+              {block.topic&&<div style={{fontSize:11,color:"#555",marginTop:1}}>{block.topic}</div>}
+              {block.notes&&<div style={{fontSize:10,color:"var(--muted)",marginTop:1,fontStyle:"italic"}}>{block.notes}</div>}
+            </div>
+            <div style={{fontWeight:700,fontSize:13,color:subData?.c||"#888",whiteSpace:"nowrap"}}>{fmtMin(block.minutes)}</div>
+            <div style={{display:"flex",flexDirection:"column",gap:2}}>
+              <button className="btn btn-secondary" style={{padding:"2px 6px",fontSize:10}} onClick={()=>moveBlock(idx,-1)}>▲</button>
+              <button className="btn btn-secondary" style={{padding:"2px 6px",fontSize:10}} onClick={()=>moveBlock(idx,1)}>▼</button>
+            </div>
+            <button className="btn btn-secondary btn-sm" onClick={()=>{setEditIdx(idx);setShowForm(false)}}>✏️</button>
+            <button className="btn btn-danger btn-sm" onClick={()=>removeBlock(idx)}>✕</button>
+          </div>
+        })}
+
+        {showForm&&editIdx===null&&<div className="card" style={{background:"#fafaf8",marginTop:10}}>
+          <RotinaBlockForm onSave={addBlock} onCancel={()=>setShowForm(false)}/>
+        </div>}
+      </div>
+
+      <div className="card">
+        <div className="card-title">📋 Copiar dia</div>
+        <div style={{display:"flex",gap:8,alignItems:"center",flexWrap:"wrap"}}>
+          <span style={{fontSize:12,fontWeight:600}}>Copiar {selectedDia.label} para:</span>
+          {DIAS_SEMANA.filter(d=>d.key!==selectedDay).map(d=>
+            <button key={d.key} className="btn btn-secondary btn-sm" onClick={()=>copyDayTo(selectedDay,d.key)}>{d.short}</button>
+          )}
+        </div>
+      </div>
+
+      {todayBlocks.length>0&&selectedDay===todayKey&&<div className="card" style={{borderLeft:"4px solid var(--green)"}}>
+        <div className="card-title">▶ Começar a estudar</div>
+        <div style={{fontSize:12,color:"var(--muted)",marginBottom:10}}>Clique num bloco para iniciar o timer com a matéria e tópico já configurados.</div>
+        {todayBlocks.map((block,idx)=>{
+          const tipo=TIPOS_ATIVIDADE.find(t=>t.id===block.tipo)||TIPOS_ATIVIDADE[0];
+          return <button key={idx} style={{
+            display:"flex",alignItems:"center",gap:10,padding:"10px 14px",width:"100%",
+            background:"#fff",borderRadius:8,border:"1px solid var(--border)",marginBottom:4,
+            cursor:"pointer",textAlign:"left",fontFamily:"inherit",transition:"all .15s"
+          }} onClick={()=>{
+            setTimerSubject(block.subject);setTimerTopic(block.topic||"");setTimerSeconds(0);navigate("timer");
+          }}>
+            <span>{tipo.label.split(" ")[0]}</span>
+            <div style={{flex:1}}>
+              <div style={{fontWeight:600,fontSize:13}}>{block.subject}</div>
+              {block.topic&&<div style={{fontSize:11,color:"#555"}}>{block.topic}</div>}
+            </div>
+            <div style={{fontSize:12,fontWeight:700,color:"var(--muted)"}}>{fmtMin(block.minutes)}</div>
+            <span style={{color:"var(--accent)",fontWeight:700,fontSize:12}}>▶</span>
+          </button>
+        })}
+      </div>}
+    </>
+  };
+
+  function RotinaBlockForm({initial,onSave,onCancel}){
+    const[sub,setSub]=useState(initial?.subject||"");
+    const[topic,setTopic]=useState(initial?.topic||"");
+    const[tipo,setTipo]=useState(initial?.tipo||"teoria");
+    const[mins,setMins]=useState(initial?.minutes||60);
+    const[notes,setNotes]=useState(initial?.notes||"");
+
+    const topicsForSub=sub?EDITAL.find(e=>e.s===sub)?.topics||[]:[];
+
+    return <div>
+      <div className="grid-2">
+        <div className="form-row">
+          <label className="label">Matéria *</label>
+          <select className="select" value={sub} onChange={e=>{setSub(e.target.value);setTopic("")}}>
+            <option value="">Selecione...</option>
+            {EDITAL.map(e=><option key={e.s} value={e.s}>{e.s}</option>)}
+          </select>
+        </div>
+        <div className="form-row">
+          <label className="label">Tópico *</label>
+          <select className="select" value={topic} onChange={e=>setTopic(e.target.value)} disabled={!sub}>
+            <option value="">Selecione o tópico...</option>
+            {topicsForSub.map((t,i)=><option key={i} value={t}>{t}</option>)}
+          </select>
+        </div>
+        <div className="form-row">
+          <label className="label">Tipo de atividade</label>
+          <select className="select" value={tipo} onChange={e=>setTipo(e.target.value)}>
+            {TIPOS_ATIVIDADE.map(t=><option key={t.id} value={t.id}>{t.label}</option>)}
+          </select>
+        </div>
+        <div className="form-row">
+          <label className="label">Tempo (minutos)</label>
+          <input className="input" type="number" value={mins} min={5} step={5} onChange={e=>setMins(parseInt(e.target.value)||5)}/>
+        </div>
+      </div>
+      <div className="form-row">
+        <label className="label">Observações (opcional)</label>
+        <input className="input" value={notes} onChange={e=>setNotes(e.target.value)} placeholder="Ex: Focar nas pegadinhas do CEBRASPE"/>
+      </div>
+      <div style={{display:"flex",gap:8}}>
+        <button className="btn btn-primary" disabled={!sub} onClick={()=>{
+          onSave({subject:sub,topic,tipo,minutes:mins,notes});
+        }}>{initial?"Salvar":"Adicionar"}</button>
+        <button className="btn btn-secondary" onClick={onCancel}>Cancelar</button>
+      </div>
+    </div>
+  }
+
+  // ══════════════════════════════════════════════════════════════
+  // CICLO DE ESTUDOS PAGE
+  // ══════════════════════════════════════════════════════════════
+  const CicloPage=()=>{
+    const[editMode,setEditMode]=useState(false);
+    const[tempCiclo,setTempCiclo]=useState([...data.ciclo.subjects]);
+
+    const addToCiclo=()=>{
+      setTempCiclo([...tempCiclo,{subject:EDITAL[0].s,topic:"",minutes:90}]);
+    };
+    const removeCiclo=idx=>{
+      setTempCiclo(tempCiclo.filter((_,i)=>i!==idx));
+    };
+    const saveCiclo=()=>{
+      setData(d=>({...d,ciclo:{...d.ciclo,subjects:tempCiclo}}));
+      setEditMode(false);
+      showToast("✓ Ciclo salvo!");
+    };
+
+    const totalCiclo=data.ciclo.subjects.reduce((a,s)=>a+s.minutes,0);
+    const currentIdx=data.ciclo.current%Math.max(1,data.ciclo.subjects.length);
+
+    const advanceCiclo=()=>{
+      setData(d=>({...d,ciclo:{...d.ciclo,current:d.ciclo.current+1}}));
+    };
+
+    return <>
+      <div className="page-title">Ciclo de Estudos</div>
+      <div className="page-sub">Monte seu ciclo rotativo — quando terminar, recomeça. Sem amarras de calendário.</div>
+
+      {data.ciclo.subjects.length===0&&!editMode?
+        <div className="card" style={{textAlign:"center",padding:40}}>
+          <div style={{fontSize:40,marginBottom:12}}>🔄</div>
+          <div style={{fontSize:14,fontWeight:600,marginBottom:4}}>Nenhum ciclo definido</div>
+          <div style={{fontSize:12,color:"var(--muted)",marginBottom:16}}>Defina as matérias e o tempo de cada uma no seu ciclo de estudos.</div>
+          <button className="btn btn-primary" onClick={()=>{setEditMode(true);setTempCiclo([])}}>Montar Ciclo</button>
+        </div>
+      :editMode?
+        <div className="card">
+          <div className="card-title">✏️ Editar Ciclo</div>
+          {tempCiclo.map((item,i)=>{
+            const topicsFor=EDITAL.find(e=>e.s===item.subject)?.topics||[];
+            return <div key={i} style={{display:"flex",gap:8,alignItems:"center",marginBottom:8,flexWrap:"wrap"}}>
+            <select className="select" style={{flex:1,minWidth:160}} value={item.subject} onChange={e=>{
+              const n=[...tempCiclo];n[i]={...n[i],subject:e.target.value,topic:""};setTempCiclo(n);
+            }}>
+              {EDITAL.map(e=><option key={e.s} value={e.s}>{e.s}</option>)}
+            </select>
+            <select className="select" style={{flex:2,minWidth:200}} value={item.topic||""} onChange={e=>{
+              const n=[...tempCiclo];n[i]={...n[i],topic:e.target.value};setTempCiclo(n);
+            }}>
+              <option value="">Tópico (todos)</option>
+              {topicsFor.map((t,ti)=><option key={ti} value={t}>{t}</option>)}
+            </select>
+            <input className="input" type="number" style={{width:70}} value={item.minutes} min={15} step={15}
+              onChange={e=>{const n=[...tempCiclo];n[i]={...n[i],minutes:parseInt(e.target.value)||15};setTempCiclo(n)}}/>
+            <span style={{fontSize:11,color:"var(--muted)"}}>min</span>
+            <button className="btn btn-danger btn-sm" onClick={()=>removeCiclo(i)}>✕</button>
+          </div>})}
+          <div style={{display:"flex",gap:8,marginTop:12}}>
+            <button className="btn btn-secondary" onClick={addToCiclo}>+ Matéria</button>
+            <button className="btn btn-primary" onClick={saveCiclo}>Salvar Ciclo</button>
+            <button className="btn btn-secondary" onClick={()=>setEditMode(false)}>Cancelar</button>
+          </div>
+        </div>
+      :<>
+        <div className="card">
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}>
+            <div className="card-title" style={{marginBottom:0}}>🔄 Seu Ciclo ({fmtMin(totalCiclo)} total)</div>
+            <button className="btn btn-secondary btn-sm" onClick={()=>{setEditMode(true);setTempCiclo([...data.ciclo.subjects])}}>Editar</button>
+          </div>
+          {data.ciclo.subjects.map((item,i)=>{
+            const subData=EDITAL.find(e=>e.s===item.subject);
+            const isCurrent=i===currentIdx;
+            return <div key={i} style={{
+              display:"flex",alignItems:"center",gap:12,padding:"10px 14px",
+              borderRadius:8,marginBottom:4,
+              background:isCurrent?"#eff6ff":"#fafaf8",
+              border:isCurrent?"2px solid var(--accent)":"1px solid transparent",
+              fontWeight:isCurrent?700:400
+            }}>
+              <div style={{width:6,height:6,borderRadius:3,background:subData?.c||"#888",flexShrink:0}}></div>
+              <div style={{flex:1,fontSize:13}}>{item.subject}{item.topic?<span style={{fontSize:11,color:"var(--muted)",marginLeft:6}}>— {item.topic}</span>:""}</div>
+              <div style={{fontSize:12,color:"var(--muted)"}}>{fmtMin(item.minutes)}</div>
+              {isCurrent&&<span style={{fontSize:10,color:"var(--accent)",fontWeight:800}}>◄ ATUAL</span>}
+            </div>
+          })}
+          <div style={{display:"flex",gap:8,marginTop:12}}>
+            <button className="btn btn-primary" onClick={()=>{
+              const current=data.ciclo.subjects[currentIdx];
+              if(current){setTimerSubject(current.subject);setTimerTopic(current.topic||"");setTimerSeconds(0);navigate("timer")}
+            }}>▶ Iniciar matéria atual</button>
+            <button className="btn btn-secondary" onClick={advanceCiclo}>Avançar ▸</button>
+          </div>
+        </div>
+      </>}
+    </>
+  };
+
+  // ══════════════════════════════════════════════════════════════
+  // TIMER PAGE
+  // ══════════════════════════════════════════════════════════════
+  const TimerPage=()=>{
+    const fmtTimer=s=>{const h=Math.floor(s/3600);const m=Math.floor((s%3600)/60);const sec=s%60;return `${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}:${String(sec).padStart(2,"0")}`};
+
+    return <>
+      <div className="page-title">Timer de Estudo</div>
+      <div className="page-sub">Cronometre suas sessões. Os minutos são registrados automaticamente ao parar.</div>
+
+      <div className="card timer-card">
+        <div style={{marginBottom:16}}>
+          <div className="grid-2" style={{maxWidth:500,margin:"0 auto",marginBottom:16}}>
+            <div className="form-row">
+              <label className="label">Matéria</label>
+              <select className="select" value={timerSubject} onChange={e=>{setTimerSubject(e.target.value);setTimerTopic("")}} disabled={timerRunning}>
+                <option value="">Selecione...</option>
+                {EDITAL.map(e=><option key={e.s} value={e.s}>{e.s}</option>)}
+              </select>
+            </div>
+            <div className="form-row">
+              <label className="label">Tópico</label>
+              <select className="select" value={timerTopic} onChange={e=>setTimerTopic(e.target.value)} disabled={timerRunning||!timerSubject}>
+                <option value="">Selecione o tópico...</option>
+                {(EDITAL.find(e=>e.s===timerSubject)?.topics||[]).map((t,i)=><option key={i} value={t}>{t}</option>)}
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div className="timer-display" style={{color:timerRunning?"var(--accent)":"var(--text)"}}>{fmtTimer(timerSeconds)}</div>
+        {timerSubject&&<div style={{fontSize:13,color:"var(--muted)",marginTop:4}}>{timerSubject}{timerTopic?` — ${timerTopic}`:""}</div>}
+
+        <div className="timer-controls">
+          {!timerRunning?
+            <button className="btn btn-primary" disabled={!timerSubject} onClick={()=>setTimerRunning(true)} style={{padding:"12px 32px",fontSize:14}}>
+              ▶ Iniciar
+            </button>
+          :<>
+            <button className="btn btn-danger" onClick={()=>{setTimerRunning(false);setTimerSeconds(0)}} style={{padding:"12px 24px"}}>
+              ✕ Descartar
+            </button>
+            <button className="btn btn-success" onClick={stopAndSaveTimer} style={{padding:"12px 24px"}}>
+              ✓ Parar e salvar
+            </button>
+          </>}
+        </div>
+      </div>
+
+      <div className="card">
+        <div className="card-title"><span className="ct-icon">📋</span> Sessões de hoje ({fmtMin(todayMinutes)})</div>
+        {todaySessions.length===0?<div style={{color:"var(--muted)",fontSize:12,textAlign:"center",padding:12}}>Nenhuma sessão registrada hoje</div>:
+        todaySessions.map(s=><div key={s.id} className="q-row">
+          <div style={{width:6,height:6,borderRadius:3,background:EDITAL.find(e=>e.s===s.subject)?.c||"#888"}}></div>
+          <div className="q-info">
+            <div style={{fontWeight:600,fontSize:13}}>{s.subject}</div>
+            {s.topic&&<div style={{fontSize:11,color:"var(--muted)"}}>{s.topic}</div>}
+          </div>
+          <div style={{fontWeight:700,fontSize:14}}>{fmtMin(s.minutes)}</div>
+        </div>)}
+      </div>
+
+      <div className="card">
+        <div className="card-title"><span className="ct-icon">➕</span> Registrar sessão manual</div>
+        <ManualSession onAdd={session=>{
+          setData(d=>({...d,sessions:[...d.sessions,session],streakDays:[...new Set([...d.streakDays,session.date])]}));
+          showToast("✓ Sessão registrada!");
+        }}/>
+      </div>
+    </>
+  };
+
+  // ══════════════════════════════════════════════════════════════
+  // MANUAL SESSION FORM
+  // ══════════════════════════════════════════════════════════════
+  function ManualSession({onAdd}){
+    const[sub,setSub]=useState("");
+    const[topic,setTopic]=useState("");
+    const[mins,setMins]=useState(60);
+    const[date,setDate]=useState(todayStr);
+
+    const topicsForSub=sub?EDITAL.find(e=>e.s===sub)?.topics||[]:[];
+
+    return <div className="grid-2" style={{alignItems:"end"}}>
+      <div className="form-row">
+        <label className="label">Matéria</label>
+        <select className="select" value={sub} onChange={e=>{setSub(e.target.value);setTopic("")}}>
+          <option value="">Selecione...</option>
+          {EDITAL.map(e=><option key={e.s} value={e.s}>{e.s}</option>)}
+        </select>
+      </div>
+      <div className="form-row">
+        <label className="label">Tópico</label>
+        <select className="select" value={topic} onChange={e=>setTopic(e.target.value)} disabled={!sub}>
+          <option value="">Selecione o tópico...</option>
+          {topicsForSub.map((t,i)=><option key={i} value={t}>{t}</option>)}
+        </select>
+      </div>
+      <div className="form-row">
+        <label className="label">Minutos</label>
+        <input className="input" type="number" value={mins} min={5} step={5} onChange={e=>setMins(parseInt(e.target.value)||5)}/>
+      </div>
+      <div className="form-row">
+        <label className="label">Data</label>
+        <input className="input" type="date" value={date} onChange={e=>setDate(e.target.value)}/>
+      </div>
+      <div className="form-row" style={{gridColumn:"1/-1"}}>
+        <button className="btn btn-primary" disabled={!sub} onClick={()=>{
+          onAdd({id:Date.now(),date,subject:sub,topic,minutes:mins,timestamp:Date.now()});
+          setSub("");setTopic("");setMins(60);
+        }}>Registrar sessão</button>
+      </div>
+    </div>
+  }
+
+  // ══════════════════════════════════════════════════════════════
+  // REVISÕES PAGE
+  // ══════════════════════════════════════════════════════════════
+  const RevisoesPage=()=>{
+    const[tab,setTab]=useState("pendentes");
+
+    const pending=data.reviews.filter(r=>!r.done).sort((a,b)=>a.dueDate.localeCompare(b.dueDate));
+    const done=data.reviews.filter(r=>r.done).sort((a,b)=>b.dueDate.localeCompare(a.dueDate));
+    const overdue=pending.filter(r=>r.dueDate<todayStr);
+    const dueToday=pending.filter(r=>r.dueDate===todayStr);
+    const upcoming=pending.filter(r=>r.dueDate>todayStr);
+
+    const markDone=id=>{
+      setData(d=>({...d,reviews:d.reviews.map(r=>r.id===id?{...r,done:true,doneDate:todayStr}:r)}));
+      showToast("✓ Revisão concluída!");
+    };
+    const dismiss=id=>{
+      setData(d=>({...d,reviews:d.reviews.filter(r=>r.id!==id)}));
+    };
+
+    const renderGroup=(items,label,color)=>{
+      if(items.length===0)return null;
+      return <>
+        <div style={{fontSize:12,fontWeight:700,color,marginBottom:6,marginTop:14}}>{label} ({items.length})</div>
+        {items.map(r=>{
+          const subData=EDITAL.find(e=>e.s===r.subject);
+          return <div key={r.id} className="review-item" style={{borderColor:subData?.c||"#888"}}>
+            <div style={{flex:1}}>
+              <div className="ri-subject">{r.subject}</div>
+              <div className="ri-topic">{r.topic}</div>
+              <div style={{fontSize:10,color:"var(--muted)",marginTop:2}}>Intervalo: D+{r.interval}</div>
+            </div>
+            <div style={{display:"flex",gap:6,alignItems:"center"}}>
+              <button className="btn btn-success btn-sm" onClick={()=>markDone(r.id)}>✓</button>
+              <button className="btn btn-secondary btn-sm" onClick={()=>dismiss(r.id)}>✕</button>
+            </div>
+          </div>
+        })}
+      </>
+    };
+
+    return <>
+      <div className="page-title">Revisões Programadas</div>
+      <div className="page-sub">Intervalos 1-7-30 dias (método Fernando Mesquita). Revisões são criadas ao marcar um tópico como "Estudando" no edital.</div>
+
+      <div className="tabs">
+        <button className={`tab-btn ${tab==="pendentes"?"active":""}`} onClick={()=>setTab("pendentes")}>Pendentes ({pending.length})</button>
+        <button className={`tab-btn ${tab==="concluidas"?"active":""}`} onClick={()=>setTab("concluidas")}>Concluídas ({done.length})</button>
+      </div>
+
+      {tab==="pendentes"?<div className="card">
+        {pending.length===0?<div style={{textAlign:"center",padding:32,color:"var(--muted)"}}>
+          <div style={{fontSize:32,marginBottom:8}}>🎉</div>
+          Nenhuma revisão pendente! Estude novos tópicos para gerar revisões.
+        </div>:<>
+          {renderGroup(overdue,"⚠️ Atrasadas","var(--red)")}
+          {renderGroup(dueToday,"📌 Hoje","var(--accent)")}
+          {renderGroup(upcoming,"📅 Próximas","var(--muted)")}
+        </>}
+      </div>:
+      <div className="card">
+        {done.length===0?<div style={{textAlign:"center",padding:32,color:"var(--muted)"}}>Nenhuma revisão concluída ainda</div>:
+        done.slice(0,30).map(r=><div key={r.id} className="review-item" style={{borderColor:"var(--green)",opacity:.6}}>
+          <div style={{flex:1}}>
+            <div className="ri-subject">{r.subject}</div>
+            <div className="ri-topic">{r.topic}</div>
+          </div>
+          <div style={{fontSize:11,color:"var(--green)",fontWeight:700}}>✓ {fmtDate(r.doneDate)}</div>
+        </div>)}
+      </div>}
+
+      <div className="card">
+        <div className="card-title"><span className="ct-icon">➕</span> Agendar revisão manual</div>
+        <ManualReview onAdd={r=>{
+          setData(d=>({...d,reviews:[...d.reviews,r]}));
+          showToast("📅 Revisão agendada!");
+        }}/>
+      </div>
+    </>
+  };
+
+  function ManualReview({onAdd}){
+    const[sub,setSub]=useState(EDITAL[0].s);
+    const[topic,setTopic]=useState("");
+    const[due,setDue]=useState(addDays(todayStr,1));
+    const topicsForSub=EDITAL.find(e=>e.s===sub)?.topics||[];
+    return <div className="grid-2" style={{alignItems:"end"}}>
+      <div className="form-row">
+        <label className="label">Matéria</label>
+        <select className="select" value={sub} onChange={e=>{setSub(e.target.value);setTopic("")}}>
+          {EDITAL.map(e=><option key={e.s} value={e.s}>{e.s}</option>)}
+        </select>
+      </div>
+      <div className="form-row">
+        <label className="label">Tópico</label>
+        <select className="select" value={topic} onChange={e=>setTopic(e.target.value)}>
+          <option value="">Selecione o tópico...</option>
+          {topicsForSub.map((t,i)=><option key={i} value={t}>{t}</option>)}
+        </select>
+      </div>
+      <div className="form-row">
+        <label className="label">Data da revisão</label>
+        <input className="input" type="date" value={due} onChange={e=>setDue(e.target.value)}/>
+      </div>
+      <div className="form-row" style={{display:"flex",alignItems:"end"}}>
+        <button className="btn btn-primary" disabled={!topic} onClick={()=>{
+          onAdd({id:Date.now(),subject:sub,topic,createdDate:todayStr,dueDate:due,interval:0,done:false});
+          setTopic("");
+        }}>Agendar</button>
+      </div>
+    </div>
+  }
+
+  // ══════════════════════════════════════════════════════════════
+  // QUESTÕES PAGE
+  // ══════════════════════════════════════════════════════════════
+  const QuestoesPage=()=>{
+    const[showForm,setShowForm]=useState(false);
+
+    const bySubject=useMemo(()=>{
+      const map={};
+      data.questions.forEach(q=>{
+        if(!map[q.subject])map[q.subject]={total:0,acertos:0,sessions:0};
+        map[q.subject].total+=q.total;map[q.subject].acertos+=q.acertos;map[q.subject].sessions++;
+      });
+      return Object.entries(map).map(([s,v])=>({subject:s,...v,pct:v.total?Math.round((v.acertos/v.total)*100):0})).sort((a,b)=>a.pct-b.pct);
+    },[data.questions]);
+
+    const byTopic=useMemo(()=>{
+      const map={};
+      data.questions.filter(q=>q.topic).forEach(q=>{
+        const key=`${q.subject}::${q.topic}`;
+        if(!map[key])map[key]={subject:q.subject,topic:q.topic,total:0,acertos:0};
+        map[key].total+=q.total;map[key].acertos+=q.acertos;
+      });
+      return Object.values(map).map(v=>({...v,pct:v.total?Math.round((v.acertos/v.total)*100):0}))
+        .filter(v=>v.total>=5).sort((a,b)=>a.pct-b.pct);
+    },[data.questions]);
+
+    const evolution=useMemo(()=>{
+      const map={};
+      data.questions.forEach(q=>{
+        const ws=weekStart(q.date);
+        if(!map[ws])map[ws]={total:0,acertos:0};
+        map[ws].total+=q.total;map[ws].acertos+=q.acertos;
+      });
+      return Object.entries(map).sort((a,b)=>a[0].localeCompare(b[0])).slice(-8)
+        .map(([ws,v])=>({week:ws,total:v.total,pct:v.total?Math.round((v.acertos/v.total)*100):0}));
+    },[data.questions]);
+
+    return <>
+      <div className="page-title">Registro de Questões</div>
+      <div className="page-sub">Registre suas baterias de questões. Acompanhe o aproveitamento por matéria.</div>
+
+      <div className="grid-3" style={{marginBottom:14}}>
+        <div className="stat-box">
+          <div className="stat-num">{qStats.total}</div>
+          <div className="stat-label">Questões totais</div>
+        </div>
+        <div className="stat-box">
+          <div className="stat-num" style={{color:"var(--green)"}}>{qStats.acertos}</div>
+          <div className="stat-label">Acertos</div>
+        </div>
+        <div className="stat-box">
+          <div className="stat-num" style={{color:qStats.pct>=70?"var(--green)":qStats.pct>=50?"var(--orange)":"var(--red)"}}>{qStats.pct}%</div>
+          <div className="stat-label">Aproveitamento</div>
+        </div>
+      </div>
+
+      <div className="card">
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}>
+          <div className="card-title" style={{marginBottom:0}}>➕ Nova bateria de questões</div>
+          <button className="btn btn-primary btn-sm" onClick={()=>setShowForm(!showForm)}>{showForm?"Fechar":"Registrar"}</button>
+        </div>
+        {showForm&&<QuestionForm onAdd={q=>{
+          setData(d=>({...d,questions:[...d.questions,q]}));
+          setShowForm(false);showToast("✓ Questões registradas!");
+        }}/>}
+      </div>
+
+      {bySubject.length>0&&<div className="card">
+        <div className="card-title"><span className="ct-icon">📊</span> Aproveitamento por matéria</div>
+        <table className="tbl">
+          <thead><tr><th>Matéria</th><th>Total</th><th>Acertos</th><th>%</th><th>Baterias</th></tr></thead>
+          <tbody>{bySubject.map(s=><tr key={s.subject}>
+            <td style={{fontWeight:600}}>{s.subject}</td>
+            <td>{s.total}</td>
+            <td>{s.acertos}</td>
+            <td style={{fontWeight:700,color:s.pct>=70?"var(--green)":s.pct>=50?"var(--orange)":"var(--red)"}}>{s.pct}%</td>
+            <td>{s.sessions}</td>
+          </tr>)}</tbody>
+        </table>
+      </div>}
+
+      {byTopic.length>0&&<div className="card">
+        <div className="card-title"><span className="ct-icon">🎯</span> Pontos fracos por tópico (mín. 5 questões)</div>
+        <div style={{fontSize:11,color:"var(--muted)",marginBottom:10}}>Seus piores tópicos primeiro — é aqui que você ganha pontos. Ataque os vermelhos.</div>
+        <table className="tbl">
+          <thead><tr><th>Tópico</th><th>Matéria</th><th>Questões</th><th>%</th></tr></thead>
+          <tbody>{byTopic.slice(0,12).map(t=><tr key={t.subject+t.topic}>
+            <td style={{fontWeight:600,fontSize:12}}>{t.topic}</td>
+            <td style={{fontSize:11,color:EDITAL.find(e=>e.s===t.subject)?.c||"var(--muted)"}}>{t.subject}</td>
+            <td>{t.acertos}/{t.total}</td>
+            <td style={{fontWeight:700,color:t.pct>=70?"var(--green)":t.pct>=50?"var(--orange)":"var(--red)"}}>{t.pct}%</td>
+          </tr>)}</tbody>
+        </table>
+      </div>}
+
+      {evolution.length>1&&<div className="card">
+        <div className="card-title"><span className="ct-icon">📈</span> Evolução do aproveitamento (por semana)</div>
+        <div className="chart-bar" style={{height:120}}>
+          {evolution.map(e=><div key={e.week} className="chart-col">
+            <div className="bar-value" style={{fontWeight:700,color:e.pct>=70?"var(--green)":e.pct>=50?"var(--orange)":"var(--red)"}}>{e.pct}%</div>
+            <div className="bar" style={{height:`${Math.max(8,e.pct)}%`,background:e.pct>=70?"var(--green)":e.pct>=50?"#fbbf24":"#fca5a5"}}></div>
+            <div className="bar-label">{fmtDate(e.week)}</div>
+          </div>)}
+        </div>
+        <div style={{fontSize:11,color:"var(--muted)",textAlign:"center",marginTop:6}}>Meta Fase 1: 65% • Fase 2: 75%+ • {evolution.map(e=>e.total).reduce((a,b)=>a+b,0)} questões no período</div>
+      </div>}
+
+      <div className="card">
+        <div className="card-title"><span className="ct-icon">📋</span> Histórico recente</div>
+        {data.questions.length===0?<div style={{color:"var(--muted)",fontSize:12,textAlign:"center",padding:16}}>Nenhuma questão registrada ainda</div>:
+        [...data.questions].reverse().slice(0,20).map(q=><div key={q.id} className="q-row">
+          <div className="q-pct" style={{color:q.pct>=70?"var(--green)":q.pct>=50?"var(--orange)":"var(--red)"}}>{q.pct}%</div>
+          <div className="q-info">
+            <div style={{fontWeight:600,fontSize:13}}>{q.subject}</div>
+            <div style={{fontSize:11,color:"var(--muted)"}}>{q.topic||"Geral"} • {q.acertos}/{q.total} • {fmtDate(q.date)}</div>
+            {q.source&&<div style={{fontSize:10,color:"var(--muted)"}}>Fonte: {q.source}</div>}
+          </div>
+        </div>)}
+      </div>
+    </>
+  };
+
+  function QuestionForm({onAdd}){
+    const[sub,setSub]=useState("");
+    const[topic,setTopic]=useState("");
+    const[total,setTotal]=useState(20);
+    const[acertos,setAcertos]=useState(0);
+    const[source,setSource]=useState("");
+    const[date,setDate]=useState(todayStr);
+
+    const topicsForSub=sub?EDITAL.find(e=>e.s===sub)?.topics||[]:[];
+
+    return <div className="grid-2" style={{alignItems:"end"}}>
+      <div className="form-row">
+        <label className="label">Matéria *</label>
+        <select className="select" value={sub} onChange={e=>{setSub(e.target.value);setTopic("")}}>
+          <option value="">Selecione...</option>
+          {EDITAL.map(e=><option key={e.s} value={e.s}>{e.s}</option>)}
+        </select>
+      </div>
+      <div className="form-row">
+        <label className="label">Tópico *</label>
+        <select className="select" value={topic} onChange={e=>setTopic(e.target.value)} disabled={!sub}>
+          <option value="">Selecione o tópico...</option>
+          {topicsForSub.map((t,i)=><option key={i} value={t}>{t}</option>)}
+        </select>
+      </div>
+      <div className="form-row">
+        <label className="label">Total de questões</label>
+        <input className="input" type="number" value={total} min={1} onChange={e=>setTotal(parseInt(e.target.value)||1)}/>
+      </div>
+      <div className="form-row">
+        <label className="label">Acertos</label>
+        <input className="input" type="number" value={acertos} min={0} max={total} onChange={e=>setAcertos(Math.min(parseInt(e.target.value)||0,total))}/>
+      </div>
+      <div className="form-row">
+        <label className="label">Fonte</label>
+        <input className="input" value={source} onChange={e=>setSource(e.target.value)} placeholder="Ex: CEBRASPE 2023"/>
+      </div>
+      <div className="form-row">
+        <label className="label">Data</label>
+        <input className="input" type="date" value={date} onChange={e=>setDate(e.target.value)}/>
+      </div>
+      <div className="form-row" style={{gridColumn:"1/-1"}}>
+        <button className="btn btn-primary" disabled={!sub||total<1} onClick={()=>{
+          const pct=Math.round((acertos/total)*100);
+          onAdd({id:Date.now(),date,subject:sub,topic,total,acertos,pct,source,timestamp:Date.now()});
+        }}>Salvar questões</button>
+      </div>
+    </div>
+  }
+
+  // ══════════════════════════════════════════════════════════════
+  // CADERNO DE ERROS PAGE
+  // ══════════════════════════════════════════════════════════════
+  const ErrosPage=()=>{
+    const[showForm,setShowForm]=useState(false);
+    const[filterSub,setFilterSub]=useState("todos");
+
+    const filtered=filterSub==="todos"?data.errors:data.errors.filter(e=>e.subject===filterSub);
+    const subjects=[...new Set(data.errors.map(e=>e.subject))];
+
+    return <>
+      <div className="page-title">Caderno de Erros</div>
+      <div className="page-sub">Registre o que errou e por quê. Revise antes das provas.</div>
+
+      <div style={{display:"flex",gap:8,marginBottom:14}}>
+        <button className="btn btn-primary" onClick={()=>setShowForm(!showForm)}>+ Novo erro</button>
+        <select className="select" style={{width:200}} value={filterSub} onChange={e=>setFilterSub(e.target.value)}>
+          <option value="todos">Todas as matérias</option>
+          {subjects.map(s=><option key={s} value={s}>{s}</option>)}
+        </select>
+      </div>
+
+      {showForm&&<div className="card"><ErrorForm onAdd={err=>{
+        setData(d=>({...d,errors:[...d.errors,err]}));
+        setShowForm(false);showToast("✓ Erro registrado!");
+      }}/></div>}
+
+      {filtered.length===0?<div className="card" style={{textAlign:"center",padding:32,color:"var(--muted)"}}>Nenhum erro registrado</div>:
+      [...filtered].reverse().map(err=>{
+        const subData=EDITAL.find(e=>e.s===err.subject);
+        return <div key={err.id} className="error-item" style={{borderColor:subData?.c||"var(--red)"}}>
+          <div className="ei-head">
+            <span className="bdg" style={{background:`${subData?.c||"#888"}18`,color:subData?.c||"#888"}}>{err.subject}</span>
+            {err.topic&&<span style={{fontSize:11,color:"var(--muted)"}}>{err.topic}</span>}
+            <span style={{fontSize:10,color:"var(--muted)",marginLeft:"auto"}}>{fmtDate(err.date)}</span>
+          </div>
+          <div className="ei-question">{err.question}</div>
+          {err.explanation&&<div className="ei-explanation">💡 {err.explanation}</div>}
+          <div style={{marginTop:8,display:"flex",gap:6}}>
+            <button className="btn btn-danger btn-sm" onClick={()=>{
+              setData(d=>({...d,errors:d.errors.filter(e=>e.id!==err.id)}));
+              showToast("Erro removido");
+            }}>Remover</button>
+          </div>
+        </div>
+      })}
+    </>
+  };
+
+  function ErrorForm({onAdd}){
+    const[sub,setSub]=useState("");
+    const[topic,setTopic]=useState("");
+    const[question,setQuestion]=useState("");
+    const[explanation,setExplanation]=useState("");
+
+    const topicsForSub=sub?EDITAL.find(e=>e.s===sub)?.topics||[]:[];
+
+    return <div>
+      <div className="grid-2">
+        <div className="form-row">
+          <label className="label">Matéria *</label>
+          <select className="select" value={sub} onChange={e=>{setSub(e.target.value);setTopic("")}}>
+            <option value="">Selecione...</option>
+            {EDITAL.map(e=><option key={e.s} value={e.s}>{e.s}</option>)}
+          </select>
+        </div>
+        <div className="form-row">
+          <label className="label">Tópico *</label>
+          <select className="select" value={topic} onChange={e=>setTopic(e.target.value)} disabled={!sub}>
+            <option value="">Selecione o tópico...</option>
+            {topicsForSub.map((t,i)=><option key={i} value={t}>{t}</option>)}
+          </select>
+        </div>
+      </div>
+      <div className="form-row">
+        <label className="label">Questão / O que errou *</label>
+        <textarea className="textarea" value={question} onChange={e=>setQuestion(e.target.value)} placeholder="Cole ou descreva a questão que errou"/>
+      </div>
+      <div className="form-row">
+        <label className="label">Por que errou / Explicação correta</label>
+        <textarea className="textarea" value={explanation} onChange={e=>setExplanation(e.target.value)} placeholder="O que você deveria saber para acertar"/>
+      </div>
+      <button className="btn btn-primary" disabled={!sub||!question} onClick={()=>{
+        onAdd({id:Date.now(),date:todayStr,subject:sub,topic,question,explanation,timestamp:Date.now()});
+      }}>Salvar erro</button>
+    </div>
+  }
+
+  // ══════════════════════════════════════════════════════════════
+  // LEI SECA PAGE
+  // ══════════════════════════════════════════════════════════════
+  const LeiSecaPage=()=>{
+    const[filter,setFilter]=useState("todos");
+    const[expanded,setExpanded]=useState(null);
+
+    const filtered=LEIS.filter(l=>filter==="todos"||l.conc.includes(filter));
+
+    const isRead=(leiId,blocoId)=>data.leiSeca[`${leiId}::${blocoId}`]||false;
+    const toggleRead=(leiId,blocoId)=>{
+      const key=`${leiId}::${blocoId}`;
+      setData(d=>({...d,leiSeca:{...d.leiSeca,[key]:!d.leiSeca[key]}}));
+    };
+
+    const leiProgress=lei=>{
+      const total=lei.blocos.length;
+      const done=lei.blocos.filter(b=>isRead(lei.id,b.id)).length;
+      return{total,done,pct:total?Math.round((done/total)*100):0};
+    };
+
+    const totalBlocos=LEIS.reduce((a,l)=>a+l.blocos.length,0);
+    const totalLidos=LEIS.reduce((a,l)=>a+l.blocos.filter(b=>isRead(l.id,b.id)).length,0);
+
+    return <>
+      <div className="page-title">Lei Seca</div>
+      <div className="page-sub">Acompanhe sua leitura da legislação. {totalLidos}/{totalBlocos} blocos lidos ({Math.round((totalLidos/totalBlocos)*100)}%)</div>
+
+      <div className="concurso-bar">
+        {[{id:"todos",label:"Todos",cls:"sel-todos"},...CONCURSOS.map(c=>({id:c.id,label:c.name,cls:`sel-${c.id}`}))].map(c=>
+          <button key={c.id} className={`conc-btn ${filter===c.id?c.cls:""}`} onClick={()=>setFilter(c.id)}>{c.label}</button>
+        )}
+      </div>
+
+      {filtered.map(lei=>{
+        const prog=leiProgress(lei);
+        const isOpen=expanded===lei.id;
+        return <div key={lei.id} className="card" style={{borderLeft:`4px solid ${lei.color}`}}>
+          <div style={{display:"flex",alignItems:"center",gap:10,cursor:"pointer"}} onClick={()=>setExpanded(isOpen?null:lei.id)}>
+            <div style={{flex:1}}>
+              <div style={{fontWeight:700,fontSize:14}}>{lei.nome}</div>
+              <div style={{fontSize:11,color:"var(--muted)"}}>{prog.done}/{prog.total} blocos lidos</div>
+            </div>
+            <div className="progress" style={{width:100}}><div className="progress-fill" style={{width:`${prog.pct}%`,background:lei.color}}></div></div>
+            <span style={{fontWeight:700,fontSize:12,color:lei.color}}>{prog.pct}%</span>
+            <span style={{fontSize:18,color:"var(--muted)"}}>{isOpen?"▾":"▸"}</span>
+          </div>
+
+          {isOpen&&<div style={{marginTop:12}}>
+            {lei.blocos.map(b=>{
+              const read=isRead(lei.id,b.id);
+              return <div key={b.id} className="lei-bloco">
+                <div className={`lb-check ${read?"done":""}`} onClick={()=>toggleRead(lei.id,b.id)}>
+                  {read?"✓":""}
+                </div>
+                <div style={{flex:1}}>
+                  <div className="lb-title" style={{textDecoration:read?"line-through":"none",opacity:read?.6:1}}>{b.t}</div>
+                  <div className="lb-focus">🎯 {b.foco}</div>
+                </div>
+              </div>
+            })}
+          </div>}
+        </div>
+      })}
+    </>
+  };
+
+  // ══════════════════════════════════════════════════════════════
+  // SIMULADOS PAGE
+  // ══════════════════════════════════════════════════════════════
+  const SimuladosPage=()=>{
+    const[showForm,setShowForm]=useState(false);
+
+    return <>
+      <div className="page-title">Simulados</div>
+      <div className="page-sub">Registre simulados completos e acompanhe sua evolução.</div>
+
+      <button className="btn btn-primary" style={{marginBottom:14}} onClick={()=>setShowForm(!showForm)}>+ Novo simulado</button>
+
+      {showForm&&<div className="card"><SimuladoForm onAdd={sim=>{
+        setData(d=>({...d,simulados:[...d.simulados,sim]}));
+        setShowForm(false);showToast("✓ Simulado registrado!");
+      }}/></div>}
+
+      {data.simulados.length===0?<div className="card" style={{textAlign:"center",padding:32,color:"var(--muted)"}}>Nenhum simulado registrado</div>:
+      [...data.simulados].reverse().map(sim=><div key={sim.id} className="card">
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"baseline"}}>
+          <div>
+            <div style={{fontWeight:700,fontSize:15}}>{sim.name||"Simulado"}</div>
+            <div style={{fontSize:11,color:"var(--muted)"}}>{fmtDate(sim.date)} • {sim.total} questões • {fmtMin(sim.timeMinutes||0)}</div>
+          </div>
+          <div style={{textAlign:"right"}}>
+            <div style={{fontSize:28,fontWeight:800,color:sim.pct>=70?"var(--green)":sim.pct>=50?"var(--orange)":"var(--red)"}}>{sim.pct}%</div>
+            <div style={{fontSize:12,fontWeight:600}}>{sim.acertos}/{sim.total}</div>
+          </div>
+        </div>
+        {sim.notes&&<div style={{marginTop:8,fontSize:12,color:"#555",background:"#fafaf8",padding:10,borderRadius:6}}>{sim.notes}</div>}
+        <div style={{marginTop:8}}>
+          <button className="btn btn-danger btn-sm" onClick={()=>{
+            setData(d=>({...d,simulados:d.simulados.filter(s=>s.id!==sim.id)}));
+          }}>Remover</button>
+        </div>
+      </div>)}
+    </>
+  };
+
+  function SimuladoForm({onAdd}){
+    const[name,setName]=useState("");
+    const[total,setTotal]=useState(60);
+    const[acertos,setAcertos]=useState(0);
+    const[time,setTime]=useState(180);
+    const[notes,setNotes]=useState("");
+    const[date,setDate]=useState(todayStr);
+
+    return <div>
+      <div className="grid-2">
+        <div className="form-row">
+          <label className="label">Nome do simulado</label>
+          <input className="input" value={name} onChange={e=>setName(e.target.value)} placeholder="Ex: Simulado SEDES #1"/>
+        </div>
+        <div className="form-row">
+          <label className="label">Data</label>
+          <input className="input" type="date" value={date} onChange={e=>setDate(e.target.value)}/>
+        </div>
+        <div className="form-row">
+          <label className="label">Total de questões</label>
+          <input className="input" type="number" value={total} min={1} onChange={e=>setTotal(parseInt(e.target.value)||1)}/>
+        </div>
+        <div className="form-row">
+          <label className="label">Acertos</label>
+          <input className="input" type="number" value={acertos} min={0} max={total} onChange={e=>setAcertos(Math.min(parseInt(e.target.value)||0,total))}/>
+        </div>
+        <div className="form-row">
+          <label className="label">Tempo (minutos)</label>
+          <input className="input" type="number" value={time} min={1} onChange={e=>setTime(parseInt(e.target.value)||1)}/>
+        </div>
+      </div>
+      <div className="form-row">
+        <label className="label">Observações</label>
+        <textarea className="textarea" value={notes} onChange={e=>setNotes(e.target.value)} placeholder="Pontos fracos, tópicos a revisar..."/>
+      </div>
+      <button className="btn btn-primary" onClick={()=>{
+        const pct=Math.round((acertos/total)*100);
+        onAdd({id:Date.now(),date,name,total,acertos,pct,timeMinutes:time,notes,timestamp:Date.now()});
+      }}>Salvar simulado</button>
+    </div>
+  }
+
+  // ══════════════════════════════════════════════════════════════
+  // CONFIGURAÇÕES PAGE
+  // ══════════════════════════════════════════════════════════════
+  const ConfigPage=()=>{
+    const[weeklyGoal,setWeeklyGoal]=useState(data.hoursGoal.weekly);
+    const[qGoal,setQGoal]=useState(data.questionsGoal?.weekly||150);
+
+    const totalSessions=data.sessions.length;
+    const totalMinutes=data.sessions.reduce((a,s)=>a+s.minutes,0);
+    const totalQuestions=data.questions.reduce((a,q)=>a+q.total,0);
+    const totalErrors=data.errors.length;
+    const totalReviews=data.reviews.length;
+
+    return <>
+      <div className="page-title">Configurações</div>
+      <div className="page-sub">Ajustes, metas e backup de dados.</div>
+
+      <div className="card">
+        <div className="card-title">🎯 Concursos ativos</div>
+        {CONCURSOS.map(c=><div key={c.id} style={{display:"flex",alignItems:"center",gap:10,padding:"8px 0",borderBottom:"1px solid #f0eeea"}}>
+          <div style={{width:8,height:8,borderRadius:4,background:c.color}}></div>
+          <div style={{flex:1}}>
+            <div style={{fontWeight:600,fontSize:13}}>{c.name}</div>
+            <div style={{fontSize:11,color:"var(--muted)"}}>Banca: {c.banca} • Prova: {c.prova}</div>
+          </div>
+        </div>)}
+      </div>
+
+      <div className="card">
+        <div className="card-title">⏱️ Meta semanal de horas</div>
+        <div style={{display:"flex",gap:10,alignItems:"center"}}>
+          <input className="input" type="number" style={{width:80}} value={weeklyGoal} min={1} max={80}
+            onChange={e=>setWeeklyGoal(parseInt(e.target.value)||1)}/>
+          <span style={{fontSize:12,color:"var(--muted)"}}>horas por semana</span>
+          <button className="btn btn-primary btn-sm" onClick={()=>{
+            setData(d=>({...d,hoursGoal:{...d.hoursGoal,weekly:weeklyGoal}}));
+            showToast("✓ Meta atualizada!");
+          }}>Salvar</button>
+        </div>
+      </div>
+
+      <div className="card">
+        <div className="card-title">📝 Meta semanal de questões</div>
+        <div style={{display:"flex",gap:10,alignItems:"center"}}>
+          <input className="input" type="number" style={{width:80}} value={qGoal} min={10} max={1000} step={10}
+            onChange={e=>setQGoal(parseInt(e.target.value)||10)}/>
+          <span style={{fontSize:12,color:"var(--muted)"}}>questões por semana</span>
+          <button className="btn btn-primary btn-sm" onClick={()=>{
+            setData(d=>({...d,questionsGoal:{weekly:qGoal}}));
+            showToast("✓ Meta atualizada!");
+          }}>Salvar</button>
+        </div>
+        <div style={{fontSize:11,color:"var(--muted)",marginTop:8}}>Sugestão do cronograma: Fase 1 = 150 • Fase 2 = 250 • Reta final = 150</div>
+      </div>
+
+      <div className="card">
+        <div className="card-title">📦 Dados armazenados</div>
+        <div className="grid-3" style={{marginBottom:14}}>
+          <div className="stat-box"><div className="stat-num">{totalSessions}</div><div className="stat-label">Sessões</div></div>
+          <div className="stat-box"><div className="stat-num">{totalQuestions}</div><div className="stat-label">Questões</div></div>
+          <div className="stat-box"><div className="stat-num">{totalErrors}</div><div className="stat-label">Erros</div></div>
+        </div>
+        <div style={{fontSize:12,color:"var(--muted)",marginBottom:12}}>Total: {fmtMin(totalMinutes)} de estudo • {totalReviews} revisões criadas</div>
+        <div style={{display:"flex",gap:8}}>
+          <button className="btn btn-secondary" onClick={exportData}>💾 Exportar backup (JSON)</button>
+          <button className="btn btn-secondary" onClick={importData}>📂 Importar backup</button>
+        </div>
+      </div>
+
+      <div className="card">
+        <div className="card-title" style={{color:"var(--red)"}}>⚠️ Zona de perigo</div>
+        <button className="btn btn-danger" onClick={()=>{
+          if(confirm("Tem certeza? Isso vai apagar TODOS os seus dados. Faça um backup antes!")){
+            setData(defaultData());showToast("Dados apagados");
+          }
+        }}>🗑️ Apagar todos os dados</button>
+      </div>
+    </>
+  };
+
+  // ══════════════════════════════════════════════════════════════
+  // RENDER
+  // ══════════════════════════════════════════════════════════════
+  const renderPage=()=>{
+    switch(page){
+      case "dashboard":return <DashboardPage/>;
+      case "rotina":return <RotinaPage/>;
+      case "edital":return <EditalPage/>;
+      case "ciclo":return <CicloPage/>;
+      case "timer":return <TimerPage/>;
+      case "revisoes":return <RevisoesPage/>;
+      case "questoes":return <QuestoesPage/>;
+      case "erros":return <ErrosPage/>;
+      case "leiseca":return <LeiSecaPage/>;
+      case "simulados":return <SimuladosPage/>;
+      case "config":return <ConfigPage/>;
+      default:return <DashboardPage/>;
+    }
+  };
+
+  return <div className="app">
+    <button className="mobile-menu-btn" onClick={()=>setMobileMenu(!mobileMenu)}>☰</button>
+
+    <div className={`sidebar ${sidebarOpen?"":"collapsed"} ${mobileMenu?"mobile-open":""}`}>
+      <div className="sb-header">
+        <span className="logo">🎯</span>
+        <h1>Estudo Pro</h1>
+        <button className="sb-toggle" onClick={()=>setSidebarOpen(!sidebarOpen)}>☰</button>
+      </div>
+      <div className="sb-nav">
+        {NAV.map(n=><button key={n.id} className={`nav-btn ${page===n.id?"active":""}`} onClick={()=>navigate(n.id)}>
+          <span className="nav-icon">{n.icon}</span>
+          <span>{n.label}</span>
+          {n.badge&&<span className="badge">{n.badge}</span>}
+        </button>)}
+      </div>
+      <div className="sb-footer">
+        <button onClick={exportData}>💾 Backup</button>
+      </div>
+    </div>
+
+    <div className="main">
+      <div className="main-inner">{renderPage()}</div>
+    </div>
+
+    {timerRunning&&page!=="timer"&&<div className="float-timer">
+      <div className="ft-subject">{timerSubject}</div>
+      <div className="ft-time">{String(Math.floor(timerSeconds/3600)).padStart(2,"0")}:{String(Math.floor((timerSeconds%3600)/60)).padStart(2,"0")}:{String(timerSeconds%60).padStart(2,"0")}</div>
+      <div className="ft-controls">
+        <button className="btn btn-success btn-sm" onClick={stopAndSaveTimer}>✓</button>
+        <button className="btn btn-secondary btn-sm" onClick={()=>navigate("timer")}>Abrir</button>
+      </div>
+    </div>}
+
+    <div id="toast" className="toast"></div>
+  </div>
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+</script>
+</body>
+</html>
