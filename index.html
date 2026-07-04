@@ -194,6 +194,71 @@ const {useState,useEffect,useCallback,useRef,useMemo}=React;
 // STORAGE
 // ═══════════════════════════════════════════════════════════════
 const STORAGE_KEY="estudopro-v1";
+// Cronograma estratégico padrão (SEDES 06/09/2026 + base ARR) — 3h/dia, método EARA
+const DEFAULT_ROTINA=()=>({
+  seg:[
+    {subject:"Língua Portuguesa",topic:"",tipo:"revisao",minutes:15,notes:"Revisão do último estudo de Português"},
+    {subject:"Língua Portuguesa",topic:"",tipo:"teoria",minutes:40,notes:"Estudo novo — avançar no edital verticalizado"},
+    {subject:"Língua Portuguesa",topic:"",tipo:"questoes",minutes:25,notes:"Questões CEBRASPE/Quadrix do tópico estudado"},
+    {subject:"SUAS / PNAS / NOB-SUAS",topic:"",tipo:"revisao",minutes:15,notes:"Revisão do último estudo de SUAS"},
+    {subject:"SUAS / PNAS / NOB-SUAS",topic:"",tipo:"teoria",minutes:40,notes:"Estudo novo — foco peso 2 SEDES"},
+    {subject:"SUAS / PNAS / NOB-SUAS",topic:"",tipo:"questoes",minutes:25,notes:"Questões Quadrix sobre o tópico"},
+    {subject:"Língua Portuguesa",topic:"",tipo:"leiseca",minutes:20,notes:"Lei seca pendente ou revisão espaçada do app"},
+  ],
+  ter:[
+    {subject:"Direito Constitucional",topic:"",tipo:"revisao",minutes:15,notes:"Revisão do último estudo de Constitucional"},
+    {subject:"Direito Constitucional",topic:"",tipo:"teoria",minutes:40,notes:"Estudo novo — matéria overlap SEDES+ARR"},
+    {subject:"Direito Constitucional",topic:"",tipo:"questoes",minutes:25,notes:"Questões CEBRASPE/Quadrix/FGV"},
+    {subject:"Legislação do DF e Maria da Penha",topic:"",tipo:"revisao",minutes:15,notes:"Revisão do último estudo"},
+    {subject:"Legislação do DF e Maria da Penha",topic:"",tipo:"teoria",minutes:40,notes:"Foco: mínimo 3 questões Maria da Penha na prova!"},
+    {subject:"Legislação do DF e Maria da Penha",topic:"",tipo:"questoes",minutes:25,notes:"Questões Quadrix sobre o tópico"},
+    {subject:"Direito Constitucional",topic:"",tipo:"leiseca",minutes:20,notes:"Lei seca CF/88 ou revisão espaçada"},
+  ],
+  qua:[
+    {subject:"Direito Administrativo",topic:"",tipo:"revisao",minutes:15,notes:"Revisão do último estudo de Administrativo"},
+    {subject:"Direito Administrativo",topic:"",tipo:"teoria",minutes:40,notes:"Estudo novo — overlap SEDES+ARR, peso 2"},
+    {subject:"Direito Administrativo",topic:"",tipo:"questoes",minutes:25,notes:"Questões CEBRASPE/Quadrix/FGV"},
+    {subject:"Programas Sociais do DF",topic:"",tipo:"revisao",minutes:15,notes:"Revisão do último estudo"},
+    {subject:"Programas Sociais do DF",topic:"",tipo:"teoria",minutes:40,notes:"Decorar leis específicas do DF — peso 2"},
+    {subject:"Programas Sociais do DF",topic:"",tipo:"questoes",minutes:25,notes:"Questões Quadrix sobre o tópico"},
+    {subject:"Direito Administrativo",topic:"",tipo:"leiseca",minutes:20,notes:"Lei seca LC 840 ou revisão espaçada"},
+  ],
+  qui:[
+    {subject:"Atendimento e Rotinas Administrativas",topic:"",tipo:"revisao",minutes:15,notes:"Revisão do último estudo"},
+    {subject:"Atendimento e Rotinas Administrativas",topic:"",tipo:"teoria",minutes:40,notes:"Arquivologia + redação oficial — peso 2"},
+    {subject:"Atendimento e Rotinas Administrativas",topic:"",tipo:"questoes",minutes:25,notes:"Questões Quadrix do tópico"},
+    {subject:"Recursos Materiais e Patrimônio",topic:"",tipo:"revisao",minutes:15,notes:"Revisão do último estudo"},
+    {subject:"Recursos Materiais e Patrimônio",topic:"",tipo:"teoria",minutes:40,notes:"Gestão patrimonial + licitações — peso 2"},
+    {subject:"Recursos Materiais e Patrimônio",topic:"",tipo:"questoes",minutes:25,notes:"Questões Quadrix do tópico"},
+    {subject:"Legislação do DF e Maria da Penha",topic:"",tipo:"leiseca",minutes:20,notes:"Lei seca Maria da Penha ou LC 840"},
+  ],
+  sex:[
+    {subject:"Primeiros Socorros",topic:"",tipo:"teoria",minutes:40,notes:"Matéria rápida — foco em memorizar procedimentos"},
+    {subject:"Primeiros Socorros",topic:"",tipo:"questoes",minutes:20,notes:"Questões rápidas do tópico"},
+    {subject:"Regimento Interno da Câmara",topic:"",tipo:"teoria",minutes:40,notes:"ARR — criar base no RICD"},
+    {subject:"Regimento Interno da Câmara",topic:"",tipo:"questoes",minutes:25,notes:"Questões CEBRASPE/FGV de Regimento"},
+    {subject:"Processo Legislativo",topic:"",tipo:"teoria",minutes:30,notes:"ARR — overlap com Dir. Constitucional"},
+    {subject:"Direito Constitucional",topic:"",tipo:"leiseca",minutes:25,notes:"Lei seca CF arts. 44-69 (Legislativo — serve SEDES e ARR)"},
+  ],
+  sab:[
+    {subject:"Raciocínio Lógico",topic:"",tipo:"teoria",minutes:35,notes:"ARR — resolver e entender a lógica"},
+    {subject:"Raciocínio Lógico",topic:"",tipo:"questoes",minutes:25,notes:"Questões FGV/CEBRASPE de RLM"},
+    {subject:"Redação Oficial",topic:"",tipo:"teoria",minutes:30,notes:"ARR — padrão ofício, pronomes de tratamento"},
+    {subject:"Técnica Legislativa",topic:"",tipo:"teoria",minutes:25,notes:"ARR — LC 95/98, estrutura das leis"},
+    {subject:"Noções de TI",topic:"",tipo:"teoria",minutes:25,notes:"ARR — foco em segurança e Office"},
+    {subject:"Noções de TI",topic:"",tipo:"questoes",minutes:20,notes:"Questões rápidas de informática"},
+    {subject:"Ética no Serviço Público",topic:"",tipo:"teoria",minutes:20,notes:"ARR — Decreto 1.171/94"},
+  ],
+  dom:[
+    {subject:"Língua Portuguesa",topic:"",tipo:"redacao",minutes:50,notes:"Redação dissertativo-argumentativa (prova SEDES) — tema de política social"},
+    {subject:"Direito Constitucional",topic:"",tipo:"leiseca",minutes:30,notes:"Lei seca CF/88 — artigos mais cobrados"},
+    {subject:"Legislação do DF e Maria da Penha",topic:"",tipo:"leiseca",minutes:25,notes:"Lei seca Maria da Penha + LODF"},
+    {subject:"SUAS / PNAS / NOB-SUAS",topic:"",tipo:"simulado",minutes:30,notes:"Simulado temático ou refazer questões erradas"},
+    {subject:"Direito Administrativo",topic:"",tipo:"revisao",minutes:25,notes:"Revisão geral da semana + caderno de erros"},
+    {subject:"Língua Portuguesa",topic:"",tipo:"revisao",minutes:20,notes:"Revisões espaçadas pendentes no app"},
+  ],
+});
+
 const defaultData=()=>({
   editalStatus:{},
   sessions:[],
@@ -207,9 +272,16 @@ const defaultData=()=>({
   questionsGoal:{weekly:150},
   streakDays:[],
   notes:{},
-  rotina:{seg:[],ter:[],qua:[],qui:[],sex:[],sab:[],dom:[]}
+  rotina:DEFAULT_ROTINA()
 });
-function load(){try{const r=localStorage.getItem(STORAGE_KEY);return r?{...defaultData(),...JSON.parse(r)}:defaultData()}catch{return defaultData()}}
+function load(){try{
+  const r=localStorage.getItem(STORAGE_KEY);
+  if(!r)return defaultData();
+  const d={...defaultData(),...JSON.parse(r)};
+  // Migração: se a rotina salva existe mas está toda vazia, carrega o cronograma estratégico padrão
+  if(!d.rotina||Object.values(d.rotina).every(day=>!day||day.length===0))d.rotina=DEFAULT_ROTINA();
+  return d;
+}catch{return defaultData()}}
 function persist(d){try{localStorage.setItem(STORAGE_KEY,JSON.stringify(d))}catch{}}
 
 // ═══════════════════════════════════════════════════════════════
