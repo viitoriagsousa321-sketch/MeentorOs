@@ -272,6 +272,7 @@ const defaultData=()=>({
   questionsGoal:{weekly:150},
   streakDays:[],
   notes:{},
+  rotinaDone:{},
   rotina:DEFAULT_ROTINA()
 });
 function load(){try{
@@ -287,7 +288,7 @@ function persist(d){try{localStorage.setItem(STORAGE_KEY,JSON.stringify(d))}catc
 // ═══════════════════════════════════════════════════════════════
 // DATE HELPERS
 // ═══════════════════════════════════════════════════════════════
-const today=()=>new Date().toISOString().slice(0,10);
+const today=()=>{const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`};
 const daysBetween=(a,b)=>Math.round((new Date(b)-new Date(a))/864e5);
 const addDays=(ds,n)=>{const d=new Date(ds+"T12:00:00");d.setDate(d.getDate()+n);return d.toISOString().slice(0,10)};
 const fmtDate=ds=>{const[y,m,d]=ds.split("-");return new Date(y,m-1,d).toLocaleDateString("pt-BR",{day:"numeric",month:"short"})};
@@ -1021,6 +1022,21 @@ function App(){
 
     const totalDayMin=dayBlocks.reduce((a,b)=>a+b.minutes,0);
 
+    // Conclusão por data real (reseta automaticamente a cada semana)
+    const selectedDate=addDays(weekStart(todayStr),DIAS_SEMANA.findIndex(d=>d.key===selectedDay));
+    const doneMap=(data.rotinaDone||{})[selectedDate]||{};
+    const doneCount=dayBlocks.filter((_,i)=>doneMap[i]).length;
+    const toggleDone=(idx)=>{
+      setData(d=>{
+        const rd={...(d.rotinaDone||{})};
+        const dm={...(rd[selectedDate]||{})};
+        dm[idx]=!dm[idx];
+        rd[selectedDate]=dm;
+        Object.keys(rd).forEach(k=>{if(daysBetween(k,todayStr)>30)delete rd[k]});
+        return{...d,rotinaDone:rd};
+      });
+    };
+
     const addBlock=(block)=>{
       const newRotina={...rotina,[selectedDay]:[...(rotina[selectedDay]||[]),block]};
       setData(d=>({...d,rotina:newRotina}));
@@ -1054,6 +1070,8 @@ function App(){
 
     const todayBlocks=rotina[todayKey]||[];
     const todayTotal=todayBlocks.reduce((a,b)=>a+b.minutes,0);
+    const todayDone=(data.rotinaDone||{})[todayStr]||{};
+    const todayDoneCount=todayBlocks.filter((_,i)=>todayDone[i]).length;
 
     return <>
       <div className="page-title">Minha Rotina</div>
@@ -1064,7 +1082,7 @@ function App(){
           <span style={{fontSize:20}}>📌</span>
           <div style={{flex:1}}>
             <div style={{fontWeight:700,fontSize:14}}>Hoje — {DIAS_SEMANA[todayDow].label}</div>
-            <div style={{fontSize:12,color:"var(--muted)"}}>{todayBlocks.length} blocos • {fmtMin(todayTotal)}</div>
+            <div style={{fontSize:12,color:"var(--muted)"}}>{todayBlocks.length} blocos • {fmtMin(todayTotal)} • ✓ {todayDoneCount}/{todayBlocks.length} feitos</div>
           </div>
           <span style={{fontSize:12,color:"var(--accent)",fontWeight:700}}>Ver ▸</span>
         </div>
@@ -1092,6 +1110,9 @@ function App(){
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}>
           <div className="card-title" style={{marginBottom:0}}>
             {selectedDia.icon} {selectedDia.label} — {dayBlocks.length} blocos ({fmtMin(totalDayMin)})
+            {dayBlocks.length>0&&<span style={{marginLeft:8,fontSize:12,fontWeight:700,color:doneCount===dayBlocks.length?"var(--green)":"var(--muted)"}}>
+              {doneCount===dayBlocks.length?"🎉 Dia completo!":`✓ ${doneCount}/${dayBlocks.length}`}
+            </span>}
           </div>
           <div style={{display:"flex",gap:6}}>
             <button className="btn btn-primary btn-sm" onClick={()=>{setShowForm(true);setEditIdx(null)}}>+ Bloco</button>
@@ -1110,14 +1131,18 @@ function App(){
           if(editIdx===idx)return <div key={idx} className="card" style={{background:"#fafaf8",marginBottom:8}}>
             <RotinaBlockForm initial={block} onSave={b=>updateBlock(idx,b)} onCancel={()=>setEditIdx(null)}/>
           </div>;
+          const isDone=!!doneMap[idx];
           return <div key={idx} style={{
             display:"flex",alignItems:"center",gap:12,padding:"12px 14px",
-            background:"#fafaf8",borderRadius:10,marginBottom:6,
-            borderLeft:`5px solid ${tipo.color}`
+            background:isDone?"#f0fdf4":"#fafaf8",borderRadius:10,marginBottom:6,
+            borderLeft:`5px solid ${isDone?"#22c55e":tipo.color}`,opacity:isDone?.8:1
           }}>
+            <button onClick={()=>toggleDone(idx)} title={isDone?"Desmarcar":"Marcar como concluído"} style={{
+              background:"none",border:"none",cursor:"pointer",fontSize:20,padding:0,lineHeight:1
+            }}>{isDone?"✅":"⬜"}</button>
             <div style={{fontSize:16}}>{tipo.label.split(" ")[0]}</div>
             <div style={{flex:1}}>
-              <div style={{fontWeight:600,fontSize:13,display:"flex",alignItems:"center",gap:6}}>
+              <div style={{fontWeight:600,fontSize:13,display:"flex",alignItems:"center",gap:6,textDecoration:isDone?"line-through":"none"}}>
                 {block.subject}
                 <span style={{fontSize:10,color:tipo.color,fontWeight:700}}>{tipo.label.split(" ").slice(1).join(" ")}</span>
               </div>
@@ -1150,25 +1175,36 @@ function App(){
       </div>
 
       {todayBlocks.length>0&&selectedDay===todayKey&&<div className="card" style={{borderLeft:"4px solid var(--green)"}}>
-        <div className="card-title">▶ Começar a estudar</div>
-        <div style={{fontSize:12,color:"var(--muted)",marginBottom:10}}>Clique num bloco para iniciar o timer com a matéria e tópico já configurados.</div>
+        <div className="card-title">▶ Começar a estudar
+          <span style={{marginLeft:8,fontSize:12,fontWeight:700,color:todayDoneCount===todayBlocks.length?"var(--green)":"var(--muted)"}}>
+            {todayDoneCount===todayBlocks.length?"🎉 Tudo feito hoje!":`✓ ${todayDoneCount}/${todayBlocks.length}`}
+          </span>
+        </div>
+        <div className="progress" style={{marginBottom:10}}><div className="progress-fill" style={{width:`${todayBlocks.length?Math.round(todayDoneCount/todayBlocks.length*100):0}%`,background:"var(--green)"}}></div></div>
+        <div style={{fontSize:12,color:"var(--muted)",marginBottom:10}}>Clique no ⬜ para concluir, ou no bloco para iniciar o timer já configurado.</div>
         {todayBlocks.map((block,idx)=>{
           const tipo=TIPOS_ATIVIDADE.find(t=>t.id===block.tipo)||TIPOS_ATIVIDADE[0];
-          return <button key={idx} style={{
+          const isDone=!!todayDone[idx];
+          return <div key={idx} style={{
             display:"flex",alignItems:"center",gap:10,padding:"10px 14px",width:"100%",
-            background:"#fff",borderRadius:8,border:"1px solid var(--border)",marginBottom:4,
-            cursor:"pointer",textAlign:"left",fontFamily:"inherit",transition:"all .15s"
-          }} onClick={()=>{
-            setTimerSubject(block.subject);setTimerTopic(block.topic||"");setTimerSeconds(0);navigate("timer");
+            background:isDone?"#f0fdf4":"#fff",borderRadius:8,border:isDone?"1px solid #bbf7d0":"1px solid var(--border)",marginBottom:4,
+            opacity:isDone?.8:1,transition:"all .15s"
           }}>
-            <span>{tipo.label.split(" ")[0]}</span>
-            <div style={{flex:1}}>
-              <div style={{fontWeight:600,fontSize:13}}>{block.subject}</div>
-              {block.topic&&<div style={{fontSize:11,color:"#555"}}>{block.topic}</div>}
+            <button onClick={()=>toggleDone(idx)} title={isDone?"Desmarcar":"Marcar como concluído"} style={{
+              background:"none",border:"none",cursor:"pointer",fontSize:18,padding:0,lineHeight:1
+            }}>{isDone?"✅":"⬜"}</button>
+            <div style={{display:"flex",alignItems:"center",gap:10,flex:1,cursor:"pointer"}} onClick={()=>{
+              setTimerSubject(block.subject);setTimerTopic(block.topic||"");setTimerSeconds(0);navigate("timer");
+            }}>
+              <span>{tipo.label.split(" ")[0]}</span>
+              <div style={{flex:1}}>
+                <div style={{fontWeight:600,fontSize:13,textDecoration:isDone?"line-through":"none"}}>{block.subject}</div>
+                {block.topic&&<div style={{fontSize:11,color:"#555"}}>{block.topic}</div>}
+              </div>
+              <div style={{fontSize:12,fontWeight:700,color:"var(--muted)"}}>{fmtMin(block.minutes)}</div>
+              <span style={{color:"var(--accent)",fontWeight:700,fontSize:12}}>▶</span>
             </div>
-            <div style={{fontSize:12,fontWeight:700,color:"var(--muted)"}}>{fmtMin(block.minutes)}</div>
-            <span style={{color:"var(--accent)",fontWeight:700,fontSize:12}}>▶</span>
-          </button>
+          </div>
         })}
       </div>}
     </>
