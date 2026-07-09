@@ -204,6 +204,7 @@ const DEFAULT_ROTINA=()=>({
     {subject:"SUAS / PNAS / NOB-SUAS",topic:"",tipo:"teoria",minutes:40,notes:"Estudo novo — foco peso 2 SEDES"},
     {subject:"SUAS / PNAS / NOB-SUAS",topic:"",tipo:"questoes",minutes:25,notes:"Questões Quadrix sobre o tópico"},
     {subject:"Língua Portuguesa",topic:"",tipo:"leiseca",minutes:20,notes:"Lei seca pendente ou revisão espaçada do app"},
+    {subject:"AFO — Adm. Financeira e Orçamentária",topic:"",tipo:"teoria",minutes:30,notes:"TCDF+ARR — bloco extra TCDF: comece pelos princípios orçamentários"},
   ],
   ter:[
     {subject:"Direito Constitucional",topic:"",tipo:"revisao",minutes:15,notes:"Revisão do último estudo de Constitucional"},
@@ -213,6 +214,7 @@ const DEFAULT_ROTINA=()=>({
     {subject:"Legislação do DF e Maria da Penha",topic:"",tipo:"teoria",minutes:40,notes:"Foco: mínimo 3 questões Maria da Penha na prova!"},
     {subject:"Legislação do DF e Maria da Penha",topic:"",tipo:"questoes",minutes:25,notes:"Questões Quadrix sobre o tópico"},
     {subject:"Direito Constitucional",topic:"",tipo:"leiseca",minutes:20,notes:"Lei seca CF/88 ou revisão espaçada"},
+    {subject:"Lei Orgânica e Regimento do TCDF",topic:"",tipo:"teoria",minutes:30,notes:"TCDF — bloco extra: a matéria mais diferencial do concurso"},
   ],
   qua:[
     {subject:"Direito Administrativo",topic:"",tipo:"revisao",minutes:15,notes:"Revisão do último estudo de Administrativo"},
@@ -222,6 +224,7 @@ const DEFAULT_ROTINA=()=>({
     {subject:"Programas Sociais do DF",topic:"",tipo:"teoria",minutes:40,notes:"Decorar leis específicas do DF — peso 2"},
     {subject:"Programas Sociais do DF",topic:"",tipo:"questoes",minutes:25,notes:"Questões Quadrix sobre o tópico"},
     {subject:"Direito Administrativo",topic:"",tipo:"leiseca",minutes:20,notes:"Lei seca LC 840 ou revisão espaçada"},
+    {subject:"Administração Geral e Pública",topic:"",tipo:"teoria",minutes:30,notes:"TCDF — bloco extra: peso alto nos Conhecimentos Especializados"},
   ],
   qui:[
     {subject:"Atendimento e Rotinas Administrativas",topic:"",tipo:"revisao",minutes:15,notes:"Revisão do último estudo"},
@@ -231,6 +234,7 @@ const DEFAULT_ROTINA=()=>({
     {subject:"Recursos Materiais e Patrimônio",topic:"",tipo:"teoria",minutes:40,notes:"Gestão patrimonial + licitações — peso 2"},
     {subject:"Recursos Materiais e Patrimônio",topic:"",tipo:"questoes",minutes:25,notes:"Questões Quadrix do tópico"},
     {subject:"Legislação do DF e Maria da Penha",topic:"",tipo:"leiseca",minutes:20,notes:"Lei seca Maria da Penha ou LC 840"},
+    {subject:"Análise de Dados, Estatística e IA",topic:"",tipo:"teoria",minutes:30,notes:"TCDF — bloco extra: comece pela estatística descritiva"},
   ],
   sex:[
     {subject:"Primeiros Socorros",topic:"",tipo:"teoria",minutes:40,notes:"Matéria rápida — foco em memorizar procedimentos"},
@@ -239,6 +243,7 @@ const DEFAULT_ROTINA=()=>({
     {subject:"Regimento Interno da Câmara",topic:"",tipo:"questoes",minutes:25,notes:"Questões CEBRASPE/FGV de Regimento"},
     {subject:"Processo Legislativo",topic:"",tipo:"teoria",minutes:30,notes:"ARR — overlap com Dir. Constitucional"},
     {subject:"Direito Constitucional",topic:"",tipo:"leiseca",minutes:25,notes:"Lei seca CF arts. 44-69 (Legislativo — serve SEDES e ARR)"},
+    {subject:"Matemática Financeira",topic:"",tipo:"questoes",minutes:30,notes:"TCDF — bloco extra: matéria de treino, resolva fazendo"},
   ],
   sab:[
     {subject:"Raciocínio Lógico",topic:"",tipo:"teoria",minutes:35,notes:"ARR — resolver e entender a lógica"},
@@ -248,6 +253,7 @@ const DEFAULT_ROTINA=()=>({
     {subject:"Noções de TI",topic:"",tipo:"teoria",minutes:25,notes:"ARR — foco em segurança e Office"},
     {subject:"Noções de TI",topic:"",tipo:"questoes",minutes:20,notes:"Questões rápidas de informática"},
     {subject:"Ética no Serviço Público",topic:"",tipo:"teoria",minutes:20,notes:"ARR — Decreto 1.171/94"},
+    {subject:"Noções de Civil, Previdenciário e Tributário",topic:"",tipo:"teoria",minutes:30,notes:"TCDF — bloco extra: rotacione entre as 3 áreas a cada semana"},
   ],
   dom:[
     {subject:"Língua Portuguesa",topic:"",tipo:"redacao",minutes:50,notes:"Redação dissertativo-argumentativa (prova SEDES) — tema de política social"},
@@ -256,6 +262,7 @@ const DEFAULT_ROTINA=()=>({
     {subject:"SUAS / PNAS / NOB-SUAS",topic:"",tipo:"simulado",minutes:30,notes:"Simulado temático ou refazer questões erradas"},
     {subject:"Direito Administrativo",topic:"",tipo:"revisao",minutes:25,notes:"Revisão geral da semana + caderno de erros"},
     {subject:"Língua Portuguesa",topic:"",tipo:"revisao",minutes:20,notes:"Revisões espaçadas pendentes no app"},
+    {subject:"Lei Orgânica e Regimento do TCDF",topic:"",tipo:"questoes",minutes:30,notes:"TCDF — bloco extra: questões CEBRASPE certo/errado da semana"},
   ],
 });
 
@@ -273,14 +280,17 @@ const defaultData=()=>({
   streakDays:[],
   notes:{},
   rotinaDone:{},
+  rotinaVersion:2,
   rotina:DEFAULT_ROTINA()
 });
 function load(){try{
   const r=localStorage.getItem(STORAGE_KEY);
   if(!r)return defaultData();
-  const d={...defaultData(),...JSON.parse(r)};
-  // Migração: se a rotina salva existe mas está toda vazia, carrega o cronograma estratégico padrão
-  if(!d.rotina||Object.values(d.rotina).every(day=>!day||day.length===0))d.rotina=DEFAULT_ROTINA();
+  const raw=JSON.parse(r);
+  const d={...defaultData(),...raw};
+  // Migração v2 (TCDF): rotina antiga ou vazia recebe o cronograma estratégico atualizado
+  const rotinaVazia=!raw.rotina||Object.values(raw.rotina).every(day=>!day||day.length===0);
+  if(rotinaVazia||!raw.rotinaVersion||raw.rotinaVersion<2){d.rotina=DEFAULT_ROTINA();d.rotinaVersion=2;}
   return d;
 }catch{return defaultData()}}
 function persist(d){try{localStorage.setItem(STORAGE_KEY,JSON.stringify(d))}catch{}}
@@ -302,13 +312,14 @@ const thisWeekDays=()=>{const ws=weekStart(today());return Array.from({length:7}
 // ═══════════════════════════════════════════════════════════════
 const CONCURSOS=[
   {id:"sedes",name:"SEDES-DF",color:"#0891b2",prova:"06/09/2026",banca:"Quadrix"},
+  {id:"tcdf",name:"TCDF Analista",color:"#b45309",prova:"22/11/2026",banca:"CEBRASPE"},
   {id:"arr",name:"Câmara (ARR)",color:"#7c3aed",prova:"A definir",banca:"CEBRASPE"},
   {id:"prf",name:"PRF Adm",color:"#16a34a",prova:"A definir",banca:"CEBRASPE"},
 ];
 
 const EDITAL=[
 // ─── TRONCO COMUM (SEDES + ARR + PRF) ───
-{s:"Língua Portuguesa",c:"#dc2626",conc:["sedes","arr","prf"],peso:"alto",topics:[
+{s:"Língua Portuguesa",c:"#dc2626",conc:["sedes","tcdf","arr","prf"],peso:"alto",topics:[
   "Interpretação de texto: inferência, ideia central, reescritura",
   "Tipologia e gêneros textuais",
   "Ortografia e acentuação gráfica",
@@ -326,7 +337,7 @@ const EDITAL=[
   "Colocação pronominal: próclise, mesóclise, ênclise",
   "Figuras de linguagem",
 ]},
-{s:"Direito Constitucional",c:"#2563eb",conc:["sedes","arr","prf"],peso:"alto",topics:[
+{s:"Direito Constitucional",c:"#2563eb",conc:["sedes","tcdf","arr","prf"],peso:"alto",topics:[
   "Princípios fundamentais (arts. 1º a 4º)",
   "Poder constituinte: originário, derivado, decorrente",
   "Direitos individuais (art. 5º, I a XL)",
@@ -347,7 +358,7 @@ const EDITAL=[
   "Defesa do Estado: estado de defesa e sítio",
   "Ordem social e econômica",
 ]},
-{s:"Direito Administrativo",c:"#059669",conc:["sedes","arr","prf"],peso:"alto",topics:[
+{s:"Direito Administrativo",c:"#059669",conc:["sedes","tcdf","arr","prf"],peso:"alto",topics:[
   "Regime jurídico-administrativo: supremacia e indisponibilidade",
   "Princípios expressos (LIMPE) e implícitos",
   "Organização administrativa: direta e indireta, desconcentração vs descentralização",
@@ -392,7 +403,7 @@ const EDITAL=[
   "SISAN e Restaurante Comunitário (Decreto 33.329/2011)",
   "Cadastro Único e integração com programas federais",
 ]},
-{s:"Legislação do DF e Maria da Penha",c:"#be185d",conc:["sedes"],peso:"alto",topics:[
+{s:"Legislação do DF e Maria da Penha",c:"#be185d",conc:["sedes","tcdf"],peso:"alto",topics:[
   "LODF Título VI: Ordem Social e Meio Ambiente",
   "LC 840/2011: provimento, vacância, direitos e deveres",
   "LC 840/2011: responsabilidade e PAD",
@@ -421,7 +432,7 @@ const EDITAL=[
   "Baixa e alienação de bens",
   "Compras no setor público e Lei 14.133/2021",
 ]},
-{s:"Primeiros Socorros",c:"#b91c1c",conc:["sedes"],peso:"baixo",topics:[
+{s:"Primeiros Socorros",c:"#b91c1c",conc:["sedes","tcdf"],peso:"baixo",topics:[
   "Engasgo (manobra de Heimlich)",
   "Sangramento: tipos e contenção",
   "Fraturas: imobilização e transporte",
@@ -431,7 +442,7 @@ const EDITAL=[
 ]},
 
 // ─── ARR (Câmara) ESPECÍFICAS ───
-{s:"Raciocínio Lógico",c:"#6d28d9",conc:["arr","prf"],peso:"alto",topics:[
+{s:"Raciocínio Lógico",c:"#6d28d9",conc:["tcdf","arr","prf"],peso:"alto",topics:[
   "Lógica proposicional: conectivos e valores lógicos",
   "Tabela-verdade: tautologia, contradição, contingência",
   "Equivalências lógicas: contrapositiva, De Morgan",
@@ -513,6 +524,71 @@ const EDITAL=[
   "Lei de Acesso à Informação (LAI)",
 ]},
 
+// ─── TCDF ESPECÍFICAS ───
+{s:"Lei Orgânica e Regimento do TCDF",c:"#b45309",conc:["tcdf"],peso:"alto",topics:[
+  "LC 1/1994: natureza, competência e jurisdição do TCDF",
+  "Julgamento de contas: regular, com ressalva, irregular",
+  "Fiscalização de atos e contratos: inspeções e auditorias",
+  "Tomada de Contas Especial (TCE)",
+  "Conselheiros e Auditores: escolha, garantias, impedimentos",
+  "Ministério Público junto ao TCDF",
+  "Sanções: multas e inabilitação",
+  "Recursos: reconsideração, embargos, revisão",
+  "Regimento Interno: Plenário, sessões e deliberações",
+  "Medidas cautelares e sustação de atos",
+]},
+{s:"AFO — Adm. Financeira e Orçamentária",c:"#0369a1",conc:["tcdf","arr"],peso:"alto",topics:[
+  "Orçamento público: conceito e princípios orçamentários",
+  "PPA, LDO e LOA: conteúdo, prazos e vedações",
+  "Ciclo orçamentário e créditos adicionais",
+  "Receita pública: classificações e estágios",
+  "Despesa pública: classificações e estágios (empenho, liquidação, pagamento)",
+  "Restos a pagar e despesas de exercícios anteriores",
+  "Lei 4.320/1964: normas gerais",
+  "LRF (LC 101/2000): planejamento, limites e vedações",
+  "Suprimento de fundos",
+  "Transferências voluntárias e destinação de recursos",
+]},
+{s:"Administração Geral e Pública",c:"#4d7c0f",conc:["tcdf"],peso:"alto",topics:[
+  "Modelos: patrimonialista, burocrática, gerencial",
+  "Planejamento estratégico: missão, visão, SWOT, BSC",
+  "Estrutura organizacional e departamentalização",
+  "Liderança, motivação e desempenho",
+  "Gestão de processos e melhoria contínua",
+  "Gestão de projetos: conceitos (PMBOK)",
+  "Gestão de pessoas por competências",
+  "Governança pública, accountability e transparência",
+  "Gestão de riscos no setor público",
+  "Gestão e fiscalização de contratos (Lei 14.133)",
+]},
+{s:"Matemática Financeira",c:"#9a3412",conc:["tcdf"],peso:"medio",topics:[
+  "Juros simples",
+  "Juros compostos",
+  "Taxas: nominal, efetiva, equivalente e real",
+  "Descontos simples e compostos",
+  "Séries de pagamentos (anuidades)",
+  "Sistemas de amortização: SAC e Price",
+]},
+{s:"Análise de Dados, Estatística e IA",c:"#155e75",conc:["tcdf"],peso:"medio",topics:[
+  "Estatística descritiva: média, mediana, moda, dispersão",
+  "Probabilidade: conceitos básicos",
+  "Amostragem e distribuições",
+  "Visualização e interpretação de dados",
+  "Banco de dados e ETL: conceitos",
+  "IA e machine learning: conceitos fundamentais",
+  "IA no setor público e governança de dados (LGPD)",
+]},
+{s:"Noções de Civil, Previdenciário e Tributário",c:"#7e22ce",conc:["tcdf"],peso:"medio",topics:[
+  "Civil: pessoas naturais e jurídicas, capacidade",
+  "Civil: negócio jurídico, prescrição e decadência",
+  "Civil: contratos — noções gerais",
+  "Previdenciário: RPPS — regime próprio dos servidores",
+  "Previdenciário: aposentadorias e pensões (EC 103/2019)",
+  "Tributário: conceito e espécies de tributos",
+  "Tributário: competência e limitações ao poder de tributar",
+  "Tributário: obrigação e crédito tributário",
+]},
+
 // ─── PRF ESPECÍFICAS ───
 {s:"Legislação de Trânsito (CTB)",c:"#16a34a",conc:["prf"],peso:"alto",topics:[
   "SNT e competências (arts. 5-25): CONTRAN, PRF, DETRAN",
@@ -551,7 +627,7 @@ const EDITAL=[
 // LEIS PARA LEI SECA
 // ═══════════════════════════════════════════════════════════════
 const LEIS=[
-{id:"cf88",nome:"CF/88",color:"#2563eb",conc:["sedes","arr","prf"],blocos:[
+{id:"cf88",nome:"CF/88",color:"#2563eb",conc:["sedes","tcdf","arr","prf"],blocos:[
   {id:"cf01",t:"Título I — Princípios Fundamentais (arts. 1-4)",foco:"SOCIDIVAPLU + CONGAERRA-PRO"},
   {id:"cf02",t:"Art. 5º, I a XL — Direitos Individuais",foco:"Ponto mais cobrado da CF"},
   {id:"cf03",t:"Art. 5º, XLI a LXXVIII — Remédios Constitucionais",foco:"HC, MS, MI, HD, AP"},
@@ -576,7 +652,7 @@ const LEIS=[
   {id:"l88",t:"Penalidades (arts. 127-142)",foco:"Adv, susp, demissão"},
   {id:"l89",t:"PAD (arts. 143-173)",foco:"3 fases: instauração, inquérito, julgamento"},
 ]},
-{id:"l14133",nome:"Lei 14.133/21",color:"#d97706",conc:["sedes","arr","prf"],blocos:[
+{id:"l14133",nome:"Lei 14.133/21",color:"#d97706",conc:["sedes","tcdf","arr","prf"],blocos:[
   {id:"l41",t:"Princípios e definições (arts. 1-5)",foco:"Abrangência e conceitos"},
   {id:"l42",t:"Agentes e fase preparatória (arts. 6-27)",foco:"ETP, TR, agente de contratação"},
   {id:"l43",t:"Modalidades (arts. 28-33)",foco:"5 modalidades: decorar"},
@@ -584,7 +660,21 @@ const LEIS=[
   {id:"l45",t:"Contratação direta (arts. 74-75)",foco:"Inexigibilidade vs dispensa"},
   {id:"l46",t:"Contratos e sanções (arts. 89-174)",foco:"Cláusulas, garantias, extinção"},
 ]},
-{id:"lc840",nome:"LC 840/2011 (DF)",color:"#0891b2",conc:["sedes"],blocos:[
+{id:"lotcdf",nome:"LC 1/1994 (Lei Orgânica TCDF)",color:"#b45309",conc:["tcdf"],blocos:[
+  {id:"lo1",t:"Natureza, competência e jurisdição (arts. 1-8)",foco:"Rol de competências — o mais cobrado"},
+  {id:"lo2",t:"Julgamento de contas (arts. 17-29)",foco:"Regular, ressalva, irregular + efeitos"},
+  {id:"lo3",t:"Fiscalização e TCE (arts. 38-47)",foco:"Inspeções, auditorias, cautelares"},
+  {id:"lo4",t:"Sanções e recursos (arts. 56-70)",foco:"Multas, reconsideração, embargos, revisão"},
+  {id:"lo5",t:"Conselheiros, Auditores e MP de Contas",foco:"Escolha, garantias, impedimentos"},
+]},
+{id:"l4320",nome:"Lei 4.320/64 (AFO)",color:"#0369a1",conc:["tcdf","arr"],blocos:[
+  {id:"l43_1",t:"Da Lei de Orçamento (arts. 2-8)",foco:"Princípios e conteúdo da LOA"},
+  {id:"l43_2",t:"Receita e despesa (arts. 9-21)",foco:"Classificações — decoreba de categorias"},
+  {id:"l43_3",t:"Exercício financeiro (arts. 34-39)",foco:"Regime de competência e caixa"},
+  {id:"l43_4",t:"Créditos adicionais (arts. 40-46)",foco:"Suplementares, especiais, extraordinários"},
+  {id:"l43_5",t:"Execução: empenho à ordem de pagamento (arts. 58-70)",foco:"Estágios da despesa"},
+]},
+{id:"lc840",nome:"LC 840/2011 (DF)",color:"#0891b2",conc:["sedes","tcdf"],blocos:[
   {id:"lc1",t:"Títulos I — Disposições preliminares",foco:"Servidor do DF"},
   {id:"lc2",t:"Título V — Dos direitos e vantagens",foco:"Direitos específicos do DF"},
   {id:"lc3",t:"Título VI — Do regime disciplinar",foco:"Deveres, proibições, penalidades"},
